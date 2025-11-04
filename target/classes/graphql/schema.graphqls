@@ -1,0 +1,17 @@
+# src/main/resources/graphql/schema.graphqls
+type User {
+    id: ID!
+    username: String!
+    roles: [String!]!
+    fullName: String!
+    email: String!
+    phone: String
+    status: String!
+    createdAt: String! 
+    updatedAt: String!
+}
+
+type Query {
+    hello: String
+    allUsers: [User]!
+}
