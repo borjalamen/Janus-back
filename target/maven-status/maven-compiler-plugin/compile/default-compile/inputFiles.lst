@@ -1,0 +1,13 @@
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\App.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\AuthController.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\ParametritzacioController.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\HelloResolver.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Document.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Parametritzacio.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Project.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Users.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\repository\DocumentRepository.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\repository\ParametritzacioRepository.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\repository\ProjectRepository.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\repository\UserRepository.java
+C:\Users\Cachert\Documents\GitHub\Janus-back\src\main\java\com\janushub\resolver\UserQueryResolver.java
