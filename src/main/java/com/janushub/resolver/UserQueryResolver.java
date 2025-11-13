@@ -1,6 +1,6 @@
 package com.janushub.resolver;
 
-import com.janushub.model.Users;
+import com.janushub.model.User;
 import com.janushub.repository.UserRepository;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
@@ -15,9 +15,13 @@ public class UserQueryResolver {
     public UserQueryResolver(UserRepository userRepository) {
         this.userRepository = userRepository;
     }
+    
+    public List<User> findAllUsers() { // <-- ¡CORREGIR ESTA LÍNEA!
+        return userRepository.findAll();
+    }
 
     @QueryMapping
-    public List<Users> allUsers() {
+    public List<User> allUsers() {
         return userRepository.findAll(); 
     }
 }
