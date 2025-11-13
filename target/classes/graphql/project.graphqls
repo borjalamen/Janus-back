@@ -1,0 +1,44 @@
+type Project {
+    id: ID!
+    code: String
+    name: String
+    departamentOrganisme: String
+    gestorResponsableSolucio: String
+    responsableProjecte: String
+    equipDesenvolupament: String
+    equipProjectesInfra: String
+    equipProves: String
+    equipAdminExplotacioXarxes: String
+    oficinaSeguretat: String
+    equipQualitat: String
+    equipAdminOperacions: String
+    equipAdminExplotacioSistemes: String
+    gestorIntegracioSolucions: String
+    createdAt: String
+}
+
+type Query {
+    allProjects: [Project]
+    projectByCode(code: String!): Project
+}
+
+type Mutation {
+    createProject(project: ProjectInput!): Project
+}
+
+input ProjectInput {
+    code: String!
+    name: String!
+    departamentOrganisme: String
+    gestorResponsableSolucio: String
+    responsableProjecte: String
+    equipDesenvolupament: String
+    equipProjectesInfra: String
+    equipProves: String
+    equipAdminExplotacioXarxes: String
+    oficinaSeguretat: String
+    equipQualitat: String
+    equipAdminOperacions: String
+    equipAdminExplotacioSistemes: String
+    gestorIntegracioSolucions: String
+}

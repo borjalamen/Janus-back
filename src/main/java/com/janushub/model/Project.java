@@ -16,8 +16,6 @@ public class Project {
     private String id;
     private String code;
     private String name;
-    
-    // Todos los campos del formulario que insertaste
     private String departamentOrganisme;
     private String gestorResponsableSolucio;
     private String responsableProjecte;
