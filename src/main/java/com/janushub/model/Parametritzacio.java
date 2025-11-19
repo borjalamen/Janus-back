@@ -9,9 +9,5 @@ import org.springframework.data.mongodb.core.mapping.Document;
 @NoArgsConstructor
 @Document(collection = "parametrization")
 public class Parametritzacio {
-    @Id
-    private String id;
-    private int numModificacio;
     private String version;
-    private String versioQuestionari;
 }

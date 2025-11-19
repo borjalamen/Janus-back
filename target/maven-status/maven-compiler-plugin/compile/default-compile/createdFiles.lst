@@ -1,2 +1,8 @@
-com\janushub\App.class
+com\janushub\model\Document.class
+com\janushub\repository\UserRepository.class
 com\janushub\HelloResolver.class
+com\janushub\App.class
+com\janushub\controller\AuthController.class
+com\janushub\model\Project.class
+com\janushub\resolver\UserQueryResolver.class
+com\janushub\model\Users.class
