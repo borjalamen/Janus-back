@@ -39,10 +39,8 @@ public class AuthController {
 
         // ¡ÉXITO!
         Map<String, Object> response = new HashMap<>();
-        response.put("id", user.getId());
         response.put("username", user.getUsername());
         response.put("roles", user.getRoles());
-        response.put("message", "Login exitoso (Modo Demo Sin Seguridad)");
 
         return ResponseEntity.ok(response);
     }

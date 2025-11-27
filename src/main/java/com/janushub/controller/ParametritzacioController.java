@@ -2,6 +2,7 @@ package com.janushub.controller;
 
 import com.janushub.model.Parametritzacio;
 import com.janushub.repository.ParametritzacioRepository;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -21,5 +22,15 @@ private final ParametritzacioRepository repository;
     @GetMapping("/all")
     public List<Parametritzacio> getAllConfig() {
         return repository.findAll();
+    }
+
+    @GetMapping("/parametrization/version")
+    public ResponseEntity<String> getVersion() {
+        return repository.findAll()
+            .stream()
+            .findFirst()
+            .map(Parametritzacio::getVersion)
+            .map(ResponseEntity::ok)
+            .orElseGet(() -> ResponseEntity.notFound().build());
     }
 }
