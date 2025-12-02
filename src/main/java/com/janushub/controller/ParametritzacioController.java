@@ -22,4 +22,5 @@ private final ParametritzacioRepository repository;
     public List<Parametritzacio> getAllConfig() {
         return repository.findAll();
     }
+    
 }
