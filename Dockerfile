@@ -1,4 +1,4 @@
-FROM registreimatges.sic.intranet.gencat.cat/gencatcloud/java:21.0.7-alpine3.20
+FROM 172.19.208.1:5000/gencat-sic-builders/mvn-builder:1.0-3.9-21-openjdk
 
 RUN apk add tzdata \
     && cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime \
