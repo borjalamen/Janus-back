@@ -20,3 +20,75 @@ rad.json
 *.flf
 #Test results file
 TestResults.xml
+
+# ------------------ Java / Maven ------------------
+/target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+
+# Eclipse
+.classpath
+.project
+.settings/
+
+# IntelliJ
+.idea/
+*.iml
+
+# VSCode
+.vscode/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Application-specific
+volumenDocumentos/
+
+# Logs
+.log
+
+# ------------------ Additional Java/IDE ignores ------------------
+# Compiled class files
+*.class
+
+# Java archive files
+*.jar
+*.war
+*.ear
+
+# Build directories
+/out/
+/build/
+
+# Gradle
+/.gradle/
+build/
+
+# NetBeans
+/nbproject/private/
+/nbbuild/
+/dist/
+/.nb-gradle/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+.idea/*
+
+# Eclipse (already had .classpath/.project/.settings) keep factorypath
+.factorypath
+
+# Local Maven repository (do not track)
+# Uncomment if you ever vendor the m2 repo
+# .m2/
+
+# User-specific files
+*.swp
+*~
+
