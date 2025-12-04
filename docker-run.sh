@@ -1,3 +1,3 @@
 #!/bin/bash
 
-java -jar  -Dspring.datasource.username=${userdb} -Dspring.datasource.password=${passworddb} -Dspring.datasource.url=${url} -Xms${XMS} -Xmx${XMX} app.jar
+java -jar -Dspring.data.mongodb.uri=${urlMongoDB} -Dspring.data.mongodb.database=${indexMongoDB} -Dspring.data.mongodb.auto-index-creation=${databaseMongoDB} -Dserver.port=${portMongoDB} -Xms${XMS} -Xmx${XMX} app.jar
