@@ -7,6 +7,9 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime; // Necesitas java.time para las fechas
 import java.util.List;
+import org.springframework.data.mongodb.core.index.Indexed; 
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
 
 @Data
 @NoArgsConstructor
@@ -15,6 +18,7 @@ import java.util.List;
 public class Users {
     @Id
     private String id;
+    @Indexed(unique = true)
     private String username;
     private String password; // Almacena el hash de la contraseña (Ej. $argon2id$...)
     private List<String> roles; // Ej. ["ADMIN", "DEVOPS"]
