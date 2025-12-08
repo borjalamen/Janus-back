@@ -2,6 +2,8 @@ package com.janushub.controller;
 
 import com.janushub.model.Users;
 import com.janushub.repository.UserRepository;
+import com.mongodb.MongoWriteException; 
+import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -26,9 +28,22 @@ public class UserController {
 
     // --- POST (Crear Usuario Manualmente) ---
     @PostMapping("/create")
-    public Users createUser(@RequestBody Users user) {
-        // Como estamos sin seguridad, guardamos la password tal cual viene
-        return repository.save(user);
+    public ResponseEntity<?> createUser(@RequestBody Users user) {
+        try {
+            Users savedUser = repository.save(user);
+            // Si tiene éxito, devuelve 201 Created
+            return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); 
+            
+        } catch (MongoWriteException e) {
+            // Código de error 11000 es el código estándar de MongoDB para clave duplicada
+            if (e.getError().getCode() == 11000) { 
+                String errorMessage = "Error 409: El nombre de usuario '" + user.getUsername() + "' ya existe y debe ser único.";
+                // Devolvemos 409 Conflict con un mensaje de error claro
+                return ResponseEntity.status(HttpStatus.CONFLICT).body(errorMessage);
+            }
+            // Si es otro error de escritura, lo relanzamos
+            throw e; 
+        }
     }
 
     // --- PUT (Actualizar Usuario) ---
@@ -63,6 +78,7 @@ public class UserController {
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
+
     // --- CAMBIAR ESTADO (Activar/Inactivar) ---
     // URL: http://localhost:8080/api/users/status/{id}
     @PutMapping("/status/{id}")
@@ -81,5 +97,12 @@ public class UserController {
                     return ResponseEntity.ok(updatedUser);
                 })
                 .orElse(ResponseEntity.notFound().build());
+    }
+
+    // --- BUSCAR POR USERNAME ---
+    // URL: http://localhost:8080/api/users/search/parteDelNombre
+    @GetMapping("/search/{username}")
+    public List<Users> getUsersByName(@PathVariable String username) {
+        return repository.findByUsernameContainingIgnoreCase(username);
     }
 }
