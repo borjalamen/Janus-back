@@ -258,6 +258,39 @@ public class DocumentController {
         }
     }
 
+    // ----------------- DELETE ALL FILES IN FOLDER -----------------
+    @DeleteMapping("/deleteAllFiles")
+    public ResponseEntity<String> deleteAllFiles(@RequestParam String idProyecto) {
+        try {
+            Path carpetaProyecto = Paths.get(VOLUMEN, idProyecto);
+            if (!Files.exists(carpetaProyecto) || !Files.isDirectory(carpetaProyecto)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encuentra la carpeta del proyecto: " + idProyecto);
+            }
+
+            int deleted = 0;
+            try (java.util.stream.Stream<Path> stream = Files.list(carpetaProyecto)) {
+                for (Path entry : (Iterable<Path>) stream::iterator) {
+                    try {
+                        if (Files.isRegularFile(entry)) {
+                            Files.delete(entry);
+                            deleted++;
+                        }
+                    } catch (IOException ex) {
+                        // Log and continue deleting other files
+                        ex.printStackTrace();
+                    }
+                }
+            }
+
+            return ResponseEntity.ok("Archivos eliminados: " + deleted);
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar archivos: " + e.getMessage());
+        }
+    }
+
     // ----------------- UPDATE / OVERWRITE FILE -----------------
     @PutMapping("/updateFile")
     public ResponseEntity<String> updateFile(@RequestParam String idProyecto,
@@ -268,36 +301,52 @@ public class DocumentController {
             if (!Files.exists(carpetaProyecto)) {
                 Files.createDirectories(carpetaProyecto);
             }
-
-            // Validación: same blocked compressed extensions as upload
-            List<String> blockedExt = List.of("zip", "rar", "7z", "tar", "gz", "tgz", "bz2");
-            String lower = nombreArchivo.toLowerCase();
-            String ext = null;
-            int i = lower.lastIndexOf('.');
-            if (i > -1 && i < lower.length() - 1) {
-                ext = lower.substring(i + 1);
+            // Replace behavior: delete the existing target file, then save the uploaded file
+            Path rutaDestinoAntiguo = carpetaProyecto.resolve(nombreArchivo);
+            if (!Files.exists(rutaDestinoAntiguo) || !Files.isRegularFile(rutaDestinoAntiguo)) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No se encuentra el archivo a reemplazar: " + nombreArchivo);
             }
 
-            String contentType = documento.getContentType();
+            // Validate uploaded file (block compressed types)
+            List<String> blockedExt = List.of("zip", "rar", "7z", "tar", "gz", "tgz", "bz2");
+            String uploadedOriginal = Paths.get(documento.getOriginalFilename()).getFileName().toString();
+            String uploadedLower = uploadedOriginal.toLowerCase();
+            String uploadedExt = null;
+            int idx = uploadedLower.lastIndexOf('.');
+            if (idx > -1 && idx < uploadedLower.length() - 1) {
+                uploadedExt = uploadedLower.substring(idx + 1);
+            }
+
+            String uploadedContentType = documento.getContentType();
             boolean isBlockedByMime = false;
-            if (contentType != null) {
-                String ct = contentType.toLowerCase();
+            if (uploadedContentType != null) {
+                String ct = uploadedContentType.toLowerCase();
                 if (ct.contains("zip") || ct.contains("compressed") || ct.contains("gzip") || ct.contains("x-7z") || ct.contains("x-rar")) {
                     isBlockedByMime = true;
                 }
             }
 
-            if ((ext != null && blockedExt.contains(ext)) || isBlockedByMime) {
+            if ((uploadedExt != null && blockedExt.contains(uploadedExt)) || isBlockedByMime) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body("No se permiten archivos comprimidos (zip, rar, 7z, tar, gz, bz2)");
             }
 
-            Path rutaArchivo = carpetaProyecto.resolve(nombreArchivo);
-            try (InputStream in = documento.getInputStream()) {
-                Files.copy(in, rutaArchivo, StandardCopyOption.REPLACE_EXISTING);
+            // Delete the old file first
+            try {
+                Files.delete(rutaDestinoAntiguo);
+            } catch (IOException ex) {
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("No se pudo eliminar el archivo antiguo: " + ex.getMessage());
             }
 
-            return ResponseEntity.ok("Documento sobrescrito correctamente");
+            // Save the uploaded file as a new file (keeping the uploaded file's original name)
+            Path nuevaRuta = carpetaProyecto.resolve(uploadedOriginal);
+            try (InputStream in = documento.getInputStream()) {
+                Files.copy(in, nuevaRuta, StandardCopyOption.REPLACE_EXISTING);
+            }
+
+            return ResponseEntity.ok("Archivo reemplazado correctamente. Nuevo nombre: " + uploadedOriginal);
         } catch (IOException e) {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
