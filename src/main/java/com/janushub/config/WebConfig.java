@@ -2,26 +2,29 @@ package com.janushub.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
+import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        
-        // Esta configuración permite al frontend conectarse
-        registry.addMapping("/**") // Permite CORS para todas las rutas (/api/auth/**, /api/config/**)
-            
-            // Aquí pones los orígenes de tu frontend
-            // (Ej. 3000 para React, 5173 para Vite, 4200 para Angular)
-            .allowedOrigins("http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000", "http://localhost:4200") 
-            
-            // Métodos permitidos
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS") 
-            
-            // Cabeceras permitidas (Content-Type es clave para el login)
-            .allowedHeaders("*") 
-            
-            .allowCredentials(true);
+        // Mejor soporte para desarrollo local en varios puertos y opciones de producción
+        registry.addMapping("/**")
+            // Permite orígenes localhost en cualquier puerto y algunos orígenes comunes
+            .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "http://[::1]:*", "http://*.local", "https://*.gencat.cat")
+            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+            .allowedHeaders("*")
+            // Expone cabeceras útiles al cliente (p. ej. para descargas o autenticación)
+            .exposedHeaders("Authorization", "Content-Disposition")
+            .allowCredentials(true)
+            .maxAge(3600);
+    }
+
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Permite servir recursos estáticos si construyes el frontend dentro de /static
+        registry.addResourceHandler("/**")
+                .addResourceLocations("classpath:/static/");
     }
 }
