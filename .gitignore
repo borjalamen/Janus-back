@@ -81,10 +81,14 @@ Dockerfile*.local
 *.crt
 
 ## Others
-target/
+# Ignore build output for this module and any nested modules
+**/target/
 .classpath
 .factorypath
 .project
 .settings/
+
+# Workspace document volume (not source)
+volumenDocumentos/
 
 ### End of file
