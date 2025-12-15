@@ -1,0 +1,149 @@
+{
+	"info": {
+		"name": "Procedures API",
+		"description": "Colección de pruebas para el endpoint /api/procedures",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Get All Procedures",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures"]
+				},
+				"description": "Obtiene todas las procedimientos que no están eliminados"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Procedure by ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures", "{{procedureId}}"]
+				},
+				"description": "Obtiene un procedimiento específico por su ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Procedure",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Procedimiento de Onboarding\",\n  \"description\": \"Procedimiento para dar de alta nuevos empleados en el sistema\",\n  \"department\": \"Recursos Humanos\",\n  \"steps\": [\n    \"Crear cuenta de usuario\",\n    \"Asignar permisos\",\n    \"Configurar correo electrónico\",\n    \"Entregar credenciales\",\n    \"Capacitación inicial\"\n  ],\n  \"isVisible\": true,\n  \"isDeleted\": false\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures"]
+				},
+				"description": "Crea un nuevo procedimiento"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Procedure",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"title\": \"Procedimiento de Onboarding Actualizado\",\n  \"description\": \"Procedimiento actualizado para dar de alta nuevos empleados\",\n  \"department\": \"Recursos Humanos\",\n  \"steps\": [\n    \"Crear cuenta de usuario\",\n    \"Asignar permisos\",\n    \"Configurar correo electrónico\",\n    \"Entregar credenciales\",\n    \"Capacitación inicial\",\n    \"Evaluación de desempeño\"\n  ],\n  \"isVisible\": true\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures", "{{procedureId}}"]
+				},
+				"description": "Actualiza un procedimiento existente"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Procedure (Soft Delete)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures", "{{procedureId}}"]
+				},
+				"description": "Elimina lógicamente un procedimiento (Soft Delete)"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete All Procedures (Physical Delete)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/physical-delete-all",
+					"host": ["{{baseUrl}}"],
+					"path": ["api", "procedures", "physical-delete-all"]
+				},
+				"description": "Elimina físicamente todos los procedimientos (USAR CON PRECAUCIÓN)"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "procedureId",
+			"value": "",
+			"type": "string"
+		}
+	]
+}
