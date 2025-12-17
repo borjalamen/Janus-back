@@ -5,6 +5,7 @@ com\janushub\model\Project.class
 com\janushub\controller\DocumentController.class
 com\janushub\controller\ParametritzacioController.class
 com\janushub\repository\ParametritzacioRepository.class
+com\janushub\model\StepProcedures.class
 com\janushub\model\Users.class
 com\janushub\controller\FormacionController.class
 com\janushub\HelloResolver.class

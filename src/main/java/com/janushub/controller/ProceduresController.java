@@ -24,21 +24,35 @@ import java.util.Optional;
  * 
  * ENDPOINTS DISPONIBLES:
  * ----------------------
- * 1. GET    /api/procedures           - Obtener todos los procedimientos activos
- * 2. GET    /api/procedures/{id}      - Obtener un procedimiento por ID
- * 3. POST   /api/procedures           - Crear nuevo procedimiento
- * 4. PUT    /api/procedures/{id}      - Actualizar procedimiento existente
- * 5. DELETE /api/procedures/{id}      - Eliminar lógicamente un procedimiento
- * 6. DELETE /api/procedures/physical-delete-all - Eliminar físicamente todos (PELIGROSO)
+ * 1. GET    /api/procedures                        - Obtener todos los procedimientos activos
+ * 2. GET    /api/procedures/{id}                   - Obtener un procedimiento por ID
+ * 3. GET    /api/procedures/search/{titulo}        - Buscar procedimientos por título
+ * 4. POST   /api/procedures                        - Crear nuevo procedimiento
+ * 5. PUT    /api/procedures/{id}                   - Actualizar procedimiento existente
+ * 6. DELETE /api/procedures/{id}                   - Eliminar lógicamente un procedimiento
+ * 7. DELETE /api/procedures/delete-all             - Eliminar lógicamente todos los procedimientos
+ * 8. DELETE /api/procedures/physical/{id}          - Eliminar físicamente un procedimiento
+ * 9. DELETE /api/procedures/physical-delete-all    - Eliminar físicamente todos (PELIGROSO)
  * 
  * MODELO DE DATOS:
  * ----------------
  * {
  *   "id": "string (MongoDB ObjectId)",
- *   "title": "string",
- *   "description": "string",
- *   "department": "string",
- *   "steps": ["string", "string", ...],
+ *   "titulo": "string",
+ *   "descripcion": "string",
+ *   "departamento": "string",
+ *   "tags": ["string", "string", ...],
+ *   "steps": [
+ *     {
+ *       "id": "string",
+ *       "titulo": "string",
+ *       "descripcion": "string",
+ *       "responsable": "string",
+ *       "metodo": "string",
+ *       "orden": number,
+ *       "tags": ["string", ...]
+ *     }
+ *   ],
  *   "isVisible": boolean,
  *   "isDeleted": boolean,
  *   "createdAt": "ISO DateTime",
@@ -243,9 +257,10 @@ public class ProceduresController {
             Procedure current = procOpt.get();
             
             // Actualización de campos
-            current.setTitle(newData.getTitle());
-            current.setDescription(newData.getDescription());
-            current.setDepartment(newData.getDepartment());
+            current.setTitulo(newData.getTitulo());
+            current.setDescripcion(newData.getDescripcion());
+            current.setDepartamento(newData.getDepartamento());
+            current.setTags(newData.getTags());
             current.setSteps(newData.getSteps());
             current.setVisible(newData.isVisible());
             
@@ -256,6 +271,27 @@ public class ProceduresController {
         } else {
             return ResponseEntity.notFound().build();
         }
+    }
+    
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 3: BUSCAR PROCEDIMIENTOS POR TÍTULO
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: GET
+     * URL: http://localhost:8080/api/procedures/search/{titulo}
+     * 
+     * Descripción:
+     * - Busca procedimientos activos cuyo título contenga el texto especificado
+     * - La búsqueda es case-insensitive
+     * - Solo muestra procedimientos con isDeleted=false
+     * 
+     * RESPUESTA ESPERADA (200 OK): Lista de procedimientos coincidentes
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @GetMapping("/search/{titulo}")
+    public List<Procedure> searchByTitulo(@PathVariable String titulo) {
+        return repository.findByTituloContainingIgnoreCaseAndIsDeletedFalse(titulo);
     }
 
     /**
@@ -303,7 +339,68 @@ public class ProceduresController {
     
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 6: ELIMINAR TODOS LOS PROCEDIMIENTOS (BORRADO FÍSICO)
+     * ENDPOINT 6: ELIMINAR TODOS LOS PROCEDIMIENTOS (BORRADO LÓGICO)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: DELETE
+     * URL: http://localhost:8080/api/procedures/delete-all
+     * 
+     * Descripción:
+     * - Realiza un BORRADO LÓGICO de TODOS los procedimientos
+     * - Marca isDeleted = true e isVisible = false en todos
+     * - Los registros permanecen en la base de datos
+     * 
+     * ⚠️ ADVERTENCIA: Afecta a todos los procedimientos de la colección
+     * 
+     * RESPUESTA ESPERADA (200 OK): (vacío)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<Void> softDeleteAllProcedures() {
+        List<Procedure> allProcedures = repository.findAll();
+        LocalDateTime now = LocalDateTime.now();
+        
+        allProcedures.forEach(proc -> {
+            proc.setDeleted(true);
+            proc.setVisible(false);
+            proc.setUpdatedAt(now);
+        });
+        
+        repository.saveAll(allProcedures);
+        return ResponseEntity.ok().build();
+    }
+    
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 7: ELIMINAR PROCEDIMIENTO (BORRADO FÍSICO)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: DELETE
+     * URL: http://localhost:8080/api/procedures/physical/{id}
+     * 
+     * Descripción:
+     * - Elimina FÍSICAMENTE un procedimiento de la base de datos
+     * - El registro se elimina permanentemente
+     * 
+     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente el registro
+     * 
+     * RESPUESTA ESPERADA (200 OK): (vacío)
+     * RESPUESTA SI NO EXISTE (404 NOT FOUND): (vacío)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @DeleteMapping("/physical/{id}")
+    public ResponseEntity<Void> deletePhysicalProcedure(@PathVariable String id) {
+        return repository.findById(id)
+                .map(procedure -> {
+                    repository.delete(procedure);
+                    return ResponseEntity.ok().<Void>build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+    
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 8: ELIMINAR TODOS LOS PROCEDIMIENTOS (BORRADO FÍSICO)
      * ═══════════════════════════════════════════════════════════════════════════════
      * 
      * ⚠️ ADVERTENCIA: Este endpoint es PELIGROSO

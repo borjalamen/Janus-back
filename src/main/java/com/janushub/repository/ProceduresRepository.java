@@ -9,4 +9,7 @@ import java.util.List;
 public interface ProceduresRepository extends MongoRepository<Procedure, String> {
     // Busca solo los que NO están eliminados lógicamente
     List<Procedure> findByIsDeletedFalse();
+    
+    // Buscar por titulo (contiene texto, case-insensitive) solo activos
+    List<Procedure> findByTituloContainingIgnoreCaseAndIsDeletedFalse(String titulo);
 }

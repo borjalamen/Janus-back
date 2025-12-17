@@ -19,12 +19,13 @@ import java.util.List;
  * 
  * ENDPOINTS DISPONIBLES:
  * ----------------------
- * 1. GET    /api/formacion/all           - Obtener todas las formaciones
- * 2. GET    /api/formacion/{id}          - Obtener una formación por ID
- * 3. GET    /api/formacion/search/{name} - Buscar formaciones por nombre
- * 4. POST   /api/formacion/create        - Crear nueva formación
- * 5. PUT    /api/formacion/update/{id}   - Actualizar formación existente
- * 6. DELETE /api/formacion/delete/{id}   - Eliminar formación
+ * 1. GET    /api/formacion/all                  - Obtener todas las formaciones activas
+ * 2. GET    /api/formacion/{id}                 - Obtener una formación por ID
+ * 3. GET    /api/formacion/search/{name}        - Buscar formaciones activas por nombre
+ * 4. POST   /api/formacion/create               - Crear nueva formación
+ * 5. PUT    /api/formacion/update/{id}          - Actualizar formación existente
+ * 6. DELETE /api/formacion/delete/{id}          - Eliminar formación (borrado lógico)
+ * 7. DELETE /api/formacion/delete/physical/{id} - Eliminar formación (borrado físico)
  * 
  * MODELO DE DATOS:
  * ----------------
@@ -50,15 +51,15 @@ public class FormacionController {
 
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 1: OBTENER TODAS LAS FORMACIONES
+     * ENDPOINT 1: OBTENER TODAS LAS FORMACIONES ACTIVAS
      * ═══════════════════════════════════════════════════════════════════════════════
      * 
      * Método: GET
      * URL: http://localhost:8080/api/formacion/all
      * 
      * Descripción:
-     * - Devuelve una lista de todas las formaciones en la base de datos
-     * - No aplica filtros, devuelve todas las formaciones
+     * - Devuelve una lista de todas las formaciones ACTIVAS en la base de datos
+     * - Solo muestra formaciones con active=true (no eliminadas lógicamente)
      * 
      * POSTMAN - Configuración:
      * ------------------------
@@ -76,7 +77,8 @@ public class FormacionController {
      *     "link": "https://udemy.com/spring-boot",
      *     "description": "Curso completo de Spring Boot",
      *     "tags": ["Java", "Spring", "Backend"],
-     *     "location": "Online"
+     *     "location": "Online",
+     *     "active": true
      *   },
      *   ...
      * ]
@@ -84,7 +86,33 @@ public class FormacionController {
      */
     @GetMapping("/all")
     public List<Formacion> getAllFormations() {
+        return repository.findByDeletedFalse();
+    }
+    
+    /**
+     * ENDPOINT DEBUG: Ver todas las formaciones sin filtro (incluye inactivas)
+     */
+    @GetMapping("/all-debug")
+    public List<Formacion> getAllFormationsDebug() {
         return repository.findAll();
+    }
+    
+    /**
+     * ENDPOINT DEBUG: Arreglar todos los registros para que deleted=false
+     */
+    @GetMapping("/fix-all")
+    public String fixAllFormations() {
+        List<Formacion> all = repository.findAll();
+        for (Formacion f : all) {
+            if (f.getDeleted() == null || f.getDeleted()) {
+                f.setDeleted(false);
+            }
+            if (f.getVisible() == null) {
+                f.setVisible(true);
+            }
+        }
+        repository.saveAll(all);
+        return "Fixed " + all.size() + " formations";
     }
 
     /**
@@ -173,6 +201,9 @@ public class FormacionController {
      */
     @PostMapping("/create")
     public Formacion createFormation(@RequestBody Formacion formation) {
+        formation.setDeleted(false);
+        formation.setVisible(true);
+        formation.setDeletedAt(null);
         return repository.save(formation);
     }
 
@@ -239,15 +270,15 @@ public class FormacionController {
 
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 5: ELIMINAR FORMACIÓN
+     * ENDPOINT 5A: ELIMINAR FORMACIÓN (BORRADO LÓGICO)
      * ═══════════════════════════════════════════════════════════════════════════════
      * 
      * Método: DELETE
      * URL: http://localhost:8080/api/formacion/delete/{id}
      * 
      * Descripción:
-     * - Elimina FÍSICAMENTE una formación de la base de datos
-     * - No hay borrado lógico, el registro se elimina permanentemente
+     * - Elimina LÓGICAMENTE una formación (marca active=false)
+     * - El registro permanece en la base de datos pero no se mostrará en consultas
      * - Retorna 404 si no existe
      * 
      * POSTMAN - Configuración:
@@ -263,11 +294,53 @@ public class FormacionController {
      * RESPUESTA ESPERADA (200 OK): (vacío)
      * RESPUESTA SI NO EXISTE (404 NOT FOUND): (vacío)
      * 
-     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente el registro
+     * ℹ️ NOTA: Esta operación NO elimina permanentemente el registro
      * ═══════════════════════════════════════════════════════════════════════════════
      */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteFormation(@PathVariable String id) {
+        return repository.findById(id)
+                .map(formation -> {
+                    formation.setDeleted(true); // Borrado lógico
+                    formation.setVisible(false);
+                    formation.setDeletedAt(java.time.LocalDateTime.now());
+                    repository.save(formation);
+                    return ResponseEntity.ok().build();
+                })
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 5B: ELIMINAR FORMACIÓN (BORRADO FÍSICO)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: DELETE
+     * URL: http://localhost:8080/api/formacion/delete/physical/{id}
+     * 
+     * Descripción:
+     * - Elimina FÍSICAMENTE una formación de la base de datos
+     * - El registro se elimina permanentemente
+     * - Retorna 404 si no existe
+     * 
+     * POSTMAN - Configuración:
+     * ------------------------
+     * Method: DELETE
+     * URL: {{baseUrl}}/api/formacion/delete/physical/67890abcdef123456
+     * Headers: Content-Type: application/json
+     * Body: (ninguno)
+     * 
+     * Parámetros de ruta:
+     * - id: El ID de MongoDB de la formación a eliminar
+     * 
+     * RESPUESTA ESPERADA (200 OK): (vacío)
+     * RESPUESTA SI NO EXISTE (404 NOT FOUND): (vacío)
+     * 
+     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente el registro
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @DeleteMapping("/delete/physical/{id}")
+    public ResponseEntity<?> deleteFormationPhysical(@PathVariable String id) {
         return repository.findById(id)
                 .map(formation -> {
                     repository.delete(formation);
@@ -278,15 +351,16 @@ public class FormacionController {
 
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 6: BUSCAR FORMACIONES POR NOMBRE
+     * ENDPOINT 6: BUSCAR FORMACIONES ACTIVAS POR NOMBRE
      * ═══════════════════════════════════════════════════════════════════════════════
      * 
      * Método: GET
      * URL: http://localhost:8080/api/formacion/search/{name}
      * 
      * Descripción:
-     * - Busca formaciones cuyo nombre contenga el texto especificado
+     * - Busca formaciones ACTIVAS cuyo nombre contenga el texto especificado
      * - La búsqueda es case-insensitive (no distingue mayúsculas/minúsculas)
+     * - Solo muestra formaciones con active=true (no eliminadas lógicamente)
      * - Retorna lista vacía si no encuentra coincidencias
      * 
      * POSTMAN - Configuración:
@@ -309,7 +383,8 @@ public class FormacionController {
      *     "link": "https://udemy.com/spring-boot",
      *     "description": "Curso completo de Spring Boot",
      *     "tags": ["Java", "Spring", "Backend"],
-     *     "location": "Online"
+     *     "location": "Online",
+     *     "active": true
      *   },
      *   {
      *     "id": "67890abcdef789012",
@@ -317,7 +392,8 @@ public class FormacionController {
      *     "link": "https://udemy.com/spring-cloud",
      *     "description": "Microservicios con Spring Cloud",
      *     "tags": ["Java", "Spring", "Microservicios"],
-     *     "location": "Online"
+     *     "location": "Online",
+     *     "active": true
      *   }
      * ]
      * 
@@ -326,6 +402,55 @@ public class FormacionController {
      */
     @GetMapping("/search/{name}")
     public List<Formacion> searchByName(@PathVariable String name) {
-        return repository.findByNameContainingIgnoreCase(name);
+        return repository.findByNameContainingIgnoreCaseAndDeletedFalse(name);
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 7A: ELIMINAR TODAS LAS FORMACIONES (BORRADO LÓGICO)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: DELETE
+     * URL: http://localhost:8080/api/formacion/delete-all
+     * 
+     * Descripción:
+     * - Elimina LÓGICAMENTE todas las formaciones (marca deleted=true)
+     * - Los registros permanecen en la base de datos
+     * 
+     * ⚠️ ADVERTENCIA: Marca todas las formaciones como eliminadas
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @DeleteMapping("/delete-all")
+    public ResponseEntity<String> deleteAllFormationsLogical() {
+        List<Formacion> all = repository.findAll();
+        for (Formacion f : all) {
+            f.setDeleted(true);
+            f.setVisible(false);
+            f.setDeletedAt(java.time.LocalDateTime.now());
+        }
+        repository.saveAll(all);
+        return ResponseEntity.ok("Deleted (logical) " + all.size() + " formations");
+    }
+
+    /**
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * ENDPOINT 7B: ELIMINAR TODAS LAS FORMACIONES (BORRADO FÍSICO)
+     * ═══════════════════════════════════════════════════════════════════════════════
+     * 
+     * Método: DELETE
+     * URL: http://localhost:8080/api/formacion/delete-all/physical
+     * 
+     * Descripción:
+     * - Elimina FÍSICAMENTE todas las formaciones de la base de datos
+     * - Los registros se eliminan permanentemente
+     * 
+     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente todos los registros
+     * ═══════════════════════════════════════════════════════════════════════════════
+     */
+    @DeleteMapping("/delete-all/physical")
+    public ResponseEntity<String> deleteAllFormationsPhysical() {
+        long count = repository.count();
+        repository.deleteAll();
+        return ResponseEntity.ok("Deleted (physical) " + count + " formations");
     }
 }

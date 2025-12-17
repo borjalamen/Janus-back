@@ -2,6 +2,7 @@ package com.janushub.model;
 
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,10 +16,20 @@ public class Procedure {
     @Id
     private String id;
     
-    private String title;
-    private String description;
-    private String department;
-    private List<String> steps;
+    @Field("titulo")
+    private String titulo;
+    
+    @Field("descripcion")
+    private String descripcion;
+    
+    @Field("departamento")
+    private String departamento;
+    
+    @Field("tags")
+    private List<String> tags;
+    
+    @Field("steps")
+    private List<StepProcedures> steps;
     
     // Campo para borrado lógico (Soft Delete)
     private boolean isDeleted; 
@@ -44,17 +55,20 @@ public class Procedure {
     public String getId() { return id; }
     public void setId(String id) { this.id = id; }
     
-    public String getTitle() { return title; }
-    public void setTitle(String title) { this.title = title; }
+    public String getTitulo() { return titulo; }
+    public void setTitulo(String titulo) { this.titulo = titulo; }
     
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
     
-    public String getDepartment() { return department; }
-    public void setDepartment(String department) { this.department = department; }
+    public String getDepartamento() { return departamento; }
+    public void setDepartamento(String departamento) { this.departamento = departamento; }
 
-    public List<String> getSteps() { return steps; }
-    public void setSteps(List<String> steps) { this.steps = steps; }
+    public List<String> getTags() { return tags; }
+    public void setTags(List<String> tags) { this.tags = tags; }
+
+    public List<StepProcedures> getSteps() { return steps; }
+    public void setSteps(List<StepProcedures> steps) { this.steps = steps; }
 
     public boolean isVisible() { return isVisible; }
     public void setVisible(boolean visible) { isVisible = visible; }

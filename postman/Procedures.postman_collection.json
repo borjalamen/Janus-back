@@ -1,12 +1,13 @@
 {
 	"info": {
-		"name": "Procedures API",
-		"description": "Colección de pruebas para el endpoint /api/procedures",
+		"_postman_id": "procedures-api-collection",
+		"name": "Procedures API - JanusHub",
+		"description": "Colección completa de endpoints para la API de Procedimientos con operaciones CRUD, incluyendo borrado lógico y físico",
 		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
 	},
 	"item": [
 		{
-			"name": "Get All Procedures",
+			"name": "GET - Obtener todos los procedimientos activos",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -18,15 +19,20 @@
 				],
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures"
+					]
 				},
-				"description": "Obtiene todas las procedimientos que no están eliminados"
+				"description": "Devuelve una lista de todos los procedimientos activos (isDeleted=false) en la base de datos."
 			},
 			"response": []
 		},
 		{
-			"name": "Get Procedure by ID",
+			"name": "GET - Obtener procedimiento por ID",
 			"request": {
 				"method": "GET",
 				"header": [
@@ -38,15 +44,48 @@
 				],
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures", "{{procedureId}}"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"{{procedureId}}"
+					]
 				},
-				"description": "Obtiene un procedimiento específico por su ID"
+				"description": "Devuelve un procedimiento específico por su ID de MongoDB. Retorna 404 si no existe o está eliminado."
 			},
 			"response": []
 		},
 		{
-			"name": "Create Procedure",
+			"name": "GET - Buscar procedimientos por título",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/search/cierre",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"search",
+						"cierre"
+					]
+				},
+				"description": "Busca procedimientos activos cuyo título contenga el texto especificado. La búsqueda es case-insensitive.\n\nEjemplo: buscar 'cierre' encontrará 'Cierre de Incidencia', 'CIERRE MENSUAL', etc."
+			},
+			"response": []
+		},
+		{
+			"name": "POST - Crear nuevo procedimiento",
 			"request": {
 				"method": "POST",
 				"header": [
@@ -58,19 +97,29 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"title\": \"Procedimiento de Onboarding\",\n  \"description\": \"Procedimiento para dar de alta nuevos empleados en el sistema\",\n  \"department\": \"Recursos Humanos\",\n  \"steps\": [\n    \"Crear cuenta de usuario\",\n    \"Asignar permisos\",\n    \"Configurar correo electrónico\",\n    \"Entregar credenciales\",\n    \"Capacitación inicial\"\n  ],\n  \"isVisible\": true,\n  \"isDeleted\": false\n}"
+					"raw": "{\n    \"titulo\": \"Cierre de Incidencia Crítica\",\n    \"descripcion\": \"Protocolo para documentar y finalizar una incidencia de nivel 1 (alta prioridad).\",\n    \"departamento\": \"Soporte Técnico\",\n    \"tags\": [\"incidencia\", \"cierre\", \"critica\"],\n    \"steps\": [\n        {\n            \"id\": \"step-1\",\n            \"titulo\": \"Verificar resolución\",\n            \"descripcion\": \"Verificar la resolución con el usuario afectado.\",\n            \"responsable\": \"AGENTE_SOPORTE\",\n            \"metodo\": \"Llamada telefónica o comentario en el ticket\",\n            \"orden\": 1,\n            \"tags\": [\"verificacion\", \"usuario\"]\n        },\n        {\n            \"id\": \"step-2\",\n            \"titulo\": \"Documentar causa raíz\",\n            \"descripcion\": \"Añadir la causa raíz y la solución final al ticket.\",\n            \"responsable\": \"AGENTE_SOPORTE\",\n            \"metodo\": \"Actualización del ticket\",\n            \"orden\": 2,\n            \"tags\": [\"documentacion\", \"causa-raiz\"]\n        }\n    ],\n    \"isVisible\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures"
+					]
 				},
-				"description": "Crea un nuevo procedimiento"
+				"description": "Crea un nuevo procedimiento en la base de datos. MongoDB genera automáticamente el ID. Los campos 'isDeleted', 'createdAt' y 'updatedAt' se inicializan automáticamente.\n\nNOTA: No enviar los campos 'id', 'isDeleted', 'createdAt' ni 'updatedAt'."
 			},
 			"response": []
 		},
 		{
-			"name": "Update Procedure",
+			"name": "PUT - Actualizar procedimiento existente",
 			"request": {
 				"method": "PUT",
 				"header": [
@@ -82,19 +131,30 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n  \"title\": \"Procedimiento de Onboarding Actualizado\",\n  \"description\": \"Procedimiento actualizado para dar de alta nuevos empleados\",\n  \"department\": \"Recursos Humanos\",\n  \"steps\": [\n    \"Crear cuenta de usuario\",\n    \"Asignar permisos\",\n    \"Configurar correo electrónico\",\n    \"Entregar credenciales\",\n    \"Capacitación inicial\",\n    \"Evaluación de desempeño\"\n  ],\n  \"isVisible\": true\n}"
+					"raw": "{\n    \"titulo\": \"Cierre de Incidencia Crítica Actualizado\",\n    \"descripcion\": \"Protocolo actualizado para documentar y finalizar una incidencia de nivel 1.\",\n    \"departamento\": \"Soporte Técnico\",\n    \"tags\": [\"incidencia\", \"cierre\", \"critica\", \"actualizado\"],\n    \"steps\": [\n        {\n            \"id\": \"step-1\",\n            \"titulo\": \"Verificar resolución\",\n            \"descripcion\": \"Verificar la resolución con el usuario afectado.\",\n            \"responsable\": \"AGENTE_SOPORTE\",\n            \"metodo\": \"Llamada telefónica o comentario en el ticket\",\n            \"orden\": 1,\n            \"tags\": [\"verificacion\", \"usuario\"]\n        }\n    ],\n    \"isVisible\": true\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
 				},
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures", "{{procedureId}}"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"{{procedureId}}"
+					]
 				},
-				"description": "Actualiza un procedimiento existente"
+				"description": "Actualiza un procedimiento existente por su ID. Retorna 404 si no existe o está eliminado.\n\nReemplaza el {{procedureId}} con el ID de MongoDB del procedimiento a actualizar."
 			},
 			"response": []
 		},
 		{
-			"name": "Delete Procedure (Soft Delete)",
+			"name": "DELETE - Eliminar procedimiento (Borrado Lógico)",
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -106,15 +166,74 @@
 				],
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures/{{procedureId}}",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures", "{{procedureId}}"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"{{procedureId}}"
+					]
 				},
-				"description": "Elimina lógicamente un procedimiento (Soft Delete)"
+				"description": "Realiza un BORRADO LÓGICO del procedimiento (marca isDeleted=true e isVisible=false).\n\nEl registro permanece en la base de datos pero no se mostrará en consultas GET ALL o búsquedas. Permite recuperar el procedimiento en el futuro.\n\nRetorna 204 NO CONTENT si se elimina correctamente, 404 si no existe."
 			},
 			"response": []
 		},
 		{
-			"name": "Delete All Procedures (Physical Delete)",
+			"name": "DELETE ALL - Eliminar todos los procedimientos (Borrado Lógico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/delete-all",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"delete-all"
+					]
+				},
+				"description": "Realiza un BORRADO LÓGICO de TODOS los procedimientos (marca isDeleted=true e isVisible=false en todos).\n\nLos registros permanecen en la base de datos pero no se mostrarán en consultas GET ALL o búsquedas. Es posible recuperar los procedimientos en el futuro.\n\n⚠️ ADVERTENCIA: Afecta a todos los procedimientos de la colección.\n\nRetorna 200 OK después de desactivar todos los registros."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE - Eliminar procedimiento (Borrado Físico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/procedures/physical/{{procedureId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"physical",
+						"{{procedureId}}"
+					]
+				},
+				"description": "⚠️ ADVERTENCIA: Realiza un BORRADO FÍSICO del procedimiento.\n\nEsta operación elimina PERMANENTEMENTE el registro de la base de datos. No hay forma de recuperar los datos.\n\nRetorna 200 OK si se elimina correctamente, 404 si no existe.\n\nUSO RECOMENDADO: Solo usar en casos especiales. Preferir el borrado lógico."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE ALL - Eliminar todos los procedimientos (Borrado Físico)",
 			"request": {
 				"method": "DELETE",
 				"header": [
@@ -126,12 +245,38 @@
 				],
 				"url": {
 					"raw": "{{baseUrl}}/api/procedures/physical-delete-all",
-					"host": ["{{baseUrl}}"],
-					"path": ["api", "procedures", "physical-delete-all"]
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"procedures",
+						"physical-delete-all"
+					]
 				},
-				"description": "Elimina físicamente todos los procedimientos (USAR CON PRECAUCIÓN)"
+				"description": "⚠️⚠️⚠️ PELIGRO EXTREMO ⚠️⚠️⚠️\n\nEsta operación elimina PERMANENTEMENTE TODOS los procedimientos de la base de datos.\n\n- NO hay forma de recuperar los datos\n- NO pide confirmación\n- Elimina TODO el contenido de la colección\n\nUSO RECOMENDADO: Solo usar en entornos de desarrollo/testing para limpiar la base de datos.\n\n⛔ NUNCA USAR EN PRODUCCIÓN ⛔\n\nRetorna 204 NO CONTENT después de eliminar todos los registros."
 			},
 			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
 		}
 	],
 	"variable": [
@@ -142,8 +287,9 @@
 		},
 		{
 			"key": "procedureId",
-			"value": "",
-			"type": "string"
+			"value": "693fcd5377273bb29c58d582",
+			"type": "string",
+			"description": "ID de ejemplo - reemplazar con un ID real de MongoDB"
 		}
 	]
 }
