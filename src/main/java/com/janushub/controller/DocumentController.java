@@ -281,6 +281,7 @@ public class DocumentController {
                         ex.printStackTrace();
                     }
                 }
+                Files.delete(carpetaProyecto);
             }
 
             return ResponseEntity.ok("Archivos eliminados: " + deleted);
