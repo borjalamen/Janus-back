@@ -23,3 +23,4 @@ com\janushub\model\Formacion.class
 com\janushub\model\Procedure.class
 com\janushub\controller\ProceduresController.class
 com\janushub\model\Parametritzacio.class
+com\janushub\model\Planificacion.class
