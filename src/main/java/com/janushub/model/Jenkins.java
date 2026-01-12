@@ -16,5 +16,6 @@ public class Jenkins {
     private String idProyecto; // ID del proyecto al que pertenece
     private String nombre;     // Nombre del Job o servidor
     private String url;        // URL de Jenkins
-    private String status;
+    private String status;     // Status of Jenkins (e.g., "ACTIVE")
 }
+

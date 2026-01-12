@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
 	"info": {
 		"_postman_id": "formacion-api-collection",
@@ -351,3 +352,358 @@
 		}
 	]
 }
+=======
+{
+	"info": {
+		"_postman_id": "formacion-api-collection",
+		"name": "Formacion API - JanusHub",
+		"description": "Colección completa de endpoints para la API de Formaciones con operaciones CRUD, incluyendo borrado lógico y físico",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "GET - Obtener todas las formaciones activas",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/all",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"all"
+					]
+				},
+				"description": "Devuelve una lista de todas las formaciones activas (deleted=false) en la base de datos. No muestra las formaciones eliminadas lógicamente."
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Obtener formación por ID",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/{{formacionId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"{{formacionId}}"
+					]
+				},
+				"description": "Devuelve una formación específica por su ID de MongoDB. Retorna 404 si no existe."
+			},
+			"response": []
+		},
+		{
+			"name": "GET - DEBUG - Ver todas sin filtro",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/all-debug",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"all-debug"
+					]
+				},
+				"description": "ENDPOINT DEBUG: Devuelve TODAS las formaciones sin filtrar por deleted. Útil para debugging y ver el estado real de la base de datos."
+			},
+			"response": []
+		},
+		{
+			"name": "GET - DEBUG - Arreglar todos los registros",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/fix-all",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"fix-all"
+					]
+				},
+				"description": "ENDPOINT DEBUG: Arregla todos los registros para que deleted=false y visible=true. Usar SOLO UNA VEZ para migrar datos antiguos o corregir inconsistencias."
+			},
+			"response": []
+		},
+		{
+			"name": "GET - Buscar formaciones por nombre",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/search/spring",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"search",
+						"spring"
+					]
+				},
+				"description": "Busca formaciones activas cuyo nombre contenga el texto especificado. La búsqueda es case-insensitive.\n\nEjemplo: buscar 'spring' encontrará 'Spring Boot', 'SPRING MVC', etc."
+			},
+			"response": []
+		},
+		{
+			"name": "POST - Crear nueva formación",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Curso de Spring Boot Avanzado\",\n    \"link\": \"https://udemy.com/spring-boot-advanced\",\n    \"description\": \"Curso avanzado de Spring Boot con microservicios\",\n    \"tags\": [\"Java\", \"Spring\", \"Microservicios\", \"Backend\"],\n    \"location\": \"Online\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/create",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"create"
+					]
+				},
+				"description": "Crea una nueva formación en la base de datos. MongoDB genera automáticamente el ID. Los campos 'deleted', 'visible' y 'deletedAt' se inicializan automáticamente.\n\nNOTA: No enviar los campos 'id', 'deleted', 'visible' ni 'deletedAt', se generan automáticamente."
+			},
+			"response": []
+		},
+		{
+			"name": "PUT - Actualizar formación existente",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\": \"Curso de Spring Boot Actualizado\",\n    \"link\": \"https://udemy.com/spring-boot-updated\",\n    \"description\": \"Descripción actualizada del curso\",\n    \"tags\": [\"Java\", \"Spring\", \"Backend\", \"REST API\"],\n    \"location\": \"Online\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/update/{{formacionId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"update",
+						"{{formacionId}}"
+					]
+				},
+				"description": "Actualiza una formación existente por su ID. Retorna 404 si no existe.\n\nReemplaza el {{formacionId}} con el ID de MongoDB de la formación a actualizar."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE - Eliminar formación (Borrado Lógico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/delete/{{formacionId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"delete",
+						"{{formacionId}}"
+					]
+				},
+				"description": "Realiza un BORRADO LÓGICO de la formación (marca deleted=true, visible=false y establece deletedAt).\n\nEl registro permanece en la base de datos pero no se mostrará en consultas GET ALL o búsquedas. Permite recuperar la formación en el futuro.\n\nRetorna 200 OK si se elimina correctamente, 404 si no existe."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE ALL - Eliminar todas las formaciones (Borrado Lógico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/delete-all",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"delete-all"
+					]
+				},
+				"description": "Realiza un BORRADO LÓGICO de TODAS las formaciones (marca deleted=true, visible=false en todas).\n\nLos registros permanecen en la base de datos pero no se mostrarán en consultas GET ALL o búsquedas. Es posible recuperar las formaciones en el futuro.\n\n⚠️ ADVERTENCIA: Afecta a todas las formaciones de la colección.\n\nRetorna 200 OK después de desactivar todos los registros."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE - Eliminar formación (Borrado Físico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/delete/physical/{{formacionId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"delete",
+						"physical",
+						"{{formacionId}}"
+					]
+				},
+				"description": "⚠️ ADVERTENCIA: Realiza un BORRADO FÍSICO de la formación.\n\nEsta operación elimina PERMANENTEMENTE el registro de la base de datos. No hay forma de recuperar los datos.\n\nRetorna 200 OK si se elimina correctamente, 404 si no existe.\n\nUSO RECOMENDADO: Solo usar en casos especiales. Preferir el borrado lógico."
+			},
+			"response": []
+		},
+		{
+			"name": "DELETE ALL - Eliminar todas las formaciones (Borrado Físico)",
+			"request": {
+				"method": "DELETE",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/api/formacion/delete-all/physical",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"api",
+						"formacion",
+						"delete-all",
+						"physical"
+					]
+				},
+				"description": "⚠️⚠️⚠️ PELIGRO EXTREMO ⚠️⚠️⚠️\n\nEsta operación elimina PERMANENTEMENTE TODAS las formaciones de la base de datos.\n\n- NO hay forma de recuperar los datos\n- NO pide confirmación\n- Elimina TODO el contenido de la colección\n\nUSO RECOMENDADO: Solo usar en entornos de desarrollo/testing para limpiar la base de datos.\n\n⛔ NUNCA USAR EN PRODUCCIÓN ⛔\n\nRetorna 200 OK después de eliminar todos los registros."
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:8080",
+			"type": "string"
+		},
+		{
+			"key": "formacionId",
+			"value": "67890abcdef123456",
+			"type": "string",
+			"description": "ID de ejemplo - reemplazar con un ID real de MongoDB"
+		}
+	]
+}
+>>>>>>> CRUD-Procedimientos-Formacion
