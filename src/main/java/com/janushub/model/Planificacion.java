@@ -6,23 +6,24 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import java.time.LocalDate;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Document(collection = "planificacions")
+@Document(collection = "planning")
 public class Planificacion {
 
     @Id
     private String id;
 
-    private String titol;
-    private String descripcio;
-
-    private LocalDate dataInici;
-    private LocalDate dataFi;
-
-    private String usuariId;
-    private String estat;
+    private String env;
+    private String project;
+    private String date;
+    private String startTime;
+    private String endTime;
+    private String devOps;
+    private String notes;
+    private String jiraUrl;
+    private String responsable;
+    private Integer periodDays;
+    private String eventType;
 }

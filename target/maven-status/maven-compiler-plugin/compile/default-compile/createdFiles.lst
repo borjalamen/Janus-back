@@ -1,5 +1,7 @@
 com\janushub\model\Document.class
 com\janushub\repository\UserRepository.class
+com\janushub\repository\PlanificacionRepository.class
+com\janushub\controller\PlanificacionController.class
 com\janushub\controller\JenkinsController.class
 com\janushub\model\Project.class
 com\janushub\controller\DocumentController.class
@@ -16,6 +18,7 @@ com\janushub\controller\AuthController.class
 com\janushub\repository\JenkinsRepository.class
 com\janushub\resolver\UserQueryResolver.class
 com\janushub\repository\FormacionRepository.class
+com\janushub\service\PlanificacionService.class
 com\janushub\config\WebConfig.class
 com\janushub\controller\UserController.class
 com\janushub\repository\ProceduresRepository.class
