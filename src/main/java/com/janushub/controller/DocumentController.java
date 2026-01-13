@@ -95,10 +95,7 @@ public class DocumentController {
         return volumenPath.toString();
     }
 
-<<<<<<< HEAD
-    // ----------------- UPLOAD -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 1: SUBIR DOCUMENTO A UN PROYECTO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -147,7 +144,6 @@ public class DocumentController {
      * - Content-Types: application/zip, application/x-rar, etc.
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @PostMapping("/uploadDoc")
     public ResponseEntity<String> uploadDoc(@RequestParam String idProyecto,
                                             @RequestParam MultipartFile documento) {
@@ -198,10 +194,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- LIST FOLDERS -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 2: LISTAR TODOS LOS PROYECTOS (CARPETAS)
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -231,7 +224,6 @@ public class DocumentController {
      * RESPUESTA SI NO HAY CARPETAS: []
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @GetMapping("/getAllFolders")
     public ResponseEntity<List<String>> getAllFolders() {
         File carpetaVolumen = new File(VOLUMEN);
@@ -240,10 +232,7 @@ public class DocumentController {
         return ResponseEntity.ok(lista);
     }
 
-<<<<<<< HEAD
-    // ----------------- LIST FILES IN PROJECT -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 3: LISTAR ARCHIVOS DE UN PROYECTO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -278,7 +267,6 @@ public class DocumentController {
      * RESPUESTA SI EL PROYECTO NO EXISTE (404 NOT FOUND): []
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @GetMapping("/getAllFiles")
     public ResponseEntity<List<String>> getAllFiles(@RequestParam String idProyecto) {
         File carpetaProyecto = new File(VOLUMEN, idProyecto);
@@ -290,10 +278,7 @@ public class DocumentController {
         return ResponseEntity.ok(lista);
     }
 
-<<<<<<< HEAD
-    // ----------------- DOWNLOAD / PREVIEW FILE -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 4: DESCARGAR O PREVISUALIZAR ARCHIVO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -351,7 +336,6 @@ public class DocumentController {
      * "No se encuentra el archivo: [nombreArchivo]"
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @GetMapping("/getFile")
     public ResponseEntity<?> getFile(@RequestParam String idProyecto,
                                      @RequestParam String nombreArchivo) {
@@ -400,10 +384,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- GET FILE INFO -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 5: OBTENER INFORMACIÓN DE UN ARCHIVO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -446,7 +427,6 @@ public class DocumentController {
      * "No se encuentra el archivo: [nombreArchivo]"
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @GetMapping("/getFileInfo")
     public ResponseEntity<?> getFileInfo(@RequestParam String idProyecto,
                                          @RequestParam String nombreArchivo) {
@@ -476,10 +456,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- GET FOLDER INFO -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 6: OBTENER INFORMACIÓN DE TODOS LOS ARCHIVOS DE UN PROYECTO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -523,7 +500,6 @@ public class DocumentController {
      * RESPUESTA SI EL PROYECTO NO EXISTE (404 NOT FOUND): []
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @GetMapping("/getFolderInfo")
     public ResponseEntity<List<Map<String, Object>>> getFolderInfo(@RequestParam String idProyecto) {
         List<Map<String, Object>> lista = new ArrayList<>();
@@ -554,10 +530,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- DELETE FILE -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 7: ELIMINAR UN ARCHIVO ESPECÍFICO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -596,7 +569,6 @@ public class DocumentController {
      * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente el archivo
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @DeleteMapping("/deleteFile")
     public ResponseEntity<String> deleteFile(@RequestParam String idProyecto,
                                              @RequestParam String nombreArchivo) {
@@ -616,10 +588,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- DELETE ALL FILES IN FOLDER -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 8: ELIMINAR TODOS LOS ARCHIVOS DE UN PROYECTO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -659,7 +628,6 @@ public class DocumentController {
      * ⚠️ La carpeta del proyecto permanece vacía
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @DeleteMapping("/deleteAllFiles")
     public ResponseEntity<String> deleteAllFiles(@RequestParam String idProyecto) {
         try {
@@ -682,10 +650,6 @@ public class DocumentController {
                         ex.printStackTrace();
                     }
                 }
-<<<<<<< HEAD
-                Files.delete(carpetaProyecto);
-=======
->>>>>>> CRUD-Procedimientos-Formacion
             }
 
             return ResponseEntity.ok("Archivos eliminados: " + deleted);
@@ -696,10 +660,7 @@ public class DocumentController {
         }
     }
 
-<<<<<<< HEAD
-    // ----------------- UPDATE / OVERWRITE FILE -----------------
-=======
-    /**
+/**
      * ═══════════════════════════════════════════════════════════════════════════════
      * ENDPOINT 9: ACTUALIZAR/REEMPLAZAR UN ARCHIVO
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -758,7 +719,6 @@ public class DocumentController {
      *   el resultado será "informe_v2.pdf" (se usa el nombre del archivo subido)
      * ═══════════════════════════════════════════════════════════════════════════════
      */
->>>>>>> CRUD-Procedimientos-Formacion
     @PutMapping("/updateFile")
     public ResponseEntity<String> updateFile(@RequestParam String idProyecto,
                                              @RequestParam String nombreArchivo,
