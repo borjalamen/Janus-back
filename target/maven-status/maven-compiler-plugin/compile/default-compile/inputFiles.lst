@@ -9,9 +9,9 @@ C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controll
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\InfraestructuraController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\JenkinsController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\ParametritzacioController.java
-C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\PerfilController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\PlanificacionController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\ProceduresController.java
+C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\ProfileController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\UserController.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\HelloResolver.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Bitacora.java
@@ -40,3 +40,4 @@ C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\resolver
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\OpenAiService.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\ParametritzacioService.java
 C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\PlanificacionService.java
+C:\Users\USUARIO\Documents\GitHub\Janus-back\src\main\java\dto\ChangePasswordRequest.java

@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/profile")
-@CrossOrigin(origins = "*") // adapta-ho si cal
 public class ProfileController {
 
     private final UserRepository userRepository;
