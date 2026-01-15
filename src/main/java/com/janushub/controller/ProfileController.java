@@ -4,7 +4,7 @@ import com.janushub.model.Users;
 import com.janushub.dto.ChangePasswordRequest;
 import com.janushub.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 public class ProfileController {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    //private final PasswordEncoder passwordEncoder;
 
-    public ProfileController(UserRepository userRepository,
-                             PasswordEncoder passwordEncoder) {
+    public ProfileController(UserRepository userRepository){
+                             //PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
+        //this.passwordEncoder = passwordEncoder;
     }
 
     // --- CONSULTAR PERFIL ---
@@ -54,26 +54,34 @@ public class ProfileController {
     }
 
     // --- CAMBIAR CONTRASENYA ---
-    @PutMapping("/password")
-    public ResponseEntity<?> changePassword(@RequestParam String username,
-                                            @RequestBody ChangePasswordRequest request) {
-        Users user = userRepository.findByUsername(username);
-        if (user == null) {
-            return ResponseEntity.status(404).body("Usuari no trobat");
-        }
-
-        // 1) validar contraseña actual
-        if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
-            return ResponseEntity.status(400).body("Contrasenya actual incorrecta");
-        }
-
-        // 2) guardar nueva contraseña cifrada
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
-
-        return ResponseEntity.ok("Contrasenya actualitzada correctament");
+    
+@PutMapping("/password")
+public ResponseEntity<?> changePassword(@RequestParam String username,
+                                        @RequestBody ChangePasswordRequest request) {
+    Users user = userRepository.findByUsername(username);
+    if (user == null) {
+        return ResponseEntity.status(404).body("Usuari no trobat");
     }
+
+    
+    String newPassword = request.getNewPassword();
+    if (newPassword == null || newPassword.isBlank() || newPassword.contains("{{")) {
+        return ResponseEntity.badRequest().body("Contrasenya no vàlida");
+    }
+
+    
+    if (!request.getCurrentPassword().equals(user.getPassword())) {
+        return ResponseEntity.status(400).body("Contrasenya actual incorrecta");
+    }
+
+   
+    user.setPassword(newPassword);
+    user.setUpdatedAt(LocalDateTime.now());
+    userRepository.save(user);
+
+    return ResponseEntity.ok("Contrasenya actualitzada correctament");
+}
+
 
     // --- ELIMINAR PERFIL ---
     @DeleteMapping
