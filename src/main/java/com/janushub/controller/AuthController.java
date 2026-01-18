@@ -29,11 +29,11 @@ public class AuthController {
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
 
-        // ¡CORREGIDO! Usamos la variable (minúscula)
-        Users user = userRepository.findByUsername(username); // (Esta era tu línea 27)
+       
+        Users user = userRepository.findByUsername(username).orElse(null);
 
         // Verificación en texto plano
-        if (user == null || !Objects.equals(password, user.getPassword())) { // (Esta era tu línea 30)
+        if (user == null || !Objects.equals(password, user.getPassword())) { 
             return ResponseEntity.status(401).body("Error: Credenciales inválidas (demo).");
         }
 

@@ -1,4 +1,4 @@
-package com.janushub.dto;
+package dto;
 
 import lombok.Data;
 

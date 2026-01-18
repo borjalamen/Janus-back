@@ -1,7 +1,7 @@
 package com.janushub.controller;
 
 import com.janushub.model.Users;
-import com.janushub.dto.ChangePasswordRequest;
+import dto.ChangePasswordRequest;
 import com.janushub.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
 //import org.springframework.security.crypto.password.PasswordEncoder;
@@ -25,7 +25,7 @@ public class ProfileController {
     // --- CONSULTAR PERFIL ---
     @GetMapping
     public ResponseEntity<Users> getProfile(@RequestParam String username) {
-        Users user = userRepository.findByUsername(username);
+        Users user = userRepository.findByUsername(username).orElse(null  );
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
@@ -38,7 +38,7 @@ public class ProfileController {
     @PutMapping
     public ResponseEntity<Users> updateProfile(@RequestParam String username,
                                                @RequestBody Users profileData) {
-        Users user = userRepository.findByUsername(username);
+        Users user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }
@@ -58,7 +58,7 @@ public class ProfileController {
 @PutMapping("/password")
 public ResponseEntity<?> changePassword(@RequestParam String username,
                                         @RequestBody ChangePasswordRequest request) {
-    Users user = userRepository.findByUsername(username);
+    Users user = userRepository.findByUsername(username).orElse(null);
     if (user == null) {
         return ResponseEntity.status(404).body("Usuari no trobat");
     }
@@ -86,7 +86,7 @@ public ResponseEntity<?> changePassword(@RequestParam String username,
     // --- ELIMINAR PERFIL ---
     @DeleteMapping
     public ResponseEntity<?> deleteProfile(@RequestParam String username) {
-        Users user = userRepository.findByUsername(username);
+        Users user = userRepository.findByUsername(username).orElse(null);
         if (user == null) {
             return ResponseEntity.notFound().build();
         }

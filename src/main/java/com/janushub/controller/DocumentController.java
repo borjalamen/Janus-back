@@ -95,55 +95,7 @@ public class DocumentController {
         return volumenPath.toString();
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 1: SUBIR DOCUMENTO A UN PROYECTO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: POST
-     * URL: http://localhost:8080/api/documentos/uploadDoc
-     * 
-     * Descripción:
-     * - Sube un archivo a la carpeta del proyecto especificado
-     * - Crea la carpeta del proyecto si no existe
-     * - Valida que el archivo NO sea comprimido (zip, rar, 7z, tar, gz, bz2)
-     * - Reemplaza el archivo si ya existe con el mismo nombre
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: POST
-     * URL: {{baseUrl}}/api/documentos/uploadDoc
-     * Headers: (Content-Type se configura automáticamente como multipart/form-data)
-     * 
-     * Body (form-data):
-     * -----------------
-     * KEY              TYPE    VALUE
-     * idProyecto       Text    proyecto123
-     * documento        File    (seleccionar archivo desde tu computadora)
-     * 
-     * PASOS EN POSTMAN:
-     * 1. Selecciona Body → form-data
-     * 2. Añade una key "idProyecto" (tipo Text) con valor "proyecto123"
-     * 3. Añade una key "documento" (tipo File) y selecciona el archivo
-     * 4. Click en Send
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * "Documento subido correctamente"
-     * 
-     * RESPUESTA SI ES ARCHIVO COMPRIMIDO (400 BAD REQUEST):
-     * ------------------------------------------------------
-     * "No se permiten archivos comprimidos (zip, rar, 7z, tar, gz, bz2)"
-     * 
-     * RESPUESTA SI HAY ERROR (500 INTERNAL SERVER ERROR):
-     * ----------------------------------------------------
-     * "Error al subir el documento: [mensaje de error]"
-     * 
-     * ARCHIVOS BLOQUEADOS:
-     * - Extensiones: .zip, .rar, .7z, .tar, .gz, .tgz, .bz2
-     * - Content-Types: application/zip, application/x-rar, etc.
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- UPLOAD -----------------
     @PostMapping("/uploadDoc")
     public ResponseEntity<String> uploadDoc(@RequestParam String idProyecto,
                                             @RequestParam MultipartFile documento) {
@@ -194,36 +146,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 2: LISTAR TODOS LOS PROYECTOS (CARPETAS)
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: GET
-     * URL: http://localhost:8080/api/documentos/getAllFolders
-     * 
-     * Descripción:
-     * - Devuelve una lista con los nombres de todos los proyectos (carpetas)
-     * - Solo lista carpetas, no archivos
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: GET
-     * URL: {{baseUrl}}/api/documentos/getAllFolders
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * [
-     *   "proyecto123",
-     *   "proyecto456",
-     *   "proyecto789"
-     * ]
-     * 
-     * RESPUESTA SI NO HAY CARPETAS: []
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- LIST FOLDERS -----------------
     @GetMapping("/getAllFolders")
     public ResponseEntity<List<String>> getAllFolders() {
         File carpetaVolumen = new File(VOLUMEN);
@@ -232,41 +155,7 @@ public class DocumentController {
         return ResponseEntity.ok(lista);
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 3: LISTAR ARCHIVOS DE UN PROYECTO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: GET
-     * URL: http://localhost:8080/api/documentos/getAllFiles
-     * 
-     * Descripción:
-     * - Devuelve una lista con los nombres de todos los archivos en un proyecto
-     * - Solo lista archivos, no carpetas
-     * - Retorna 404 si el proyecto no existe
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: GET
-     * URL: {{baseUrl}}/api/documentos/getAllFiles?idProyecto=proyecto123
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * [
-     *   "documento1.pdf",
-     *   "imagen.jpg",
-     *   "informe.docx"
-     * ]
-     * 
-     * RESPUESTA SI NO HAY ARCHIVOS: []
-     * RESPUESTA SI EL PROYECTO NO EXISTE (404 NOT FOUND): []
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- LIST FILES IN PROJECT -----------------
     @GetMapping("/getAllFiles")
     public ResponseEntity<List<String>> getAllFiles(@RequestParam String idProyecto) {
         File carpetaProyecto = new File(VOLUMEN, idProyecto);
@@ -278,64 +167,7 @@ public class DocumentController {
         return ResponseEntity.ok(lista);
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 4: DESCARGAR O PREVISUALIZAR ARCHIVO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: GET
-     * URL: http://localhost:8080/api/documentos/getFile
-     * 
-     * Descripción:
-     * - Descarga o previsualiza un archivo específico
-     * - Archivos de imagen, video, PDF y texto se muestran inline (preview)
-     * - Otros archivos se descargan como attachment
-     * - Detecta automáticamente el content-type del archivo
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: GET
-     * URL: {{baseUrl}}/api/documentos/getFile?idProyecto=proyecto123&nombreArchivo=documento.pdf
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * - nombreArchivo: Nombre completo del archivo (con extensión)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * [Contenido binario del archivo]
-     * 
-     * Headers de respuesta:
-     * - Content-Type: image/jpeg, application/pdf, etc.
-     * - Content-Disposition: inline o attachment
-     * - Content-Length: tamaño en bytes
-     * 
-     * TIPOS DE ARCHIVO:
-     * -----------------
-     * Inline (preview):
-     * - Imágenes: .jpg, .png, .gif, .svg, etc.
-     * - Videos: .mp4, .webm, etc.
-     * - PDF: .pdf
-     * - Texto: .txt, .json, .xml, etc.
-     * 
-     * Attachment (descarga):
-     * - Documentos: .docx, .xlsx, .pptx
-     * - Otros archivos no listados arriba
-     * 
-     * VISUALIZAR EN POSTMAN:
-     * ----------------------
-     * 1. En Postman, después de enviar la petición
-     * 2. Click en "Visualize" o "Preview" para ver el archivo
-     * 3. Para imágenes/PDFs verás el contenido directamente
-     * 4. Para otros archivos, usa "Save Response" → "Save to a file"
-     * 
-     * RESPUESTA SI NO EXISTE (404 NOT FOUND):
-     * ----------------------------------------
-     * "No se encuentra el archivo: [nombreArchivo]"
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- DOWNLOAD / PREVIEW FILE -----------------
     @GetMapping("/getFile")
     public ResponseEntity<?> getFile(@RequestParam String idProyecto,
                                      @RequestParam String nombreArchivo) {
@@ -384,49 +216,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 5: OBTENER INFORMACIÓN DE UN ARCHIVO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: GET
-     * URL: http://localhost:8080/api/documentos/getFileInfo
-     * 
-     * Descripción:
-     * - Devuelve metadatos de un archivo específico sin descargarlo
-     * - Información: nombre, tamaño, tipo de contenido, fecha de modificación
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: GET
-     * URL: {{baseUrl}}/api/documentos/getFileInfo?idProyecto=proyecto123&nombreArchivo=documento.pdf
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * - nombreArchivo: Nombre completo del archivo (con extensión)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * {
-     *   "name": "documento.pdf",
-     *   "size": 1048576,
-     *   "contentType": "application/pdf",
-     *   "lastModified": "2025-12-15T14:30:00Z"
-     * }
-     * 
-     * CAMPOS DE RESPUESTA:
-     * - name: Nombre del archivo
-     * - size: Tamaño en bytes (1048576 bytes = 1 MB)
-     * - contentType: Tipo MIME del archivo
-     * - lastModified: Fecha y hora de última modificación (ISO 8601)
-     * 
-     * RESPUESTA SI NO EXISTE (404 NOT FOUND):
-     * ----------------------------------------
-     * "No se encuentra el archivo: [nombreArchivo]"
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- GET FILE INFO -----------------
     @GetMapping("/getFileInfo")
     public ResponseEntity<?> getFileInfo(@RequestParam String idProyecto,
                                          @RequestParam String nombreArchivo) {
@@ -456,50 +246,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 6: OBTENER INFORMACIÓN DE TODOS LOS ARCHIVOS DE UN PROYECTO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: GET
-     * URL: http://localhost:8080/api/documentos/getFolderInfo
-     * 
-     * Descripción:
-     * - Devuelve metadatos de TODOS los archivos en un proyecto
-     * - Para cada archivo: nombre, tamaño, tipo de contenido, última modificación
-     * - Útil para mostrar un listado completo con detalles
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: GET
-     * URL: {{baseUrl}}/api/documentos/getFolderInfo?idProyecto=proyecto123
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * [
-     *   {
-     *     "name": "documento1.pdf",
-     *     "size": 1048576,
-     *     "contentType": "application/pdf",
-     *     "lastModified": "2025-12-15T14:30:00Z"
-     *   },
-     *   {
-     *     "name": "imagen.jpg",
-     *     "size": 524288,
-     *     "contentType": "image/jpeg",
-     *     "lastModified": "2025-12-15T15:20:00Z"
-     *   }
-     * ]
-     * 
-     * RESPUESTA SI NO HAY ARCHIVOS: []
-     * RESPUESTA SI EL PROYECTO NO EXISTE (404 NOT FOUND): []
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- GET FOLDER INFO -----------------
     @GetMapping("/getFolderInfo")
     public ResponseEntity<List<Map<String, Object>>> getFolderInfo(@RequestParam String idProyecto) {
         List<Map<String, Object>> lista = new ArrayList<>();
@@ -530,45 +277,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 7: ELIMINAR UN ARCHIVO ESPECÍFICO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: DELETE
-     * URL: http://localhost:8080/api/documentos/deleteFile
-     * 
-     * Descripción:
-     * - Elimina un archivo específico de un proyecto
-     * - Eliminación física (permanente)
-     * - Retorna 404 si el archivo no existe
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: DELETE
-     * URL: {{baseUrl}}/api/documentos/deleteFile?idProyecto=proyecto123&nombreArchivo=documento.pdf
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * - nombreArchivo: Nombre completo del archivo a eliminar (con extensión)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * "Archivo eliminado correctamente"
-     * 
-     * RESPUESTA SI NO EXISTE (404 NOT FOUND):
-     * ----------------------------------------
-     * "No se encuentra el archivo: [nombreArchivo]"
-     * 
-     * RESPUESTA SI HAY ERROR (500 INTERNAL SERVER ERROR):
-     * ----------------------------------------------------
-     * "Error al eliminar el archivo: [mensaje de error]"
-     * 
-     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente el archivo
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- DELETE FILE -----------------
     @DeleteMapping("/deleteFile")
     public ResponseEntity<String> deleteFile(@RequestParam String idProyecto,
                                              @RequestParam String nombreArchivo) {
@@ -588,46 +297,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 8: ELIMINAR TODOS LOS ARCHIVOS DE UN PROYECTO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: DELETE
-     * URL: http://localhost:8080/api/documentos/deleteAllFiles
-     * 
-     * Descripción:
-     * - Elimina TODOS los archivos de un proyecto
-     * - Eliminación física (permanente)
-     * - NO elimina la carpeta del proyecto, solo su contenido
-     * - Retorna el número de archivos eliminados
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: DELETE
-     * URL: {{baseUrl}}/api/documentos/deleteAllFiles?idProyecto=proyecto123
-     * Headers: Content-Type: application/json
-     * Body: (ninguno)
-     * 
-     * Parámetros Query (añadir a la URL):
-     * - idProyecto: Nombre del proyecto (carpeta)
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * "Archivos eliminados: 5"
-     * 
-     * RESPUESTA SI EL PROYECTO NO EXISTE (404 NOT FOUND):
-     * ----------------------------------------------------
-     * "No se encuentra la carpeta del proyecto: [idProyecto]"
-     * 
-     * RESPUESTA SI HAY ERROR (500 INTERNAL SERVER ERROR):
-     * ----------------------------------------------------
-     * "Error al eliminar archivos: [mensaje de error]"
-     * 
-     * ⚠️ ADVERTENCIA: Esta operación elimina permanentemente TODOS los archivos
-     * ⚠️ La carpeta del proyecto permanece vacía
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- DELETE ALL FILES IN FOLDER -----------------
     @DeleteMapping("/deleteAllFiles")
     public ResponseEntity<String> deleteAllFiles(@RequestParam String idProyecto) {
         try {
@@ -650,6 +320,7 @@ public class DocumentController {
                         ex.printStackTrace();
                     }
                 }
+                Files.delete(carpetaProyecto);
             }
 
             return ResponseEntity.ok("Archivos eliminados: " + deleted);
@@ -660,65 +331,7 @@ public class DocumentController {
         }
     }
 
-/**
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * ENDPOINT 9: ACTUALIZAR/REEMPLAZAR UN ARCHIVO
-     * ═══════════════════════════════════════════════════════════════════════════════
-     * 
-     * Método: PUT
-     * URL: http://localhost:8080/api/documentos/updateFile
-     * 
-     * Descripción:
-     * - Reemplaza un archivo existente con uno nuevo
-     * - Elimina el archivo antiguo y guarda el nuevo
-     * - El nuevo archivo puede tener un nombre diferente
-     * - Valida que el nuevo archivo NO sea comprimido
-     * - Retorna 404 si el archivo original no existe
-     * 
-     * POSTMAN - Configuración:
-     * ------------------------
-     * Method: PUT
-     * URL: {{baseUrl}}/api/documentos/updateFile
-     * Headers: (Content-Type se configura automáticamente como multipart/form-data)
-     * 
-     * Body (form-data):
-     * -----------------
-     * KEY              TYPE    VALUE
-     * idProyecto       Text    proyecto123
-     * nombreArchivo    Text    documento_viejo.pdf (archivo a reemplazar)
-     * documento        File    (seleccionar nuevo archivo desde tu computadora)
-     * 
-     * PASOS EN POSTMAN:
-     * 1. Selecciona Body → form-data
-     * 2. Añade key "idProyecto" (tipo Text) con valor "proyecto123"
-     * 3. Añade key "nombreArchivo" (tipo Text) con el nombre del archivo a reemplazar
-     * 4. Añade key "documento" (tipo File) y selecciona el nuevo archivo
-     * 5. Click en Send
-     * 
-     * RESPUESTA ESPERADA (200 OK):
-     * ----------------------------
-     * "Archivo reemplazado correctamente. Nuevo nombre: documento_nuevo.pdf"
-     * 
-     * RESPUESTA SI EL ARCHIVO ORIGINAL NO EXISTE (404 NOT FOUND):
-     * ------------------------------------------------------------
-     * "No se encuentra el archivo a reemplazar: [nombreArchivo]"
-     * 
-     * RESPUESTA SI ES ARCHIVO COMPRIMIDO (400 BAD REQUEST):
-     * ------------------------------------------------------
-     * "No se permiten archivos comprimidos (zip, rar, 7z, tar, gz, bz2)"
-     * 
-     * RESPUESTA SI HAY ERROR (500 INTERNAL SERVER ERROR):
-     * ----------------------------------------------------
-     * "Error al actualizar el documento: [mensaje de error]"
-     * 
-     * NOTAS IMPORTANTES:
-     * ------------------
-     * - El archivo antiguo se elimina completamente
-     * - El nuevo archivo puede tener un nombre diferente al original
-     * - Si subes "informe_v2.pdf" para reemplazar "informe_v1.pdf",
-     *   el resultado será "informe_v2.pdf" (se usa el nombre del archivo subido)
-     * ═══════════════════════════════════════════════════════════════════════════════
-     */
+    // ----------------- UPDATE / OVERWRITE FILE -----------------
     @PutMapping("/updateFile")
     public ResponseEntity<String> updateFile(@RequestParam String idProyecto,
                                              @RequestParam String nombreArchivo,

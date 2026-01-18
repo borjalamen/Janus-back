@@ -8,8 +8,7 @@ import org.springframework.data.mongodb.core.mapping.Document;
 import java.time.LocalDateTime; // Necesitas java.time para las fechas
 import java.util.List;
 import org.springframework.data.mongodb.core.index.Indexed; 
-import org.springframework.data.annotation.Id;
-import org.springframework.data.mongodb.core.mapping.Document;
+
 
 @Data
 @NoArgsConstructor
@@ -28,4 +27,6 @@ public class Users {
     private String status; // Ej. "ACTIVE"
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String avatarPath;
+    
 }
