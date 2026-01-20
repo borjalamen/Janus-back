@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import com.janushub.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -33,40 +34,39 @@ public class ProfileImageController {
 
     @PostMapping
      public ResponseEntity<?> uploadImage(
-            @RequestParam("file") MultipartFile file,
-            Authentication authentication) {
+            @RequestParam("username") String username,
+            @RequestParam("file") MultipartFile file) {
 
-        String username = authentication.getName();
+                if (file.isEmpty()) {
+                    return ResponseEntity.badRequest()
+                            .body("No se ha seleccionado ningún archivo");
+                }
 
-        // Validar formato
-        if (!file.getContentType().equals("image/jpeg") &&
-            !file.getContentType().equals("image/png")) {
-            return ResponseEntity.badRequest()
-                    .body("Formato no permitido. Solo JPG o PNG");
-        }
+                if (!file.getContentType().equals("image/jpeg") && 
+                    !file.getContentType().equals("image/png")) {
+                        return ResponseEntity.badRequest()
+                                .body("Formato no permitido. Solo JPG o PNG");                    
+                }
 
+                try {
+                    Files.createDirectories(Paths.get(uploadDir));
+                    String fileExtension = file.getContentType().equals("image/png") ? ".png" : ".jpg";
+                    String fileName = username + fileExtension;
+                    Path filePath = Paths.get(uploadDir).resolve(fileName);
 
-        try {
+                    Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+                    userService.updateAvatar(username, filePath.toString());
 
-            Files.createDirectories(Paths.get(uploadDir));
-            String fileExtension = file.getContentType().equals("image/png") ? ".png" : ".jpg"; 
-            String fileName = username + fileExtension;
-            Path filePath = Paths.get(uploadDir).resolve(fileName);
+                    return ResponseEntity.ok("Imagen guardada correctamente");
 
-            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-            userService.updateAvatar(username, filePath.toString());
+                } catch (IOException e) {
+                    return ResponseEntity.internalServerError()
+                            .body("Error al guardar la imagen");
+                }
+            }
 
-            return ResponseEntity.ok("Imagen guardada correctamente");
-           
-        } catch (IOException e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al guardar la imagen");
-    }
-}
-
-        @GetMapping
-    public ResponseEntity<Resource> getImage(Authentication authentication) throws IOException {
-        String username = authentication.getName();
+            @GetMapping
+    public ResponseEntity<Resource> getImage(@RequestParam String username) throws IOException {
         String avatarPath = userService.getAvatarPath(username);
 
         if (avatarPath == null) {
@@ -75,26 +75,30 @@ public class ProfileImageController {
 
         Path filePath = Paths.get(avatarPath);
         Resource resource = new UrlResource(filePath.toUri());
-       
 
-       return ResponseEntity.ok()
-                .contentType(MediaType.IMAGE_JPEG)
-                .body(resource);
-}
+        return ResponseEntity.ok()
+                .contentType(Files.probeContentType(filePath).equals("image/png") ? 
+                             MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG)
+                .body(resource);        
 
-        @DeleteMapping("/image")
-    public ResponseEntity<?> deleteImage(Authentication authentication) throws IOException {
-        String username = authentication.getName();
+    }
+
+    @DeleteMapping
+    public ResponseEntity<?> deleteImage(@RequestParam String username) throws IOException {
         String avatarPath = userService.getAvatarPath(username);
 
-        if (avatarPath == null) {
+        if (avatarPath != null) {
             Files.deleteIfExists(Paths.get(avatarPath));
             userService.removeAvatar(username);
         }
 
-        
         return ResponseEntity.ok("Imagen eliminada correctamente");
+      
     }
-
-
 }
+           
+
+
+        
+
+        
