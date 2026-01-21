@@ -1,28 +1,24 @@
 package com.janushub.controller;
 
+import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
+
 import java.time.LocalDateTime;
 import java.util.List;
-
-import org.apache.catalina.connector.Response;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.DeleteMapping;
 
 import com.janushub.model.StepDocumentID;
 import com.janushub.model.StepRepository;
 
+@RestController
+@RequestMapping("/api/steps") // ← ruta base correcta
 public class StepController {
 
-     private final StepRepository stepRepository;
+    private final StepRepository stepRepository;
 
-     public StepController(StepRepository stepRepository) {
-            this.stepRepository = stepRepository;
-        }
+    public StepController(StepRepository stepRepository) {
+        this.stepRepository = stepRepository;
+    }
 
      @PostMapping
     public ResponseEntity<?> createStep(@RequestBody StepDocumentID step) {
@@ -31,6 +27,10 @@ public class StepController {
                     .body("ID duplicado");
         }
 
+        step.setCreatedAt(LocalDateTime.now());
+        step.setUpdatedAt(LocalDateTime.now());
+
+
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(stepRepository.save(step));
@@ -38,6 +38,8 @@ public class StepController {
         
 
     }
+
+    @GetMapping("/{id}")
 
 
         public ResponseEntity<?> getStepById(@PathVariable String id) {
@@ -68,7 +70,7 @@ public ResponseEntity<?> update(
 }
 
         @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable String id) {
+    public ResponseEntity<?> deleteStep(@PathVariable String id) {
         if (!stepRepository.existsById(id)) {
             return ResponseEntity.notFound().build();
         }

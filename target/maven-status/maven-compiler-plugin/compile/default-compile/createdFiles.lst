@@ -19,6 +19,7 @@ com\janushub\controller\MediaVideoController.class
 com\janushub\model\Infraestructura$OtherItem.class
 com\janushub\repository\JenkinsRepository.class
 com\janushub\model\StepProcedures$StepProceduresBuilder.class
+com\janushub\model\Steps.class
 com\janushub\repository\FormacionRepository.class
 com\janushub\config\WebConfig.class
 com\janushub\model\Infraestructura.class
