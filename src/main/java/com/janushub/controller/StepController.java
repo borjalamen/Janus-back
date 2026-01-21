@@ -64,7 +64,9 @@ public ResponseEntity<?> update(
                 existing.setOrden(step.getOrden());
                 existing.setTags(step.getTags());
                 existing.setUpdatedAt(LocalDateTime.now());
-                return ResponseEntity.ok(stepRepository.save(existing));
+
+                StepDocumentID updatedStep = stepRepository.save(existing);
+                return ResponseEntity.ok(updatedStep);
             })
             .orElse(ResponseEntity.notFound().build());
 }
