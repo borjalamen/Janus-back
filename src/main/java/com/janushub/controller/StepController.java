@@ -1,5 +1,6 @@
 package com.janushub.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.apache.catalina.connector.Response;
@@ -48,18 +49,23 @@ public class StepController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> update(
-            @PathVariable String id,
-            @RequestBody StepRepository step) {
+public ResponseEntity<?> update(
+        @PathVariable String id,
+        @RequestBody StepDocumentID step) {
 
-        return stepRepository.findById(id)
-                .map(existing -> {
-                    existing.setTitle(step.getTitle());
-                    existing.setDescription(step.getDescription());
-                    return ResponseEntity.ok(stepRepository.save(existing));
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
+    return stepRepository.findById(id)
+            .map(existing -> {
+                existing.setTitulo(step.getTitulo());
+                existing.setDescripcion(step.getDescripcion());
+                existing.setResponsable(step.getResponsable());
+                existing.setMetodo(step.getMetodo());
+                existing.setOrden(step.getOrden());
+                existing.setTags(step.getTags());
+                existing.setUpdatedAt(LocalDateTime.now());
+                return ResponseEntity.ok(stepRepository.save(existing));
+            })
+            .orElse(ResponseEntity.notFound().build());
+}
 
         @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable String id) {
