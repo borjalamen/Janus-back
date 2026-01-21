@@ -51,13 +51,13 @@ public class UserController {
     public ResponseEntity<Users> updateUser(@PathVariable String id, @RequestBody Users userDetails) {
         return repository.findById(id)
                 .map(users -> {
-                    // Actualizamos los campos importantes
+                    
                     users.setUsername(userDetails.getUsername());
                     users.setFullName(userDetails.getFullName());
-                    users.setEmail(userDetails.getEmail()); // Asegúrate de tener este campo en tu Modelo
+                    users.setEmail(userDetails.getEmail()); 
                     users.setRoles(userDetails.getRoles());
                     
-                    // Solo actualizamos la contraseña si nos envían una nueva
+                    
                     if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
                         users.setPassword(userDetails.getPassword());
                     }
@@ -85,12 +85,12 @@ public class UserController {
     public ResponseEntity<Users> updateUserStatus(@PathVariable String id, @RequestBody Map<String, String> statusMap) {
         return repository.findById(id)
                 .map(users -> {
-                    // Leemos el nuevo estado del JSON (ej: "INACTIVE")
+                   
                     String newStatus = statusMap.get("status");
                     
                     if (newStatus != null && !newStatus.isEmpty()) {
                         users.setStatus(newStatus);
-                        // Aquí podrías añadir lógica extra, como guardar la fecha de baja
+                        
                     }
                     
                     Users updatedUser = repository.save(users);

@@ -14,6 +14,7 @@ com\janushub\model\Jenkins.class
 com\janushub\controller\StepController.class
 com\janushub\App.class
 com\janushub\controller\AuthController.class
+com\janushub\controller\MediaVideoController.class
 com\janushub\model\Infraestructura$OtherItem.class
 com\janushub\repository\JenkinsRepository.class
 com\janushub\model\StepProcedures$StepProceduresBuilder.class
@@ -30,6 +31,7 @@ com\janushub\model\Document.class
 com\janushub\repository\BitacoraRepository.class
 com\janushub\repository\UserRepository.class
 com\janushub\repository\PlanificacionRepository.class
+com\janushub\model\MediaVideo.class
 com\janushub\service\OpenAiService.class
 com\janushub\controller\PlanificacionController.class
 com\janushub\controller\JenkinsController.class
@@ -45,6 +47,7 @@ com\janushub\model\StepDocumentID.class
 com\janushub\model\Procedure$ProcedureBuilder.class
 com\janushub\controller\Authentication.class
 com\janushub\controller\BitacoraController.class
+com\janushub\repository\MediaVideoRepository.class
 com\janushub\resolver\UserQueryResolver.class
 com\janushub\service\PlanificacionService.class
 com\janushub\model\Bitacora.class
