@@ -41,8 +41,9 @@ public class ProfileCVController {
         String username = authentication.getName();
 
         String contentType = file.getContentType();
-        if (!"application/pdf".equals(contentType) &&
-            !"application/vnd.openxmlformats-officedocument.wordprocessingml.document".equals(contentType)) {
+       if (contentType == null ||
+    (!contentType.contains("pdf") &&
+     !contentType.contains("word"))) {
             return ResponseEntity.badRequest()
                     .body("Formato no permitido. Solo PDF o DOCX");
         }
