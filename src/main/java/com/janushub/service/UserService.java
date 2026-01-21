@@ -1,8 +1,5 @@
 package com.janushub.service;
 
-import java.util.Optional;
-
-import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.stereotype.Service;
 
 import com.janushub.model.Users;
@@ -15,8 +12,8 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
 
     private final UserRepository userRepository;
-  
 
+    // ---------- AVATAR ----------
     public void updateAvatar(String username, String path) {
         Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
@@ -31,14 +28,34 @@ public class UserService {
                 .orElse(null);
     }
 
-     public void removeAvatar(String username) {
+    public void removeAvatar(String username) {
         Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         user.setAvatarPath(null);
         userRepository.save(user);
     }
+
+    // ---------- CV ----------
+    public void updateCv(String username, String path) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setCvPath(path);
+        userRepository.save(user);
+    }
+
+    public String getCvPath(String username) {
+        return userRepository.findByUsername(username)
+                .map(Users::getCvPath)
+                .orElse(null);
+    }
+
+    public void removeCv(String username) {
+        Users user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+
+        user.setCvPath(null);
+        userRepository.save(user);
+    }
 }
-
-    
-
