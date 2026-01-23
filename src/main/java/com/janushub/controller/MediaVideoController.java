@@ -73,4 +73,33 @@ public class MediaVideoController {
                 })
                 .orElseGet(() -> ResponseEntity.notFound().build());
     }
+
+    @PostMapping(value = "/videos/upload", consumes = "multipart/form-data")
+    public ResponseEntity<MediaVideo> upload(
+        @RequestPart("file") MultipartFile file,
+        @RequestPart("thumbnail") MultipartFile thumbnail,
+        @RequestPart("title") String title,
+        @RequestPart("description") String description) throws IOException {
+
+        Path uploadDir = Paths.get("assets/multimedia");
+        Files.createDirectories(uploadDir);
+
+        String fileName = UUID.randomUUID() + "-" + file.getOriginalFilename();
+        String thumbName = UUID.randomUUID() + "-" + thumbnail.getOriginalFilename();
+
+        file.transferTo(uploadDir.resolve(fileName).toFile());
+        thumbnail.transferTo(uploadDir.resolve(thumbName).toFile());
+
+        MediaVideo media = new MediaVideo();
+        media.setTitle(title);
+        media.setDescription(description);
+        media.setFile("assets/multimedia/" + fileName);
+        media.setThumbnail("assets/multimedia/" + thumbName);
+        media.setCreatedAt(LocalDateTime.now());
+        media.setUpdatedAt(LocalDateTime.now());
+
+        MediaVideo saved = repository.save(media);
+        return ResponseEntity.ok(saved);
+    }
+
 }

@@ -6,6 +6,7 @@ RUN apk add tzdata \
     && echo "Europe/Madrid" > /etc/timezone \
     && apk del tzdata
 
+RUN mkdir -p /app/assets/multimedia
 COPY target/janus-backend-*.jar app.jar
 
 COPY docker-run.sh /entrypoint.sh
