@@ -30,7 +30,7 @@ public class ProfileImageController {
 
     private final UserService userService;
 
-    private final String uploadDir = "uploads/avatars/";
+    private final String uploadDir = "/app/assets/multimedia/avatars/";
 
     @PostMapping
      public ResponseEntity<?> uploadImage(
@@ -50,8 +50,8 @@ public class ProfileImageController {
 
                 try {
                     Files.createDirectories(Paths.get(uploadDir));
-                    String fileExtension = file.getContentType().equals("image/png") ? ".png" : ".jpg";
-                    String fileName = username + fileExtension;
+                    String fileExtension = contentType.equals(MediaType.IMAGE_PNG_VALUE) ? ".png" : ".jpg";
+                    String fileName = username + "_" + System.currentTimeMillis() + extension;
                     Path filePath = Paths.get(uploadDir).resolve(fileName);
 
                     Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
@@ -74,11 +74,19 @@ public class ProfileImageController {
         }
 
         Path filePath = Paths.get(avatarPath);
+
+
+        if (!Files.exists(path)) {
+            return ResponseEntity.notFound().build();
+        }
+
         Resource resource = new UrlResource(filePath.toUri());
+         MediaType mediaType = Files.probeContentType(path).equals(MediaType.IMAGE_PNG_VALUE)
+                ? MediaType.IMAGE_PNG
+                : MediaType.IMAGE_JPEG;
 
         return ResponseEntity.ok()
-                .contentType(Files.probeContentType(filePath).equals("image/png") ? 
-                             MediaType.IMAGE_PNG : MediaType.IMAGE_JPEG)
+                .contentType(mediaType)
                 .body(resource);        
 
     }
