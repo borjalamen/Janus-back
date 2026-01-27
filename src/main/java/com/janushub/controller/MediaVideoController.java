@@ -97,7 +97,7 @@ public ResponseEntity<?> delete(@PathVariable String id) {
             .orElseGet(() -> ResponseEntity.notFound().build());
 }
 
-    @PostMapping(value = "/videos/upload", consumes = "multipart/form-data")
+    @PostMapping(value = "/videos/upload")
     public ResponseEntity<MediaVideo> upload(
             @RequestPart("file") MultipartFile file,
             @RequestPart("thumbnail") MultipartFile thumbnail,
