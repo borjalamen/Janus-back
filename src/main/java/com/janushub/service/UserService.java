@@ -13,12 +13,19 @@ public class UserService {
 
     private final UserRepository userRepository;
 
+    private Users getUserOrThrow(String username) {
+        return userRepository.findByUsername(username)
+                .orElseThrow(() ->
+                        new IllegalArgumentException("Usuario no encontrado: " + username));
+    }
+
     // ---------- AVATAR ----------
     public void updateAvatar(String username, String path) {
         Users user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         user.setAvatarPath(path);
+         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -29,19 +36,20 @@ public class UserService {
     }
 
     public void removeAvatar(String username) {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+        Users user = getUserOrThrow(username);
 
         user.setAvatarPath(null);
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
     // ---------- CV ----------
-    public void updateCv(String username, String path) {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
+    public void updateCv(String username) {
+        Users user = getUserOrThrow(username)
+                
 
         user.setCvPath(path);
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -56,6 +64,7 @@ public class UserService {
                 .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
         user.setCvPath(null);
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 }
