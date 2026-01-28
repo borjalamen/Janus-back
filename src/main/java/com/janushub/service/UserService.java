@@ -45,14 +45,13 @@ public class UserService {
     }
 
     // ---------- CV ----------
-    public void updateCv(String username) {
-        Users user = getUserOrThrow(username);
-                
+    public void updateCv(String username, String path) {
+    Users user = getUserOrThrow(username);
 
-        user.setCvPath(path);
-        user.setUpdatedAt(LocalDateTime.now());
-        userRepository.save(user);
-    }
+    user.setCvPath(path);
+    user.setUpdatedAt(LocalDateTime.now());
+    userRepository.save(user);
+}
 
     public String getCvPath(String username) {
         return userRepository.findByUsername(username)
