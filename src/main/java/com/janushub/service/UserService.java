@@ -4,6 +4,7 @@ import org.springframework.stereotype.Service;
 
 import com.janushub.model.Users;
 import com.janushub.repository.UserRepository;
+import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -45,7 +46,7 @@ public class UserService {
 
     // ---------- CV ----------
     public void updateCv(String username) {
-        Users user = getUserOrThrow(username)
+        Users user = getUserOrThrow(username);
                 
 
         user.setCvPath(path);
