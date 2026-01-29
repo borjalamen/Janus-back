@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.FilenameUtils;
+import org.springframework.security.core.Authentication;
 
 
 
@@ -59,7 +60,7 @@ public ResponseEntity<?> uploadImage(
 
     try {
         // Carpeta on guardes els avatars
-        Path uploadDir = Paths.get("/app/assets/multimedia/avatars");
+       Path uploadDir = Paths.get(this.uploadDir);
         Files.createDirectories(uploadDir);
 
         // 3) path complet
