@@ -10,6 +10,8 @@ RUN apt-get update \
     && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/assets/multimedia
+RUN mkdir -p /app/assets/multimedia/avatars \
+    /app/assets/multimedia/cv
 WORKDIR /app
 
 COPY target/janus-backend-*.jar app.jar
