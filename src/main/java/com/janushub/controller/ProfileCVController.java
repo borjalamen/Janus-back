@@ -31,8 +31,9 @@ public class ProfileCVController {
     private final UserService userService;
     private final String uploadDir = "/app/assets/multimedia/cv/";
 
-    @PostMapping
-    public ResponseEntity<?> uploadCv(
+    // ---------- PUJAR / ACTUALITZAR EL MEU CV (usuari loguejat) ----------
+    @PostMapping("/me")
+    public ResponseEntity<?> uploadMyCv(
             @RequestParam("file") MultipartFile file,
             Authentication authentication) {
 
@@ -73,8 +74,56 @@ public class ProfileCVController {
         }
     }
 
-    @GetMapping
-    public ResponseEntity<Resource> getCv(Authentication authentication) throws IOException {
+    // ---------- PUJAR / ACTUALITZAR CV D'UN ALTRE USUARI (per ex. ADMIN) ----------
+    @PostMapping
+    public ResponseEntity<?> uploadCvForUser(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("username") String username,
+            Authentication authentication) {
+
+
+        if (!userService.existsByUsername(username)) {
+            return ResponseEntity.status(404).body("Usuari no trobat");
+        }
+
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
+        }
+
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                (!contentType.equals(MediaType.APPLICATION_PDF_VALUE) &&
+                 !contentType.equals("application/msword") &&
+                 !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
+
+            return ResponseEntity.badRequest()
+                    .body("Formato no permitido. Solo PDF o DOC/DOCX");
+        }
+
+        try {
+            Files.createDirectories(Paths.get(uploadDir));
+
+            String extension =
+                    contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
+                    contentType.equals("application/msword") ? ".doc" : ".docx";
+
+            String fileName = username + "_" + System.currentTimeMillis() + extension;
+            Path filePath = Paths.get(uploadDir).resolve(fileName);
+
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+            userService.updateCv(username, filePath.toString());
+
+            return ResponseEntity.ok("CV guardado correctamente");
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                    .body("Error al guardar el CV");
+        }
+    }
+
+    // ---------- OBTENIR EL MEU CV ----------
+    @GetMapping("/me")
+    public ResponseEntity<Resource> getMyCv(Authentication authentication) throws IOException {
         String username = authentication.getName();
 
         String cvPath = userService.getCvPath(username);
@@ -98,9 +147,47 @@ public class ProfileCVController {
                 .body(resource);
     }
 
-    @DeleteMapping
-    public ResponseEntity<?> deleteCv(Authentication authentication) throws IOException {
+    // ---------- OBTENIR EL CV D'UN ALTRE USUARI (per ex. ADMIN o per mostrar-lo) ----------
+    @GetMapping
+    public ResponseEntity<Resource> getCvForUser(@RequestParam("username") String username) throws IOException {
+        String cvPath = userService.getCvPath(username);
+        if (cvPath == null) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Path path = Paths.get(cvPath);
+        if (!Files.exists(path)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        Resource resource = new UrlResource(path.toUri());
+        String contentType = Files.probeContentType(path);
+        MediaType mediaType = (contentType != null)
+                ? MediaType.parseMediaType(contentType)
+                : MediaType.APPLICATION_PDF;
+
+        return ResponseEntity.ok()
+                .contentType(mediaType)
+                .body(resource);
+    }
+
+    // ---------- ESBORRAR EL MEU CV ----------
+    @DeleteMapping("/me")
+    public ResponseEntity<?> deleteMyCv(Authentication authentication) throws IOException {
         String username = authentication.getName();
+
+        String cvPath = userService.getCvPath(username);
+        if (cvPath != null) {
+            Files.deleteIfExists(Paths.get(cvPath));
+            userService.removeCv(username);
+        }
+
+        return ResponseEntity.ok("CV eliminado correctamente");
+    }
+
+    // ---------- ESBORRAR EL CV D'UN ALTRE USUARI ----------
+    @DeleteMapping
+    public ResponseEntity<?> deleteCvForUser(@RequestParam("username") String username) throws IOException {
 
         String cvPath = userService.getCvPath(username);
         if (cvPath != null) {
