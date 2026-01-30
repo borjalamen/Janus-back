@@ -38,13 +38,13 @@ public class ProfileImageController {
     @PostMapping
 public ResponseEntity<?> uploadImage(
         @RequestParam("file") MultipartFile imageFile,
-        Authentication authentication) {
+        @RequestParam("username") String username) {
 
     if (imageFile.isEmpty()) {
         return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
     }
 
-    String username = authentication.getName();
+    
 
     // 1) contentType
     String contentType = imageFile.getContentType();
