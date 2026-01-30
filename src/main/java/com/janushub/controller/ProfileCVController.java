@@ -37,14 +37,14 @@ public class ProfileCVController {
     @PostMapping
     public ResponseEntity<?> uploadCv(
             @RequestParam MultipartFile file,
-            Authentication authentication) {
+             @RequestParam("username") String username) {
 
                 if (file.isEmpty()) {
             return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
         }
 
 
-        String username = authentication.getName();
+       
 
         String contentType = file.getContentType();
        if (contentType == null ||
