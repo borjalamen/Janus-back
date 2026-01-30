@@ -67,4 +67,7 @@ public class UserService {
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
+    public boolean existsByUsername(String username) {
+    return userRepository.findByUsername(username).isPresent();
+}
 }
