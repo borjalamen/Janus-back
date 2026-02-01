@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class ProfileCVController {
 
     private final UserService userService;
-    private final String uploadDir = "/uploads/cv/";
+    private final String uploadDir = "uploads/cv/";
 
     @PostMapping
     public ResponseEntity<?> uploadCv(
