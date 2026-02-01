@@ -34,7 +34,7 @@ public class ProfileCVController {
     private final UserService userService;
     private final String uploadDir = "uploads/cv/";
 
-    @PostMapping
+   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCv(
             @RequestParam("file") MultipartFile file,
              @RequestParam("username") String username) {
@@ -59,7 +59,7 @@ public class ProfileCVController {
 
         try {
             Path uploadPath = Paths.get(uploadDir);
-            Files.createDirectories(Paths.get(uploadDir));
+            Files.createDirectories(uploadPath);
 
              String extension =
                     contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
