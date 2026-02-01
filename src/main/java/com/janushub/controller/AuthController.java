@@ -17,6 +17,7 @@ import java.util.Objects;
 public class AuthController {
 // ¡CORREGIDO! La variable debe empezar con minúscula
     private final UserRepository userRepository; 
+    
 
     // ¡CORREGIDO! El constructor debe usar la variable (esta era tu línea 18)
     public AuthController(UserRepository userRepository) { 

@@ -32,7 +32,7 @@ import lombok.RequiredArgsConstructor;
 public class ProfileCVController {
 
     private final UserService userService;
-    private final String uploadDir = "/app/assets/multimedia/avatars/";
+    private final String uploadDir = "/app/assets/multimedia/cv/";
 
     @PostMapping
     public ResponseEntity<?> uploadCv(
@@ -58,6 +58,7 @@ public class ProfileCVController {
         }
 
         try {
+            Path uploadPath = Paths.get(uploadDir);
             Files.createDirectories(Paths.get(uploadDir));
 
              String extension =
@@ -79,8 +80,8 @@ public class ProfileCVController {
 
     
     @GetMapping
-    public ResponseEntity<Resource> getCv(Authentication authentication) throws IOException {
-        String username = authentication.getName();
+    public ResponseEntity<Resource> getCv(@RequestParam String username) throws IOException {
+        
         String cvPath = userService.getCvPath(username);
 
         if (cvPath == null) {
@@ -96,15 +97,14 @@ public class ProfileCVController {
         Resource resource = new UrlResource(path.toUri());
         String contentType = Files.probeContentType(path);
 
-        return ResponseEntity.ok()
-                .contentType(MediaType.APPLICATION_PDF)
+         return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
 
     
     @DeleteMapping
-    public ResponseEntity<?> deleteCv(Authentication authentication) throws IOException {
-        String username = authentication.getName();
+    public ResponseEntity<?> deleteCv(@RequestParam String username) throws IOException {
         String cvPath = userService.getCvPath(username);
 
         if (cvPath != null) {
