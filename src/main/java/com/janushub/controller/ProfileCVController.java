@@ -32,11 +32,11 @@ import lombok.RequiredArgsConstructor;
 public class ProfileCVController {
 
     private final UserService userService;
-    private final String uploadDir = "/app/assets/multimedia/cv/";
+    private final String uploadDir = "/uploads/cv/";
 
     @PostMapping
     public ResponseEntity<?> uploadCv(
-            @RequestParam MultipartFile file,
+            @RequestParam("file") MultipartFile file,
              @RequestParam("username") String username) {
 
                 if (file.isEmpty()) {
