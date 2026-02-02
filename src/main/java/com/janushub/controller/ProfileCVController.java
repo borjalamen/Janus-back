@@ -73,8 +73,8 @@ public class ProfileCVController {
             return ResponseEntity.ok("CV guardado correctamente");
 
         } catch (IOException e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al guardar el CV");
+            e.printStackTrace(); 
+        return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 
