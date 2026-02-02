@@ -46,7 +46,7 @@ public class UserService {
 
     // ---------- CV ----------
     public void updateCv(String username, String path) {
-    Users user = getUserOrThrow(username);
+    Users user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
 
     user.setCvPath(path);
     user.setUpdatedAt(LocalDateTime.now());
