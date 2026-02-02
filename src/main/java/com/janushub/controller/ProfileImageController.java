@@ -11,13 +11,12 @@ import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.janushub.service.UserService;
@@ -32,12 +31,11 @@ public class ProfileImageController {
     private final UserService userService;
     private final String uploadDir = "/app/assets/multimedia/avatars/";
 
+    // ---------- SUBIR AVATAR ----------
     @PostMapping
     public ResponseEntity<?> uploadImage(
             @RequestParam("file") MultipartFile imageFile,
-            Authentication authentication) {
-
-        String username = authentication.getName();
+            @RequestParam("username") String username) {
 
         if (imageFile.isEmpty()) {
             return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
@@ -61,7 +59,6 @@ public class ProfileImageController {
             Path path = uploadDir.resolve(fileName);
 
             Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-
             userService.updateAvatar(username, path.toString());
 
             return ResponseEntity.ok("Imagen de perfil guardada correctamente");
@@ -72,10 +69,9 @@ public class ProfileImageController {
         }
     }
 
+    // ---------- OBTENER AVATAR ----------
     @GetMapping
-    public ResponseEntity<Resource> getImage(Authentication authentication) throws IOException {
-        String username = authentication.getName();
-
+    public ResponseEntity<Resource> getImage(@RequestParam("username") String username) throws IOException {
         String avatarPath = userService.getAvatarPath(username);
         if (avatarPath == null) {
             return ResponseEntity.notFound().build();
@@ -97,10 +93,9 @@ public class ProfileImageController {
                 .body(resource);
     }
 
+    // ---------- ELIMINAR AVATAR ----------
     @DeleteMapping
-    public ResponseEntity<?> deleteImage(Authentication authentication) throws IOException {
-        String username = authentication.getName();
-
+    public ResponseEntity<?> deleteImage(@RequestParam("username") String username) throws IOException {
         String avatarPath = userService.getAvatarPath(username);
         if (avatarPath != null) {
             Path filePath = Paths.get(avatarPath);
