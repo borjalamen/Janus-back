@@ -29,13 +29,12 @@ import lombok.RequiredArgsConstructor;
 public class ProfileCVController {
 
     private final UserService userService;
-    private final String uploadDir = "/app/assets/multimedia/cv/";
+    private final String uploadDir = "uploads/cv/";
 
-    // ---------- PUJAR / ACTUALITZAR EL MEU CV (usuari loguejat) ----------
-    @PostMapping("/me")
-    public ResponseEntity<?> uploadMyCv(
+   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadCv(
             @RequestParam("file") MultipartFile file,
-            Authentication authentication) {
+             @RequestParam("username") String username) {
 
         String username = authentication.getName();
 
@@ -54,7 +53,8 @@ public class ProfileCVController {
         }
 
         try {
-            Files.createDirectories(Paths.get(uploadDir));
+            Path uploadPath = Paths.get(uploadDir);
+            Files.createDirectories(uploadPath);
 
             String extension =
                     contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
@@ -69,17 +69,16 @@ public class ProfileCVController {
             return ResponseEntity.ok("CV guardado correctamente");
 
         } catch (IOException e) {
-            return ResponseEntity.internalServerError()
-                    .body("Error al guardar el CV");
+            e.printStackTrace(); 
+        return ResponseEntity.internalServerError().body(e.getMessage());
         }
     }
 
-    // ---------- PUJAR / ACTUALITZAR CV D'UN ALTRE USUARI (per ex. ADMIN) ----------
-    @PostMapping
-    public ResponseEntity<?> uploadCvForUser(
-            @RequestParam("file") MultipartFile file,
-            @RequestParam("username") String username,
-            Authentication authentication) {
+    
+    @GetMapping
+    public ResponseEntity<Resource> getCv(@RequestParam String username) throws IOException {
+        
+        String cvPath = userService.getCvPath(username);
 
 
         if (!userService.existsByUsername(username)) {
@@ -142,14 +141,14 @@ public class ProfileCVController {
                 ? MediaType.parseMediaType(contentType)
                 : MediaType.APPLICATION_PDF;
 
-        return ResponseEntity.ok()
-                .contentType(mediaType)
+         return ResponseEntity.ok()
+                .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
 
-    // ---------- OBTENIR EL CV D'UN ALTRE USUARI (per ex. ADMIN o per mostrar-lo) ----------
-    @GetMapping
-    public ResponseEntity<Resource> getCvForUser(@RequestParam("username") String username) throws IOException {
+    
+    @DeleteMapping
+    public ResponseEntity<?> deleteCv(@RequestParam String username) throws IOException {
         String cvPath = userService.getCvPath(username);
         if (cvPath == null) {
             return ResponseEntity.notFound().build();
