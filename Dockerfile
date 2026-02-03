@@ -1,17 +1,19 @@
 FROM maven:3.9.9-eclipse-temurin-21-alpine
 USER root
 
-RUN apk add tzdata \
-    && cp /usr/share/zoneinfo/Europe/Madrid /etc/localtime \
+RUN apt-get update \
+    && apt-get install -y tzdata \
+    && ln -fs /usr/share/zoneinfo/Europe/Madrid /etc/localtime \
     && echo "Europe/Madrid" > /etc/timezone \
-    && apk del tzdata
+    && dpkg-reconfigure -f noninteractive tzdata \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
 
 RUN mkdir -p /app/assets/multimedia
+RUN mkdir -p /app/assets/multimedia/avatars \
+    /app/assets/multimedia/cv
 WORKDIR /app
 
 COPY target/janus-backend-*.jar app.jar
-COPY docker-run.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh
-
-CMD ["/entrypoint.sh"]
+CMD ["java","-jar","app.jar"]

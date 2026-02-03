@@ -97,12 +97,12 @@ public ResponseEntity<?> delete(@PathVariable String id) {
             .orElseGet(() -> ResponseEntity.notFound().build());
 }
 
-    @PostMapping(value = "/videos/upload")
-    public ResponseEntity<MediaVideo> upload(
-            @RequestPart("file") MultipartFile file,
-            @RequestPart("thumbnail") MultipartFile thumbnail,
-            @RequestPart("title") String title,
-            @RequestPart("description") String description) throws IOException {
+   @PostMapping("/videos/upload")
+public ResponseEntity<MediaVideo> upload(
+        @RequestParam("file") MultipartFile file,
+        @RequestParam("thumbnail") MultipartFile thumbnail,
+        @RequestParam("title") String title,
+        @RequestParam("description") String description) throws IOException {
 
         // Ruta dins del contenidor (muntada amb el volum)
         Path uploadDir = Paths.get("/app/assets/multimedia");

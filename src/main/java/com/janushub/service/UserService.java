@@ -1,10 +1,11 @@
 package com.janushub.service;
 
+import java.time.LocalDateTime;
+
 import org.springframework.stereotype.Service;
 
 import com.janushub.model.Users;
 import com.janushub.repository.UserRepository;
-import java.time.LocalDateTime;
 
 import lombok.RequiredArgsConstructor;
 
@@ -15,6 +16,7 @@ public class UserService {
     private final UserRepository userRepository;
 
     private Users getUserOrThrow(String username) {
+        System.out.println("DEBUG getUserOrThrow -> username = " + username);
         return userRepository.findByUsername(username)
                 .orElseThrow(() ->
                         new IllegalArgumentException("Usuario no encontrado: " + username));
@@ -22,11 +24,9 @@ public class UserService {
 
     // ---------- AVATAR ----------
     public void updateAvatar(String username, String path) {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        Users user = getUserOrThrow(username);
         user.setAvatarPath(path);
-         user.setUpdatedAt(LocalDateTime.now());
+        user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
     }
 
@@ -38,7 +38,6 @@ public class UserService {
 
     public void removeAvatar(String username) {
         Users user = getUserOrThrow(username);
-
         user.setAvatarPath(null);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -46,12 +45,11 @@ public class UserService {
 
     // ---------- CV ----------
     public void updateCv(String username, String path) {
-    Users user = userRepository.findByUsername(username).orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
-    user.setCvPath(path);
-    user.setUpdatedAt(LocalDateTime.now());
-    userRepository.save(user);
-}
+        Users user = getUserOrThrow(username);
+        user.setCvPath(path);
+        user.setUpdatedAt(LocalDateTime.now());
+        userRepository.save(user);
+    }
 
     public String getCvPath(String username) {
         return userRepository.findByUsername(username)
@@ -60,11 +58,13 @@ public class UserService {
     }
 
     public void removeCv(String username) {
-        Users user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("Usuario no encontrado"));
-
+        Users user = getUserOrThrow(username);
         user.setCvPath(null);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
+    }
+
+    public boolean existsByUsername(String username) {
+        return userRepository.findByUsername(username).isPresent();
     }
 }

@@ -35,6 +35,7 @@ com\janushub\repository\UserRepository.class
 com\janushub\repository\PlanificacionRepository.class
 com\janushub\model\MediaVideo.class
 com\janushub\service\OpenAiService.class
+com\janushub\config\JwUtil.class
 com\janushub\controller\PlanificacionController.class
 com\janushub\controller\JenkinsController.class
 com\janushub\controller\ProfileImageController.class
