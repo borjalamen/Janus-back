@@ -15,8 +15,8 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.janushub.service.UserService;
@@ -29,7 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class ProfileImageController {
 
     private final UserService userService;
-    private final String uploadDir = "/app/assets/multimedia/avatars/";
+    private final String baseDir = "/app/assets/multimedia";
 
     // ---------- SUBIR AVATAR ----------
     @PostMapping
@@ -52,18 +52,18 @@ public class ProfileImageController {
         }
 
         try {
-            Path uploadDir = Paths.get(this.uploadDir);
-            Files.createDirectories(uploadDir);
+            Path userDir = Paths.get(baseDir, username); // /app/assets/multimedia/{username}
+            Files.createDirectories(userDir);
 
-            String fileName = username + "_" + System.currentTimeMillis() + "." + extension;
-            Path path = uploadDir.resolve(fileName);
+            String fileName = "avatar_" + System.currentTimeMillis() + "." + extension;
+            Path path = userDir.resolve(fileName);
 
             Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
             userService.updateAvatar(username, path.toString());
 
             return ResponseEntity.ok("Imagen de perfil guardada correctamente");
-
         } catch (IOException e) {
+            e.printStackTrace();
             return ResponseEntity.internalServerError()
                     .body("Error al guardar la imagen de perfil");
         }
