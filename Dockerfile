@@ -1,4 +1,4 @@
-FROM maven:3.9.9-eclipse-temurin-21-alpine
+FROM 172.19.208.1:5000/gencat-sic-builders/mvn-builder:1.0-3.9-21-openjdk
 USER root
 
 RUN apt-get update \
