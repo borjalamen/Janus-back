@@ -33,41 +33,51 @@ public class ProfileImageController {
 
     // ---------- SUBIR AVATAR ----------
     @PostMapping
-    public ResponseEntity<?> uploadImage(
-            @RequestParam("file") MultipartFile imageFile,
-            @RequestParam("username") String username) {
+public ResponseEntity<?> uploadImage(
+        @RequestParam("file") MultipartFile imageFile,
+        @RequestParam("username") String username) {
 
-        if (imageFile.isEmpty()) {
-            return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
-        }
-
-        String contentType = imageFile.getContentType();
-        if (contentType == null || !contentType.startsWith("image/")) {
-            return ResponseEntity.badRequest().body("Formato no permitido. Solo imágenes");
-        }
-
-        String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-        if (extension == null || extension.isBlank()) {
-            extension = "png";
-        }
-
-        try {
-            Path userDir = Paths.get(baseDir, username); // /app/assets/multimedia/{username}
-            Files.createDirectories(userDir);
-
-            String fileName = "avatar_" + System.currentTimeMillis() + "." + extension;
-            Path path = userDir.resolve(fileName);
-
-            Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-            userService.updateAvatar(username, path.toString());
-
-            return ResponseEntity.ok("Imagen de perfil guardada correctamente");
-        } catch (IOException e) {
-            e.printStackTrace();
-            return ResponseEntity.internalServerError()
-                    .body("Error al guardar la imagen de perfil");
-        }
+    if (imageFile.isEmpty()) {
+        return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
     }
+
+    String contentType = imageFile.getContentType();
+    if (contentType == null || !contentType.startsWith("image/")) {
+        return ResponseEntity.badRequest().body("Formato no permitido. Solo imágenes");
+    }
+
+    String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+    if (extension == null || extension.isBlank()) {
+        extension = "png";
+    }
+
+    try {
+        // 1) esborrar avatar antic si existeix
+        String oldAvatarPath = userService.getAvatarPath(username);
+        if (oldAvatarPath != null && !oldAvatarPath.isBlank()) {
+            Files.deleteIfExists(Paths.get(oldAvatarPath));
+        }
+
+        // 2) carpeta de l'usuari
+        Path userDir = Paths.get(baseDir, username); // /app/assets/multimedia/{username}
+        Files.createDirectories(userDir);
+
+        // 3) NOM FIX → sempre el mateix avatar
+        String fileName = "avatar." + extension.toLowerCase();   // avatar.png / avatar.jpg...
+        Path path = userDir.resolve(fileName);
+
+        // 4) guardar nou avatar (sobreescriu si cal)
+        Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+        userService.updateAvatar(username, path.toString());
+
+        return ResponseEntity.ok("Imagen de perfil guardada correctamente");
+    } catch (IOException e) {
+        e.printStackTrace();
+        return ResponseEntity.internalServerError()
+                .body("Error al guardar la imagen de perfil");
+    }
+}
+
 
     // ---------- OBTENER AVATAR ----------
     @GetMapping
