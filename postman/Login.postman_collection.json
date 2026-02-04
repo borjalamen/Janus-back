@@ -1,0 +1,41 @@
+{
+  "info": {
+    "_postman_id": "b92aed20-bfe6-4549-8ca1-a73f425a322d",
+    "name": "Login",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51382486",
+    "_collection_link": "https://go.postman.co/collection/51382486-b92aed20-bfe6-4549-8ca1-a73f425a322d?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "http://localhost:8080/api/auth/signin",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"username\": \"jlopez\",\r\n  \"password\": \"jlopez1234\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/auth/signin",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "auth",
+            "signin"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}

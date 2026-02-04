@@ -1,179 +1,191 @@
 {
-	"info": {
-		"_postman_id": "ff6ed146-eeba-4b0d-82d7-a2ec8c3dbfa7",
-		"name": "Planificacion",
-		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
-		"_exporter_id": "51382486",
-		"_collection_link": "https://ateresp17-9998660.postman.co/workspace/Aleix-Ter%C3%A9s's-Workspace~6e100994-a1bb-4e67-815a-403e348200b6/collection/51382520-ff6ed146-eeba-4b0d-82d7-a2ec8c3dbfa7?action=share&source=collection_link&creator=51382486"
-	},
-	"item": [
-		{
-			"name": "Crear",
-			"event": [
-				{
-					"listen": "test",
-					"script": {
-						"exec": [
-							"let data = pm.response.json();\r",
-							"pm.collectionVariables.set(\"planificacionId\", data.id);"
-						],
-						"type": "text/javascript",
-						"packages": {},
-						"requests": {}
-					}
-				}
-			],
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "POST",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD\",\r\n  \"date\": \"2026-01-10\",\r\n  \"startTime\": \"09:00\",\r\n  \"endTime\": \"10:00\",\r\n  \"devOps\": \"Borja Lara\",\r\n  \"notes\": \"Primera prova\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 1,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/planificacion",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"planificacion"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get per id",
-			"request": {
-				"method": "GET",
-				"header": [],
-				"url": {
-					"raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"planificacion",
-						"{{planificacionId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Put por id",
-			"request": {
-				"method": "PUT",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD MODIFICADA\",\r\n  \"date\": \"2026-01-15\",\r\n  \"startTime\": \"10:00\",\r\n  \"endTime\": \"11:00\",\r\n  \"devOps\": \"Borja\",\r\n  \"notes\": \"Planificació actualitzada des de Postman\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 2,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"planificacion",
-						"{{planificacionId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Delete por id",
-			"request": {
-				"auth": {
-					"type": "noauth"
-				},
-				"method": "DELETE",
-				"header": [],
-				"body": {
-					"mode": "raw",
-					"raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD MODIFICADA\",\r\n  \"date\": \"2026-01-15\",\r\n  \"startTime\": \"10:00\",\r\n  \"endTime\": \"11:00\",\r\n  \"devOps\": \"Borja\",\r\n  \"notes\": \"Planificació actualitzada des de Postman\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 2,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
-					"options": {
-						"raw": {
-							"language": "json"
-						}
-					}
-				},
-				"url": {
-					"raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
-					"protocol": "http",
-					"host": [
-						"localhost"
-					],
-					"port": "8080",
-					"path": [
-						"api",
-						"planificacion",
-						"{{planificacionId}}"
-					]
-				}
-			},
-			"response": []
-		},
-		{
-			"name": "Get de todo",
-			"request": {
-				"method": "GET",
-				"header": []
-			},
-			"response": []
-		}
-	],
-	"event": [
-		{
-			"listen": "prerequest",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		},
-		{
-			"listen": "test",
-			"script": {
-				"type": "text/javascript",
-				"packages": {},
-				"requests": {},
-				"exec": [
-					""
-				]
-			}
-		}
-	],
-	"variable": [
-		{
-			"key": "planificacionId",
-			"value": ""
-		}
-	]
+  "info": {
+    "_postman_id": "ff6ed146-eeba-4b0d-82d7-a2ec8c3dbfa7",
+    "name": "Planificacion",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51382486",
+    "_collection_link": "https://go.postman.co/collection/51382520-ff6ed146-eeba-4b0d-82d7-a2ec8c3dbfa7?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "Crear",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "let data = pm.response.json();\r",
+              "pm.collectionVariables.set(\"planificacionId\", data.id);"
+            ],
+            "type": "text/javascript",
+            "packages": {},
+            "requests": {}
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD\",\r\n  \"date\": \"2026-01-10\",\r\n  \"startTime\": \"09:00\",\r\n  \"endTime\": \"10:00\",\r\n  \"devOps\": \"Borja Lara\",\r\n  \"notes\": \"Primera prova\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 1,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/planificacion",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "planificacion"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get per id",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "planificacion",
+            "{{planificacionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Put por id",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD MODIFICADA\",\r\n  \"date\": \"2026-01-15\",\r\n  \"startTime\": \"10:00\",\r\n  \"endTime\": \"11:00\",\r\n  \"devOps\": \"Borja\",\r\n  \"notes\": \"Planificació actualitzada des de Postman\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 2,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "planificacion",
+            "{{planificacionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Delete por id",
+      "request": {
+        "auth": {
+          "type": "noauth"
+        },
+        "method": "DELETE",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"env\": \"DEV\",\r\n  \"project\": \"Prova CRUD MODIFICADA\",\r\n  \"date\": \"2026-01-15\",\r\n  \"startTime\": \"10:00\",\r\n  \"endTime\": \"11:00\",\r\n  \"devOps\": \"Borja\",\r\n  \"notes\": \"Planificació actualitzada des de Postman\",\r\n  \"jiraUrl\": \"\",\r\n  \"responsable\": \"\",\r\n  \"periodDays\": 2,\r\n  \"eventType\": \"DEPLOY\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/planificacion/{{planificacionId}}",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "planificacion",
+            "{{planificacionId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Get de todo",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:8080/api/planificacion",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "planificacion"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "planificacionId",
+      "value": ""
+    }
+  ]
 }

@@ -167,6 +167,62 @@
         }
       },
       "response": []
+    },
+    {
+      "name": "Subir video",
+      "protocolProfileBehavior": {
+        "disabledSystemHeaders": {
+          "content-type": true
+        }
+      },
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "formdata",
+          "formdata": [
+            {
+              "key": "file",
+              "type": "file",
+              "uuid": "2912a456-d61f-4a97-86a0-dcdb1d160f4c",
+              "src": "/C:/Users/USUARIO/Documents/GitHub/Janus-front-spa/src/assets/multimedia/Debtdoctor - Indragroup.mp4"
+            },
+            {
+              "key": "thumbnail",
+              "type": "file",
+              "uuid": "14435079-e3ce-4626-9553-884b942d7e84",
+              "src": "/C:/Users/USUARIO/Downloads/png-transparent-mythical-phoenix-watercolor-resplendent-flaming-phoenix-bird-thumbnail.png"
+            },
+            {
+              "key": "title",
+              "value": "Video prueba",
+              "type": "text",
+              "uuid": "ebf4db29-1113-43b0-9925-bc30312eafa9"
+            },
+            {
+              "key": "description",
+              "value": "Descripcion prueba",
+              "type": "text",
+              "uuid": "acab53ba-7666-4ed0-8110-ce744c9b37dd"
+            }
+          ]
+        },
+        "url": {
+          "raw": "http://localhost:8080/api/media/videos/upload",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8080",
+          "path": [
+            "api",
+            "media",
+            "videos",
+            "upload"
+          ]
+        }
+      },
+      "response": []
     }
   ],
   "event": [
@@ -200,8 +256,7 @@
     },
     {
       "key": "id",
-      "value": "",
-      "type": "default"
+      "value": ""
     }
   ]
 }

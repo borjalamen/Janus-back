@@ -1,0 +1,316 @@
+{
+  "info": {
+    "_postman_id": "5ccd8956-7201-4ceb-adba-9f03a0b7f0a9",
+    "name": "Avatar Images/CV",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "51382486",
+    "_collection_link": "https://go.postman.co/collection/51382520-5ccd8956-7201-4ceb-adba-9f03a0b7f0a9?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "CV",
+      "item": [
+        {
+          "name": "Subir CV Profile",
+          "request": {
+            "auth": {
+              "type": "bearer"
+            },
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "eae8897d-14b9-4068-ac38-c2284433aef8",
+                  "src": "postman-cloud:///1f0f7049-48d8-4d80-b10f-e6b9bdae5ae3"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/profile/cv",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "profile",
+                "cv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Subir CV Admin",
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "eae8897d-14b9-4068-ac38-c2284433aef8",
+                  "src": "postman-cloud:///1f0f7049-48d8-4d80-b10f-e6b9bdae5ae3"
+                },
+                {
+                  "key": "username",
+                  "value": "jlopez",
+                  "type": "text",
+                  "uuid": "8a9c66c8-3f41-46c4-8a1c-8927ed95f7a8"
+                }
+              ]
+            },
+            "url": {
+              "raw": "http://localhost:8080/api/profile/cv",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "profile",
+                "cv"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver CV Profile",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/profile/cv/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "cv",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver CV Admin",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/profile/cv?username=fsgil",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "cv"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "fsgil"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar CV Admin",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "fsgil1234",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "fsgil",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "DELETE",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": []
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/profile/image?username=fsgil",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "image"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "fsgil"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Eliminar CV Profile",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/profile/cv/me",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "cv",
+                "me"
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Images",
+      "item": [
+        {
+          "name": "Subir Imagenes",
+          "protocolProfileBehavior": {
+            "disabledSystemHeaders": {}
+          },
+          "request": {
+            "method": "POST",
+            "header": [],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                {
+                  "key": "username",
+                  "value": "fsgil",
+                  "type": "text",
+                  "uuid": "bd295a5c-3fd9-4b3b-94e5-3c14aaa63ae0"
+                },
+                {
+                  "key": "file",
+                  "type": "file",
+                  "uuid": "e8cded13-6473-4e68-aa7b-bc4321042fbe",
+                  "src": "postman-cloud:///1f0f702b-12f0-4790-baa1-5aef4de84e43"
+                }
+              ]
+            },
+            "url": {
+              "raw": "{{baseURL}}/api/profile/image",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "image"
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Ver Imagen por user",
+          "request": {
+            "auth": {
+              "type": "basic",
+              "basic": [
+                {
+                  "key": "password",
+                  "value": "fsgil1234",
+                  "type": "string"
+                },
+                {
+                  "key": "username",
+                  "value": "fsgil",
+                  "type": "string"
+                }
+              ]
+            },
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseURL}}/api/profile/image?username=fsgil",
+              "host": [
+                "{{baseURL}}"
+              ],
+              "path": [
+                "api",
+                "profile",
+                "image"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "fsgil"
+                }
+              ]
+            }
+          },
+          "response": []
+        },
+        {
+          "name": "Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [],
+            "url": {
+              "raw": "http://localhost:8080/api/profile/image?username=jlopez",
+              "protocol": "http",
+              "host": [
+                "localhost"
+              ],
+              "port": "8080",
+              "path": [
+                "api",
+                "profile",
+                "image"
+              ],
+              "query": [
+                {
+                  "key": "username",
+                  "value": "jlopez"
+                }
+              ]
+            }
+          },
+          "response": []
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseURL",
+      "value": "",
+      "type": "default"
+    }
+  ]
+}
