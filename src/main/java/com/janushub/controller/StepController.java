@@ -50,6 +50,8 @@ public class StepController {
                 .body(saved);
     }
 
+    @GetMapping
+
     public ResponseEntity<List<StepDocumentID>> getAllSteps() {
         return ResponseEntity.ok(stepRepository.findAll());
     }
