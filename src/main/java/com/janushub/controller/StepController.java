@@ -22,40 +22,53 @@ public class StepController {
 
      @PostMapping
     public ResponseEntity<?> createStep(@RequestBody StepDocumentID step) {
-        if (stepRepository.existsByTitulo(step.getTitulo())) {
+
+        step.setID(null); 
+
+
+        if (stepRepository.existsByStepID(step.getStepById())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("ID duplicado");
+                    .body("ID duplicado" + step.getStepById());
         }
 
+        
         step.setCreatedAt(LocalDateTime.now());
         step.setUpdatedAt(LocalDateTime.now());
+        step.setDeleted(false);
+        step.setVisible(true);
+
+        StepDocumentID saved = StepRepository.save(step);
 
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(stepRepository.save(step));
-
-        
+                .body(stepRepository.save(step));        
 
     }
 
-    @GetMapping("/{id}")
+    @GetMapping
+    public ResponseEntity<List<StepDocumentID>> getAllSteps() {
+        return ResponseEntity.ok(stepRepository.findAll());
+    }
 
 
-        public ResponseEntity<?> getStepById(@PathVariable String id) {
-        return stepRepository.findById(id)
+    @GetMapping("/{stepId}")
+
+
+        public ResponseEntity<?> getStepById(@PathVariable String stepId) {
+        return stepRepository.findByStepId(StepId)
                 .map(ResponseEntity :: ok)
                 .orElse(ResponseEntity.notFound().build());
 
 
     }
 
-    @PutMapping("/{id}")
+    @PutMapping("/{stepId}")
 public ResponseEntity<?> update(
-        @PathVariable String id,
+        @PathVariable String stepId,
         @RequestBody StepDocumentID step) {
 
-    return stepRepository.findById(id)
+    return stepRepository.findById(stepId)
             .map(existing -> {
                 existing.setTitulo(step.getTitulo());
                 existing.setDescripcion(step.getDescripcion());
@@ -66,25 +79,22 @@ public ResponseEntity<?> update(
                 existing.setUpdatedAt(LocalDateTime.now());
 
                 StepDocumentID updatedStep = stepRepository.save(existing);
-                return ResponseEntity.ok(updatedStep);
+                return ResponseEntity.ok(updated);
             })
             .orElse(ResponseEntity.notFound().build());
 }
 
         @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteStep(@PathVariable String id) {
-        if (!stepRepository.existsById(id)) {
-            return ResponseEntity.notFound().build();
-        }
-        stepRepository.deleteById(id);
-        return ResponseEntity.noContent().build();
+    public ResponseEntity<?> deleteStep(@PathVariable String stepId) {
+        return stepRepository.findByStepId(stepId)
+                .map(existing -> {
+                    stepRepository.delete(existing);
+                    return ResponseEntity.ok("Step eliminado con stepId: " + stepId);
+                })
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body("No existe Step con stepId: " + stepId));
     }
-
-    @GetMapping
-    public ResponseEntity<List<StepDocumentID>> getAllSteps() {
-        List<StepDocumentID> steps = stepRepository.findAll();
-        return ResponseEntity.ok(steps);
-    }
+   
 }
 
 
