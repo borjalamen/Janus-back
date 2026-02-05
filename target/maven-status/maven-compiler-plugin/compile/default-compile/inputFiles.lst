@@ -30,6 +30,7 @@ C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Param
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Planificacion.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Procedure.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Project.java
+C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepCounter.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepDocumentID.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepProcedures.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepRepository.java
@@ -50,5 +51,6 @@ C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\resolver\Us
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\OpenAiService.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\ParametritzacioService.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\PlanificacionService.java
+C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\StepSequenceGenerator.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\service\UserService.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\dto\ChangePasswordRequest.java

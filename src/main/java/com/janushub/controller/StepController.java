@@ -10,15 +10,19 @@ import java.util.UUID;
 
 import com.janushub.model.StepDocumentID;
 import com.janushub.model.StepRepository;
+import com.janushub.service.StepSequenceGenerator;
+
 
 @RestController
 @RequestMapping("/api/steps") // ← ruta base correcta
 public class StepController {
 
     private final StepRepository stepRepository;
+    private final StepSequenceGenerator sequenceGenerator;
 
-    public StepController(StepRepository stepRepository) {
+    public StepController(StepRepository stepRepository, StepSequenceGenerator sequenceGenerator) {
         this.stepRepository = stepRepository;
+        this.sequenceGenerator = sequenceGenerator;
     }
 
      @PostMapping
@@ -26,16 +30,11 @@ public class StepController {
 
         step.setId(null); 
 
-         if (step.getStepId() == null || step.getStepId().isBlank()) {
-            step.setStepId("STEP-" + UUID.randomUUID());
-        }
+         // Generar stepId automàtic incremental
+        long nextId = sequenceGenerator.getNextSequence("stepId");
+        String formattedId = String.format("step-%03d", nextId);
 
-
-
-        if (stepRepository.existsByStepId(step.getStepId())) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body("ID duplicado" + step.getStepId());
-        }
+        step.setStepId(formattedId);
 
         
         step.setCreatedAt(LocalDateTime.now());
@@ -50,6 +49,7 @@ public class StepController {
                 .status(HttpStatus.CREATED)
                 .body(saved);
     }
+
     public ResponseEntity<List<StepDocumentID>> getAllSteps() {
         return ResponseEntity.ok(stepRepository.findAll());
     }
@@ -97,7 +97,7 @@ public ResponseEntity<?> updateStep(
           
 }
 
-        @DeleteMapping("/{id}")
+        @DeleteMapping("/{stepId}")
     public ResponseEntity<?> deleteStep(@PathVariable String stepId) {
 
         StepDocumentID existing = stepRepository.findByStepId(stepId);
