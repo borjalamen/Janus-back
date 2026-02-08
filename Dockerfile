@@ -1,4 +1,4 @@
-FROM 172.19.208.1:5000/gencat-sic-builders/mvn-builder:1.0-3.9-21-openjdk
+FROM eclipse-temurin:21-jdk
 USER root
 
 RUN apt-get update \
