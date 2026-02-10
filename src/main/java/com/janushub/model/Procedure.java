@@ -25,6 +25,9 @@ public class Procedure {
     @Id
     private String id;
 
+    @Field("procedureId")   
+    private String procedureId;
+
     @Field("titulo")
     private String titulo;
 
@@ -53,4 +56,6 @@ public class Procedure {
 
     @Builder.Default
     private boolean isVisible = true;
+
+    
 }
