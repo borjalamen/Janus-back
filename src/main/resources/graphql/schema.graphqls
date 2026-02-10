@@ -15,3 +15,42 @@ type Query {
     hello: String
     allUsers: [User]!
 }
+
+type Step {
+  StepID: String
+  titulo: String
+  descripcion: String
+  responsable: String
+  metodo: String
+  orden: Int
+  tags: [String]
+  createdAt: String
+  updatedAt: String
+  visible: Boolean
+  deleted: Boolean
+}
+
+type Procedure {
+  ProcedureID: String
+  titulo: String
+  descripcion: String
+  responsable: String
+  steps: [Step]
+  createdAt: String
+  updatedAt: String
+  visible: Boolean
+  deleted: Boolean
+}
+
+type Query {
+  # STEPS
+  getAllSteps: [Step]
+  getStepByStepID(stepId: String!): Step
+  searchStepsByResponsable(responsable: String!): [Step]
+  searchStepsByTag(tag: String!): [Step]
+
+  # PROCEDURES
+  getAllProcedures: [Procedure]
+  getProcedureByProcedureID(procedureId: String!): Procedure
+  searchProceduresByTitulo(titulo: String!): [Procedure]
+}
