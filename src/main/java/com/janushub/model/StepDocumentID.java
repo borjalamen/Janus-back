@@ -1,5 +1,9 @@
 package com.janushub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -9,6 +13,8 @@ import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 import org.springframework.data.mongodb.core.mapping.Field;
+
+
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -26,10 +32,11 @@ import java.util.List;
 
 public class StepDocumentID {
 
+     @JsonIgnore
      @Id
     private String id; // _id MongoDB (únic)
 
-
+     @JsonProperty("StepID")
      @Field("stepId")
     @Indexed(unique = true)
     private String stepId; // ID funcional únic del step
