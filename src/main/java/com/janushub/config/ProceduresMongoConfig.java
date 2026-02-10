@@ -26,6 +26,8 @@ public class ProceduresMongoConfig {
         if (!toDelete.isEmpty()) {
             proceduresRepository.deleteAll(toDelete);
             System.out.println("Eliminats " + toDelete.size() + " procediments amb procedureId null");
+        } else {
+            System.out.println("No s'han trobat procediments amb procedureId null");
         }
 
         // 2️⃣ Assegura l'índex únic amb partialFilterExpression
