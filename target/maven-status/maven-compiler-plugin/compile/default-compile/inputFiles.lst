@@ -10,7 +10,6 @@ C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\BitacoraController.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\DocumentController.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\FormacionController.java
-C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\GraphQLController.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\InfraestructuraController.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\JenkinsController.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\controller\MediaVideoController.java
@@ -32,8 +31,6 @@ C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Media
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Parametritzacio.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Planificacion.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Procedure.java
-C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\ProcedureDocument.java
-C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\ProcedureRepository.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\Project.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepCounter.java
 C:\Users\Jano\Documents\GitHub\Janus-back\src\main\java\com\janushub\model\StepDocumentID.java
