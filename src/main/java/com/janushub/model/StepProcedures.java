@@ -37,4 +37,10 @@ public class StepProcedures {
 
     @Field("tags")
     private List<String> tags;
+    
+    @Field("entorno")
+    private String entorno;
+
+    @Field("imageUrl")
+    private String imageUrl;
 }
