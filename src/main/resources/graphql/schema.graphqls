@@ -1,4 +1,3 @@
-# src/main/resources/graphql/schema.graphqls
 type User {
     id: ID!
     username: String!
@@ -7,11 +6,70 @@ type User {
     email: String!
     phone: String
     status: String!
-    createdAt: String! 
+    createdAt: String!
     updatedAt: String!
+}
+
+type Bitacora {
+    id: ID!
+    idProyecto: String!
+    contexto: String
+    error: String
+    solucion: String
+    fecha: String
+    tags: [String]
+    visible: Boolean
+}
+
+type Procedure {
+    id: ID!
+    titulo: String
+    descripcion: String
+    departamento: String
+    tags: [String]
+    isDeleted: Boolean
+    isVisible: Boolean
+    createdAt: String
+    updatedAt: String
+}
+
+type Project {
+    id: ID!
+    code: String
+    name: String
+    departamentOrganisme: String
+    gestorResponsableSolucio: String
+    responsableProjecte: String
+    equipDesenvolupament: String
+    equipProjectesInfra: String
+    equipProves: String
+    equipAdminExplotacioXarxes: String
+    oficinaSeguretat: String
+    equipQualitat: String
+    equipAdminOperacions: String
+    equipAdminExplotacioSistemes: String
+    gestorIntegracioSolucions: String
+    createdAt: String
 }
 
 type Query {
     hello: String
+
+    # USERS
     allUsers: [User]!
+
+    # BITACORA
+    allBitacoras: [Bitacora]!
+    bitacoraById(id: ID!): Bitacora
+    bitacorasByProject(idProyecto: String!): [Bitacora]!
+
+    # PROCEDURES
+    allProcedures: [Procedure]!
+    procedureById(id: ID!): Procedure
+    searchProceduresByTitulo(titulo: String!): [Procedure]!
+
+    # PROJECTS
+    allProjects: [Project]!
+    projectById(id: ID!): Project
+    searchProjectsByName(name: String!): [Project]!
 }
