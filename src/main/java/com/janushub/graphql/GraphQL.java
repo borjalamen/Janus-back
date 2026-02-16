@@ -41,13 +41,6 @@ public class GraphQL {
         return "GraphQL funcionando correctamente 🚀";
     }
 
-    // ==========================
-    // USERS
-    // ==========================
-    @QueryMapping
-    public List<Users> allUsers() {
-        return userRepository.findAll();
-    }
 
     // ==========================
     // BITACORA
