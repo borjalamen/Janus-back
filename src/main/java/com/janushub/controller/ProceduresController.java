@@ -206,6 +206,20 @@ public class ProceduresController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public Procedure createProcedure(@RequestBody Procedure procedure) {
+
+        Procedure last = repository.findTopByOrderByIdDesc();
+
+    int nextNumber = 1;
+
+    if (last != null && last.getId() != null && last.getId().startsWith("procedure-")) {
+        String lastId = last.getId(); // procedure-005
+        String numberPart = lastId.replace("procedure-", ""); // 005
+        nextNumber = Integer.parseInt(numberPart) + 1;
+    }
+
+        String newId = String.format("procedure-%03d", nextNumber);
+        procedure.setId(newId);
+
         procedure.setDeleted(false);
         procedure.setCreatedAt(LocalDateTime.now());
         procedure.setUpdatedAt(LocalDateTime.now()); 
