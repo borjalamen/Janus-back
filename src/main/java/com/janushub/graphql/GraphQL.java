@@ -33,13 +33,7 @@ public class GraphQL {
         this.projectRepository = projectRepository;
     }
 
-    // ==========================
-    // BASIC
-    // ==========================
-    @QueryMapping
-    public String hello() {
-        return "GraphQL funcionando correctamente 🚀";
-    }
+  
 
 
     // ==========================
