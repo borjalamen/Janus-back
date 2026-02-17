@@ -1,4 +1,5 @@
 com\janushub\model\Infraestructura$AuthItem.class
+com\janushub\graphql\GraphQL.class
 com\janushub\model\Infraestructura$JdkItem.class
 com\janushub\model\StepDocumentID$StepDocumentIDBuilder.class
 com\janushub\service\UneteService.class
@@ -10,7 +11,6 @@ com\janushub\model\StepRepository.class
 com\janushub\controller\FormacionController.class
 dto\ChangePasswordRequest.class
 com\janushub\controller\AiController.class
-com\janushub\HelloResolver.class
 com\janushub\service\ParametritzacioService.class
 com\janushub\model\Jenkins.class
 com\janushub\controller\StepController.class
@@ -20,6 +20,7 @@ com\janushub\controller\MediaVideoController.class
 com\janushub\model\Infraestructura$OtherItem.class
 com\janushub\repository\JenkinsRepository.class
 com\janushub\model\StepProcedures$StepProceduresBuilder.class
+com\janushub\repository\ProjectRepository.class
 com\janushub\model\Steps.class
 com\janushub\repository\FormacionRepository.class
 com\janushub\config\WebConfig.class
