@@ -207,8 +207,7 @@ public class ProceduresController {
     @ResponseStatus(HttpStatus.CREATED)
     public Procedure createProcedure(@RequestBody Procedure procedure) {
 
-        Procedure last = repository.findTopByOrderByIdDesc();
-
+         Procedure last = repository.findTopByIdStartingWithOrderByIdDesc("procedure-");
     int nextNumber = 1;
 
     if (last != null && last.getId() != null && last.getId().startsWith("procedure-")) {

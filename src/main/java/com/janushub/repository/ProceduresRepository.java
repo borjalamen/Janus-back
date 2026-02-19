@@ -13,5 +13,6 @@ public interface ProceduresRepository extends MongoRepository<Procedure, String>
     // Buscar por titulo (contiene texto, case-insensitive) solo activos
     List<Procedure> findByTituloContainingIgnoreCaseAndIsDeletedFalse(String titulo);
 
-    Procedure findTopByOrderByIdDesc();
+    Procedure findTopByIdStartingWithOrderByIdDesc(String prefix);
+    
 }
