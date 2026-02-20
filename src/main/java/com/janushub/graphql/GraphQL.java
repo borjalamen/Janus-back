@@ -12,6 +12,12 @@ import com.janushub.repository.UserRepository;
 import org.springframework.graphql.data.method.annotation.QueryMapping;
 import org.springframework.stereotype.Controller;
 import org.springframework.graphql.data.method.annotation.Argument;
+import org.springframework.graphql.data.method.annotation.MutationMapping;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.Optional;
+
 
 import java.util.List;
 
@@ -97,4 +103,175 @@ public class GraphQL {
     public List<Project> searchProjectsByName(@Argument String name) {
         return projectRepository.findByNameContainingIgnoreCase(name);
     }
+
+     // ==========================================================
+    // MUTATIONS
+    // ==========================================================
+
+    // ==========================
+    // CREATE PROCEDURE (ID procedure-XXX)
+    // ==========================
+
+    @MutationMapping
+    public Procedure createProcedure(@Argument Procedure procedure) {
+
+        Procedure last = proceduresRepository.findTopByOrderByIdDesc();
+
+        int nextNumber = 1;
+
+        if (last != null && last.getId() != null && last.getId().startsWith("procedure-")) {
+            String numberPart = last.getId().replace("procedure-", "");
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+
+        String newId = String.format("procedure-%03d", nextNumber);
+        procedure.setId(newId);
+
+        procedure.setDeleted(false);
+        procedure.setVisible(true);
+        procedure.setCreatedAt(LocalDateTime.now());
+        procedure.setUpdatedAt(LocalDateTime.now());
+
+        return proceduresRepository.save(procedure);
+    }
+
+    // ==========================
+    // SOFT DELETE PROCEDURE
+    // ==========================
+
+     @MutationMapping
+    public Boolean softDeleteProcedure(@Argument String id) {
+
+        Optional<Procedure> procOpt = proceduresRepository.findById(id);
+
+        if (procOpt.isPresent()) {
+            Procedure proc = procOpt.get();
+            proc.setDeleted(true);
+            proc.setVisible(false);
+            proc.setUpdatedAt(LocalDateTime.now());
+            proceduresRepository.save(proc);
+            return true;
+        }
+
+        return false;
+    }
+
+    // ==========================
+    // PHYSICAL DELETE PROCEDURE
+    // ==========================
+
+     @MutationMapping
+    public Boolean deleteProcedurePhysical(@Argument String id) {
+
+        Optional<Procedure> procOpt = proceduresRepository.findById(id);
+
+        if (procOpt.isPresent()) {
+            proceduresRepository.delete(procOpt.get());
+            return true;
+        }
+
+        return false;
+    }
+
+      // ==========================
+    // CREATE PROJECT (ID project-XXX)
+    // ==========================
+    @MutationMapping
+    public Project createProject(@Argument Project project) {
+
+        Project last = projectRepository.findTopByOrderByIdDesc();
+
+        int nextNumber = 1;
+
+        if (last != null && last.getId() != null && last.getId().startsWith("project-")) {
+            String numberPart = last.getId().replace("project-", "");
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+
+        String newId = String.format("project-%03d", nextNumber);
+        project.setId(newId);
+
+        project.setCreatedAt(LocalDateTime.now());
+
+        return projectRepository.save(project);
+    }
+
+     // ==========================
+    // CREATE BITACORA (ID bitacora-XXX)
+    // ==========================
+    @MutationMapping
+    public Bitacora createBitacora(@Argument Bitacora bitacora) {
+
+        Bitacora last = bitacoraRepository.findTopByOrderByIdDesc();
+
+        int nextNumber = 1;
+
+        if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+            String numberPart = last.getId().replace("bitacora-", "");
+            nextNumber = Integer.parseInt(numberPart) + 1;
+        }
+
+        String newId = String.format("bitacora-%03d", nextNumber);
+        bitacora.setId(newId);
+
+        bitacora.setVisible(true);
+
+        return bitacoraRepository.save(bitacora);
+    }
+
+    // ==========================
+    // SOFT DELETE BITACORA
+    // ==========================
+    @MutationMapping
+    public Boolean softDeleteBitacora(@Argument String id) {
+
+        Optional<Bitacora> bitOpt = bitacoraRepository.findById(id);
+
+        if (bitOpt.isPresent()) {
+            Bitacora b = bitOpt.get();
+            b.setVisible(false);
+            bitacoraRepository.save(b);
+            return true;
+        }
+
+        return false;
+    }
+
+     // ==========================
+    // PHYSICAL DELETE BITACORA
+    // ==========================
+    @MutationMapping
+    public Boolean deleteBitacoraPhysical(@Argument String id) {
+
+        Optional<Bitacora> bitOpt = bitacoraRepository.findById(id);
+
+        if (bitOpt.isPresent()) {
+            bitacoraRepository.delete(bitOpt.get());
+            return true;
+        }
+
+        return false;
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

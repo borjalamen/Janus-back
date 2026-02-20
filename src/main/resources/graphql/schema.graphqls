@@ -73,3 +73,44 @@ type Query {
     projectById(id: ID!): Project
     searchProjectsByName(name: String!): [Project]!
 }
+
+type Mutation {
+  createProcedure(procedure: ProcedureInput!): Procedure
+  softDeleteProcedure(id: String!): Boolean
+  deleteProcedurePhysical(id: String!): Boolean
+
+  createProject(project: ProjectInput!): Project
+
+  createBitacora(bitacora: BitacoraInput!): Bitacora
+  softDeleteBitacora(id: String!): Boolean
+  deleteBitacoraPhysical(id: String!): Boolean
+}
+
+input ProcedureInput {
+  titulo: String
+  descripcion: String
+  departamento: String
+  visible: Boolean
+}
+
+input ProjectInput {
+  code: String
+  name: String
+  departamentOrganisme: String
+  gestorResponsableSolucio: String
+  responsableProjecte: String
+  equipDesenvolupament: String
+  equipProjectesInfra: String
+  equipProves: String
+  equipAdminExplotacioXarxes: String
+  oficinaSeguretat: String
+  equipQualitat: String
+  equipAdminOperacions: String
+  equipAdminExplotacioSistemes: String
+  gestorIntegracioSolucions: String
+}
+
+input BitacoraInput {
+  idProyecto: String
+  visible: Boolean
+}
