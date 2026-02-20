@@ -115,7 +115,7 @@ public class GraphQL {
     @MutationMapping
     public Procedure createProcedure(@Argument Procedure procedure) {
 
-        Procedure last = proceduresRepository.findTopByOrderByIdDesc();
+        Procedure last = proceduresRepository.findTopByIdStartingWithOrderByIdDesc("procedure-");
 
         int nextNumber = 1;
 
@@ -179,7 +179,7 @@ public class GraphQL {
     @MutationMapping
     public Project createProject(@Argument Project project) {
 
-        Project last = projectRepository.findTopByOrderByIdDesc();
+        Project last = projectRepository.findTopByIdStartingWithOrderByIdDesc("project-");
 
         int nextNumber = 1;
 
@@ -202,7 +202,7 @@ public class GraphQL {
     @MutationMapping
     public Bitacora createBitacora(@Argument Bitacora bitacora) {
 
-        Bitacora last = bitacoraRepository.findTopByOrderByIdDesc();
+        Bitacora last = bitacoraRepository.findTopByIdStartingWithOrderByIdDesc("bitacora-");
 
         int nextNumber = 1;
 

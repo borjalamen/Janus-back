@@ -21,4 +21,6 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     
     // 4. Buscar por ID de Proyecto (Solo las NO visibles / Borradas Lógicamente)
     List<Bitacora> findByIdProyectoAndVisibleFalse(String idProyecto);
+
+    Bitacora findTopByIdStartingWithOrderByIdDesc(String prefix);
 }
