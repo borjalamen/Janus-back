@@ -80,13 +80,13 @@ public class BitacoraController {
     // URL: /api/bitacora/create
     @PostMapping("/create")
     public Bitacora createBitacora(@RequestBody Bitacora bitacora) {
-       Bitacora last = repository.findLastBitacora();
+      Optional <Bitacora> last = repository.findTopByOrderByIdDesc();
     int nextNumber = 1;
 
-    if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+    if (last != null && last.get().getId() != null && last.get().getId().startsWith("bitacora-")) {
 
     
-            String numberPart = last.getId().replace("bitacora-", "");
+            String numberPart = last.get().getId().replace("bitacora-", "");
             nextNumber = Integer.parseInt(numberPart) + 1;
 
     }
