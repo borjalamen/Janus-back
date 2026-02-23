@@ -17,4 +17,6 @@ public interface ProjectRepository extends MongoRepository<Project, String> {
     List<Project> findByDepartamentOrganismeContainingIgnoreCase(String departamentOrganisme);
 
     Project findTopByIdStartingWithOrderByIdDesc(String prefix); 
+    
+    List<Project> findByDeletedFalse();
 }

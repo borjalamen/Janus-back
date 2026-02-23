@@ -31,4 +31,6 @@ public class Project {
     private String equipAdminExplotacioSistemes;
     private String gestorIntegracioSolucions;
     private LocalDateTime createdAt;
+    private Boolean deleted = false;
+    private Boolean visible = true;
 }

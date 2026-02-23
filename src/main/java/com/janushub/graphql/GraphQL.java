@@ -225,6 +225,25 @@ public Project updateProject(@Argument String id, @Argument("project") Project p
     return null;
 }
 
+@MutationMapping
+public Boolean softDeleteProject(@Argument String id) {
+
+    Optional<Project> projectOpt = projectRepository.findById(id);
+
+    if (projectOpt.isPresent()) {
+
+        Project p = projectOpt.get();
+        p.setDeleted(true);
+        p.setVisible(false);
+
+        projectRepository.save(p);
+
+        return true;
+    }
+
+    return false;
+}
+
      // ==========================
     // CREATE BITACORA (ID bitacora-XXX)
     // ==========================
