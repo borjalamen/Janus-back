@@ -115,5 +115,10 @@ input ProjectInput {
 
 input BitacoraInput {
   idProyecto: String
+  contexto: String
+  error: String
+  solucion: String
+  fecha: String
+  tags: [String]
   visible: Boolean
 }
