@@ -59,17 +59,17 @@ public class BitacoraController {
     }
     
     // --- GET BY ID DE PROYECTO (Solo visibles) ---
-    // URL: /api/bitacora/project/{idProyecto}
-    @GetMapping("/project/{idProyecto}")
-    public List<Bitacora> getByProyecto(@PathVariable String idProyecto) {
-        return repository.findByIdProyectoAndVisibleTrue(idProyecto);
+    // URL: /api/bitacora/project/{id}
+    @GetMapping("/project/{id}")
+    public List<Bitacora> getByProyecto(@PathVariable String id) {
+        return repository.findByIdProyectoAndVisibleTrue(id);
     }
     
     // --- GET HIDDEN (Logs de un proyecto que están borrados lógicamente) ---
-    // URL: /api/bitacora/project/hidden/{idProyecto}
-    @GetMapping("/project/hidden/{idProyecto}")
-    public List<Bitacora> getByProyectoHidden(@PathVariable String idProyecto) {
-        return repository.findByIdProyectoAndVisibleFalse(idProyecto);
+    // URL: /api/bitacora/project/hidden/{id}
+    @GetMapping("/project/hidden/{id}")
+    public List<Bitacora> getByProyectoHidden(@PathVariable String id) {
+        return repository.findByIdProyectoAndVisibleFalse(id);
     }
 
     // =============================================================
