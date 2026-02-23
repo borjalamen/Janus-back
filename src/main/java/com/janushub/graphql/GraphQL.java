@@ -63,12 +63,7 @@ public Bitacora bitacoraById(@Argument String id) {
 
 @QueryMapping
 public List<Bitacora> searchBitacoraByContexto(@Argument String texto) {
-   return bitacoraRepository
-            .findAllVisible()
-            .stream()
-            .filter(b -> b.getContexto() != null &&
-                    b.getContexto().toLowerCase().contains(texto.toLowerCase()))
-            .toList();
+   return bitacoraRepository.searchByTexto(texto);
 }
 
     @QueryMapping

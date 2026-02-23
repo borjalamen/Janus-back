@@ -20,7 +20,7 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     Optional<Bitacora> findVisibleById(String id);
 
     @Query("{ 'contexto': { $regex: ?0, $options: 'i' }, 'visible': true }")
-List<Bitacora> searchByContexto(String contexto);
+List<Bitacora> searchByTexto(String contexto);
 
 
     // 3. Buscar por ID de Proyecto (Solo las visibles)
