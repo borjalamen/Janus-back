@@ -110,7 +110,7 @@ public class BitacoraController {
         return repository.findByIdAndVisibleTrue(id) 
                 .map(existingBitacora -> {
                     // Actualización de campos
-                    existingBitacora.setIdProyecto(details.getIdProyecto());
+                    existingBitacora.setId(details.getId());
                     existingBitacora.setContexto(details.getContexto());
                     existingBitacora.setError(details.getError());
                     existingBitacora.setSolucion(details.getSolucion());

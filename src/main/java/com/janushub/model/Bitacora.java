@@ -15,7 +15,7 @@ public class Bitacora {
     @Id
     private String id;
     
-    private String idProyecto;
+    
     private String contexto;
     private String error;
     private String solucion;
