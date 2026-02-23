@@ -253,6 +253,19 @@ public class GraphQL {
         return false;
     }
 
+    @MutationMapping
+public Boolean deleteProjectPhysical(@Argument String id) {
+
+    Optional<Project> projectOpt = projectRepository.findById(id);
+
+    if (projectOpt.isPresent()) {
+        projectRepository.delete(projectOpt.get());
+        return true;
+    }
+
+    return false;
+}
+
 
 
 
