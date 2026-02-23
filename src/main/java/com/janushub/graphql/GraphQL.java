@@ -61,6 +61,11 @@ public Bitacora bitacoraById(@Argument String id) {
     return bitacoraRepository.findVisibleById(id).orElse(null);
 }
 
+@QueryMapping
+public List<Bitacora> searchBitacoraByContexto(@Argument String texto) {
+    return bitacoraRepository.searchByContexto(texto);
+}
+
     @QueryMapping
     public List<Bitacora> bitacorasByProject(@Argument String idProyecto) {
         return bitacoraRepository.findByProyectoVisible(idProyecto);
@@ -83,7 +88,7 @@ public Bitacora bitacoraById(@Argument String id) {
 
     @QueryMapping
     public List<Procedure> searchProceduresByTitulo(@Argument String titulo) {
-        return proceduresRepository.findByTituloContainingIgnoreCaseAndIsDeletedFalse(titulo);
+        return proceduresRepository.searchByTitulo(titulo);
     }
 
     // ==========================
@@ -134,6 +139,25 @@ public Bitacora bitacoraById(@Argument String id) {
 
         return proceduresRepository.save(procedure);
     }
+
+    @MutationMapping
+public Procedure updateProcedure(@Argument String id, @Argument Procedure input) {
+
+    return proceduresRepository.findById(id)
+            .filter(p -> !p.isDeleted())
+            .map(existing -> {
+
+                existing.setTitulo(input.getTitulo());
+                existing.setDescripcion(input.getDescripcion());
+                existing.setDepartamento(input.getDepartamento());
+                existing.setTags(input.getTags());
+
+                existing.setUpdatedAt(LocalDateTime.now());
+
+                return proceduresRepository.save(existing);
+            })
+            .orElse(null);
+}
 
     // ==========================
     // SOFT DELETE PROCEDURE
@@ -266,6 +290,23 @@ public Boolean softDeleteProject(@Argument String id) {
 
         return bitacoraRepository.save(bitacora);
     }
+
+    @MutationMapping
+public Bitacora updateBitacora(@Argument String id, @Argument Bitacora input) {
+
+    return bitacoraRepository.findById(id)
+            .map(existing -> {
+
+                existing.setContexto(input.getContexto());
+                existing.setError(input.getError());
+                existing.setSolucion(input.getSolucion());
+                existing.setTags(input.getTags());
+                existing.setFecha(input.getFecha());
+
+                return bitacoraRepository.save(existing);
+            })
+            .orElse(null);
+}
 
     // ==========================
     // SOFT DELETE BITACORA
