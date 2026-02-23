@@ -4,7 +4,9 @@ import com.janushub.model.Bitacora;
 import com.janushub.repository.BitacoraRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import java.time.LocalDateTime;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @RestController
@@ -77,8 +79,24 @@ public class BitacoraController {
     // URL: /api/bitacora/create
     @PostMapping("/create")
     public Bitacora createBitacora(@RequestBody Bitacora bitacora) {
-        bitacora.setVisible(true); // Siempre nace como no borrado
-        return repository.save(bitacora);
+       Bitacora last = repository.findTopByIdStartingWithOrderByIdDesc("bitacora-");
+
+    int nextNumber = 1;
+
+    if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+        String numberPart = last.getId().replace("bitacora-", "");
+        nextNumber = Integer.parseInt(numberPart) + 1;
+    }
+
+    String newId = String.format("bitacora-%03d", nextNumber);
+    bitacora.setId(newId);
+
+    
+    bitacora.setFecha(LocalDateTime.now());
+
+    bitacora.setVisible(true);
+
+    return repository.save(bitacora);
     }
 
     // =============================================================

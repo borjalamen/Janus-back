@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -18,7 +19,7 @@ public class Bitacora {
     private String contexto;
     private String error;
     private String solucion;
-    private String fecha; // Mantenemos String para tu formato "12102025"
+    private LocalDateTime fecha; 
     private List<String> tags;
     private boolean visible = true;
 }
