@@ -80,6 +80,7 @@ type Mutation {
   deleteProcedurePhysical(id: String!): Boolean
 
   createProject(project: ProjectInput!): Project
+  updateProject(id: String!, project: ProjectInput!): Project
   deleteProjectPhysical(id: String!): Boolean
 
   createBitacora(bitacora: BitacoraInput!): Bitacora

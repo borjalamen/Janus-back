@@ -196,6 +196,35 @@ public class GraphQL {
         return projectRepository.save(project);
     }
 
+    @MutationMapping
+public Project updateProject(@Argument String id, @Argument Project project) {
+
+    Optional<Project> projectOpt = projectRepository.findById(id);
+
+    if (projectOpt.isPresent()) {
+        Project existing = projectOpt.get();
+
+        existing.setCode(project.getCode());
+        existing.setName(project.getName());
+        existing.setDepartamentOrganisme(project.getDepartamentOrganisme());
+        existing.setGestorResponsableSolucio(project.getGestorResponsableSolucio());
+        existing.setResponsableProjecte(project.getResponsableProjecte());
+        existing.setEquipDesenvolupament(project.getEquipDesenvolupament());
+        existing.setEquipProjectesInfra(project.getEquipProjectesInfra());
+        existing.setEquipProves(project.getEquipProves());
+        existing.setEquipAdminExplotacioXarxes(project.getEquipAdminExplotacioXarxes());
+        existing.setOficinaSeguretat(project.getOficinaSeguretat());
+        existing.setEquipQualitat(project.getEquipQualitat());
+        existing.setEquipAdminOperacions(project.getEquipAdminOperacions());
+        existing.setEquipAdminExplotacioSistemes(project.getEquipAdminExplotacioSistemes());
+        existing.setGestorIntegracioSolucions(project.getGestorIntegracioSolucions());
+
+        return projectRepository.save(existing);
+    }
+
+    return null;
+}
+
      // ==========================
     // CREATE BITACORA (ID bitacora-XXX)
     // ==========================
