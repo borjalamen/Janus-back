@@ -197,7 +197,7 @@ public class GraphQL {
     }
 
     @MutationMapping
-public Project updateProject(@Argument String id, @Argument Project project) {
+public Project updateProject(@Argument String id, @Argument("project") Project project) {
 
     Optional<Project> projectOpt = projectRepository.findById(id);
 
