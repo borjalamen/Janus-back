@@ -13,7 +13,7 @@ import java.util.List;
 @Document(collection = "logbook")
 public class Bitacora {
     @Id
-    private String idProyecto;
+    private String id;
     
     
     private String contexto;

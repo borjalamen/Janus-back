@@ -83,13 +83,13 @@ public class BitacoraController {
 
     int nextNumber = 1;
 
-    if (last != null && last.getIdProyecto() != null && last.getIdProyecto().startsWith("bitacora-")) {
-        String numberPart = last.getIdProyecto().replace("bitacora-", "");
+    if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+        String numberPart = last.getId().replace("bitacora-", "");
         nextNumber = Integer.parseInt(numberPart) + 1;
     }
 
     String newId = String.format("bitacora-%03d", nextNumber);
-    bitacora.setIdProyecto(newId);
+    bitacora.setId(newId);
 
     
     bitacora.setFecha(LocalDateTime.now());
@@ -110,7 +110,7 @@ public class BitacoraController {
         return repository.findByIdAndVisibleTrue(id) 
                 .map(existingBitacora -> {
                     // Actualización de campos
-                    existingBitacora.setIdProyecto(details.getIdProyecto());
+                    existingBitacora.setId(details.getId());
                     existingBitacora.setContexto(details.getContexto());
                     existingBitacora.setError(details.getError());
                     existingBitacora.setSolucion(details.getSolucion());

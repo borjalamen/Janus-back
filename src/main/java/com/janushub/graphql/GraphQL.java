@@ -254,13 +254,13 @@ public Boolean softDeleteProject(@Argument String id) {
 
         int nextNumber = 1;
 
-        if (last != null && last.getIdProyecto() != null && last.getIdProyecto().startsWith("bitacora-")) {
-            String numberPart = last.getIdProyecto().replace("bitacora-", "");
+        if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+            String numberPart = last.getId().replace("bitacora-", "");
             nextNumber = Integer.parseInt(numberPart) + 1;
         }
 
         String newId = String.format("bitacora-%03d", nextNumber);
-        bitacora.setIdProyecto(newId);
+        bitacora.setId(newId);
 
         bitacora.setVisible(true);
 
