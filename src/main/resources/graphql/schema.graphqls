@@ -34,7 +34,7 @@ type Procedure {
 }
 
 type Project {
-    id: ID!
+    id: String
     code: String
     name: String
     departamentOrganisme: String
@@ -69,8 +69,8 @@ type Query {
     searchProceduresByTitulo(titulo: String!): [Procedure]!
 
     # PROJECTS
-    allProjects: [Project]!
-    projectById(id: ID!): Project
+    getAllProjects: [Project]!
+    getProjectById(id: String!): Project
     searchProjectsByName(name: String!): [Project]!
 }
 

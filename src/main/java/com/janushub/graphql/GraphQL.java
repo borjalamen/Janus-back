@@ -90,12 +90,12 @@ public class GraphQL {
     // PROJECTS
     // ==========================
     @QueryMapping
-    public List<Project> allProjects() {
+    public List<Project> getAllProjects() {
         return projectRepository.findAll();
     }
 
     @QueryMapping
-    public Project projectById(@Argument String id) {
+    public Project getProjectById(@Argument String id) {
         return projectRepository.findById(id).orElse(null);
     }
 
