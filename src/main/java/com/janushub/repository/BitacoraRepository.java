@@ -20,7 +20,7 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     Optional<Bitacora> findVisibleById(String id);
 
     @Query(value = "{}", sort = "{ _id: -1 }")
-    Bitacora findTopByOrderByIdDesc();
+Optional<Bitacora> findTopByOrderByIdDesc();
 
     // 3. Buscar por ID de Proyecto (Solo las visibles)
     @Query("{ 'idProyecto': ?0, 'visible': true }")
