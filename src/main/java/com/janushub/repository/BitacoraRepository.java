@@ -14,13 +14,13 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     List<Bitacora> findByVisibleTrue();
     
     // 2. Buscar por ID (Solo si está visible)
-    Optional<Bitacora> findByIdAndVisibleTrue(String id);
+    Optional<Bitacora> findByIdAndVisibleTrue(String idProyecto);
     
     // 3. Buscar por ID de Proyecto (Solo las visibles)
-    List<Bitacora> findByIdProyectoAndVisibleTrue(String id);
+    List<Bitacora> findByIdProyectoAndVisibleTrue(String idProyecto);
     
     // 4. Buscar por ID de Proyecto (Solo las NO visibles / Borradas Lógicamente)
-    List<Bitacora> findByIdProyectoAndVisibleFalse(String id);
+    List<Bitacora> findByIdProyectoAndVisibleFalse(String idProyecto);
 
     Bitacora findTopByIdStartingWithOrderByIdDesc(String prefix);
 }
