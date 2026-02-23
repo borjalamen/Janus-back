@@ -85,8 +85,15 @@ public class BitacoraController {
     int nextNumber = 1;
 
     if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
-        String numberPart = last.getId().replace("bitacora-", "");
-        nextNumber = Integer.parseInt(numberPart) + 1;
+
+        try {
+            String numberPart = last.getId().replace("bitacora-", "");
+            nextNumber = Integer.parseInt(numberPart) + 1;
+
+        } catch (Exception e) {
+            nextNumber = 1;
+        }
+        
     }
 
     String newId = String.format("bitacora-%03d", nextNumber);

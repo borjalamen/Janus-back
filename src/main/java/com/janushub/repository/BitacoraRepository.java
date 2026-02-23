@@ -30,8 +30,6 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
    @Query("{ 'idProyecto': ?0, 'visible': false }")
     List<Bitacora> findByProyectoHidden(String idProyecto);
 
-    @Query(value = "{}", sort = "{ _id: -1 }")
-    Bitacora findLastBitacora();
 
 
 }
