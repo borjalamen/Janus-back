@@ -12,16 +12,20 @@ import java.util.Optional;
 public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
 
 // 1. GET ALL (Solo las activas/visibles)
-    List<Bitacora> findByVisibleTrue();
+    @Query("{ 'visible': true }")
+    List<Bitacora> findAllVisible();
     
     // 2. Buscar por ID (Solo si está visible)
-    Optional<Bitacora> findByIdAndVisibleTrue(String id);
-    
+     @Query("{ '_id': ?0, 'visible': true }")
+    Optional<Bitacora> findVisibleById(String id);
+
     // 3. Buscar por ID de Proyecto (Solo las visibles)
-    List<Bitacora> findByIdProyectoAndVisibleTrue(String idProyecto);
+    @Query("{ 'idProyecto': ?0, 'visible': true }")
+    List<Bitacora> findByProyectoVisible(String idProyecto);
     
     // 4. Buscar por ID de Proyecto (Solo las NO visibles / Borradas Lógicamente)
-    List<Bitacora> findByIdProyectoAndVisibleFalse(String idProyecto);
+   @Query("{ 'idProyecto': ?0, 'visible': false }")
+    List<Bitacora> findByProyectoHidden(String idProyecto);
 
     @Query(value = "{}", sort = "{ _id: -1 }")
     Bitacora findLastBitacora();

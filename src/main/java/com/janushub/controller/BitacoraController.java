@@ -5,6 +5,7 @@ import com.janushub.repository.BitacoraRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,7 +29,7 @@ public class BitacoraController {
     @GetMapping("/all")
     public List<Bitacora> getAllBitacoras() {
         // Usa el filtro para mostrar solo los no borrados lógicamente
-        return repository.findByVisibleTrue(); 
+        return repository.findAllVisible(); 
     }
     
     // --- GET ALL RAW (Vista administrativa: Incluye borrados lógicos) ---
@@ -43,7 +44,7 @@ public class BitacoraController {
     @GetMapping("/{id}")
     public ResponseEntity<Bitacora> getBitacoraById(@PathVariable String id) {
         // Busca por la ID de documento Y que visible sea true
-        return repository.findByIdAndVisibleTrue(id)
+        return repository.findVisibleById(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -62,14 +63,14 @@ public class BitacoraController {
     // URL: /api/bitacora/project/{id}
     @GetMapping("/project/{id}")
     public List<Bitacora> getByProyecto(@PathVariable String id) {
-        return repository.findByIdProyectoAndVisibleTrue(id);
+        return repository.findByProyectoVisible(id);
     }
     
     // --- GET HIDDEN (Logs de un proyecto que están borrados lógicamente) ---
     // URL: /api/bitacora/project/hidden/{id}
     @GetMapping("/project/hidden/{id}")
     public List<Bitacora> getByProyectoHidden(@PathVariable String id) {
-        return repository.findByIdProyectoAndVisibleFalse(id);
+        return repository.findByProyectoHidden(id);
     }
 
     // =============================================================
@@ -106,27 +107,25 @@ public class BitacoraController {
     // URL: /api/bitacora/update/{id}
     @PutMapping("/update/{id}")
     public ResponseEntity<Bitacora> updateBitacora(@PathVariable String id, @RequestBody Bitacora details) {
-        // Buscamos solo si está visible (para que no se pueda editar un borrado lógico)
-        return repository.findByIdAndVisibleTrue(id) 
-                .map(existingBitacora -> {
-                    // Actualización de campos
-                    existingBitacora.setId(details.getId());
-                    existingBitacora.setContexto(details.getContexto());
-                    existingBitacora.setError(details.getError());
-                    existingBitacora.setSolucion(details.getSolucion());
-                    existingBitacora.setFecha(details.getFecha());
-                    existingBitacora.setTags(details.getTags());
+        Optional<Bitacora> optional = repository.findById(id);
 
-                    // Solo actualizamos 'visible' si se envía explícitamente en el cuerpo
-                    // Si no se envía, se mantiene el valor existente (true)
-                    if (details.isVisible() != existingBitacora.isVisible()) {
-                        existingBitacora.setVisible(details.isVisible());
-                    }
-
-                    return ResponseEntity.ok(repository.save(existingBitacora));
-                })
-                .orElse(ResponseEntity.notFound().build());
+    if (optional.isEmpty()) {
+        return ResponseEntity.notFound().build();
     }
+
+    Bitacora existing = optional.get();
+
+    existing.setContexto(details.getContexto());
+    existing.setError(details.getError());
+    existing.setSolucion(details.getSolucion());
+    existing.setFecha(details.getFecha());
+    existing.setTags(details.getTags());
+    existing.setVisible(details.isVisible());
+
+    Bitacora saved = repository.save(existing);
+
+    return ResponseEntity.ok(saved);
+}
 
     // =============================================================
     //                       4. BORRAR (DELETE)

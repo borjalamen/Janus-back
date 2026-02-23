@@ -53,17 +53,17 @@ public class GraphQL {
     // ==========================
     @QueryMapping
     public List<Bitacora> allBitacoras() {
-        return bitacoraRepository.findByVisibleTrue();
+        return bitacoraRepository.findAllVisible();
     }
 
-    @QueryMapping
-    public Bitacora bitacoraById(@Argument String id) {
-        return bitacoraRepository.findByIdAndVisibleTrue(id).orElse(null);
-    }
+  @QueryMapping
+public Bitacora bitacoraById(@Argument String id) {
+    return bitacoraRepository.findVisibleById(id).orElse(null);
+}
 
     @QueryMapping
     public List<Bitacora> bitacorasByProject(@Argument String idProyecto) {
-        return bitacoraRepository.findByIdProyectoAndVisibleTrue(idProyecto);
+        return bitacoraRepository.findByProyectoVisible(idProyecto);
     }
 
     // ==========================
