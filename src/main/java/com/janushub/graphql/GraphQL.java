@@ -62,7 +62,7 @@ public Bitacora bitacoraById(@Argument String id) {
 }
 
 @QueryMapping
-public List<Bitacora> searchBitacoraByContexto(@Argument String texto) {
+public List<Bitacora> searchBitacoraByTexto(@Argument String texto) {
    return bitacoraRepository.searchByTexto(texto);
 }
 
@@ -306,7 +306,7 @@ public Bitacora updateBitacora(@Argument String id, @Argument Bitacora input) {
 
                 return bitacoraRepository.save(existing);
             })
-            .orElse(null);
+            .orElseThrow(() -> new RuntimeException("Bitacora not found"));
 }
 
     // ==========================

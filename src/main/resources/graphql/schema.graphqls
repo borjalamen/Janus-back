@@ -96,6 +96,7 @@ input ProcedureInput {
   titulo: String
   descripcion: String
   departamento: String
+  tags: [String]
   visible: Boolean
 }
 
