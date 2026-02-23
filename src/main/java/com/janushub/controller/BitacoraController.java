@@ -80,7 +80,7 @@ public class BitacoraController {
     // URL: /api/bitacora/create
     @PostMapping("/create")
     public Bitacora createBitacora(@RequestBody Bitacora bitacora) {
-       Bitacora last = repository.findLastBitacora();
+       Bitacora last = repository.findTopByOrderByIdDesc();
 
     int nextNumber = 1;
 
