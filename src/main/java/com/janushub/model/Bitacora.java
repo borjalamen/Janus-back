@@ -14,6 +14,8 @@ import java.util.List;
 public class Bitacora {
     @Id
     private String id;
+
+    private String idProyecto;
     
     
     private String contexto;
