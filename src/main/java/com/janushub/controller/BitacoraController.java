@@ -119,7 +119,8 @@ public class BitacoraController {
 
     existing.setContexto(details.getContexto());
     existing.setError(details.getError());
-    existing.setSolucion(details.getSolucion());
+    existing.setSoluciones(details.getSoluciones());
+    existing.setEntorno(details.getEntorno());
     existing.setFecha(details.getFecha());
     existing.setTags(details.getTags());
     existing.setVisible(details.isVisible());

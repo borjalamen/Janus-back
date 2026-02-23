@@ -16,12 +16,12 @@ public class Bitacora {
     private String id;
 
     private String idProyecto;
-    
-    
+
     private String contexto;
     private String error;
-    private String solucion;
-    private LocalDateTime fecha; 
+    private List<Solucion> soluciones; // Array de soluciones (antes era String solucion)
+    private String entorno; // 'minsait' | 'preproduccion' | 'produccion'
+    private LocalDateTime fecha;
     private List<String> tags;
     private boolean visible = true;
 }

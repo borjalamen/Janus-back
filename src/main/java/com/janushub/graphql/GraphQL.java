@@ -300,7 +300,8 @@ public Bitacora updateBitacora(@Argument String id, @Argument Bitacora input) {
 
                 existing.setContexto(input.getContexto());
                 existing.setError(input.getError());
-                existing.setSolucion(input.getSolucion());
+                existing.setSoluciones(input.getSoluciones());
+                existing.setEntorno(input.getEntorno());
                 existing.setTags(input.getTags());
                 existing.setFecha(input.getFecha());
 
