@@ -2,6 +2,7 @@ package com.janushub.repository;
 
 import com.janushub.model.Bitacora;
 import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -22,5 +23,6 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     // 4. Buscar por ID de Proyecto (Solo las NO visibles / Borradas Lógicamente)
     List<Bitacora> findByIdProyectoAndVisibleFalse(String idProyecto);
 
-    Bitacora findTopByIdStartingWithOrderByIdDesc(String prefix);
+    @Query(value = "{}", sort = "{ _id: -1 }")
+    Bitacora findLastBitacora();
 }

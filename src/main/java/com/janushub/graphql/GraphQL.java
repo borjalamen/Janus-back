@@ -250,7 +250,7 @@ public Boolean softDeleteProject(@Argument String id) {
     @MutationMapping
     public Bitacora createBitacora(@Argument Bitacora bitacora) {
 
-        Bitacora last = bitacoraRepository.findTopByIdStartingWithOrderByIdDesc("bitacora-");
+        Bitacora last = bitacoraRepository.findLastBitacora();
 
         int nextNumber = 1;
 
