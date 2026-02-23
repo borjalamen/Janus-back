@@ -14,7 +14,7 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     List<Bitacora> findByVisibleTrue();
     
     // 2. Buscar por ID (Solo si está visible)
-    Optional<Bitacora> findByIdAndVisibleTrue(String idProyecto);
+    Optional<Bitacora> findByIdAndVisibleTrue(String id);
     
     // 3. Buscar por ID de Proyecto (Solo las visibles)
     List<Bitacora> findByIdProyectoAndVisibleTrue(String idProyecto);
