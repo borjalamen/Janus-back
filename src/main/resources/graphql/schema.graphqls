@@ -62,6 +62,7 @@ type Query {
     allBitacoras: [Bitacora]!
     bitacoraById(id: ID!): Bitacora
     bitacorasByProject(idProyecto: String!): [Bitacora]!
+    searchBitacoraByContexto(texto: String!): [Bitacora]!
 
     # PROCEDURES
     allProcedures: [Procedure]!
