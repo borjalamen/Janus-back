@@ -1,10 +1,12 @@
 package com.janushub.graphql;
 
 import com.janushub.model.Bitacora;
+import com.janushub.model.Formacion;
 import com.janushub.model.Procedure;
 import com.janushub.model.Project;
 import com.janushub.model.Users;
 import com.janushub.repository.BitacoraRepository;
+import com.janushub.repository.FormacionRepository;
 import com.janushub.repository.ProceduresRepository;
 import com.janushub.repository.ProjectRepository;
 import com.janushub.repository.UserRepository;
@@ -28,15 +30,18 @@ public class GraphQL {
     private final BitacoraRepository bitacoraRepository;
     private final ProceduresRepository proceduresRepository;
     private final ProjectRepository projectRepository;
+    private final FormacionRepository formacionRepository;
 
     public GraphQL(UserRepository userRepository,
                                   BitacoraRepository bitacoraRepository,
                                   ProceduresRepository proceduresRepository,
-                                  ProjectRepository projectRepository) {
+                                  ProjectRepository projectRepository,
+                                FormacionRepository formacionRepository) {
         this.userRepository = userRepository;
         this.bitacoraRepository = bitacoraRepository;
         this.proceduresRepository = proceduresRepository;
         this.projectRepository = projectRepository;
+        this.formacionRepository = formacionRepository;
     }
 
     // ==========================
@@ -114,6 +119,21 @@ public List<Bitacora> searchBitacoraByTitulo(@Argument String titulo) {
     public List<Project> searchProjectsByName(@Argument String name) {
         return projectRepository.findByNameContainingIgnoreCase(name);
     }
+
+
+     // ==========================
+    // FORMACION
+    // ==========================
+
+    @QueryMapping
+public List<Formacion> getAllFormaciones() {
+    return formacionRepository.findByDeletedFalse();
+}
+
+@QueryMapping
+public List<Formacion> searchFormacionByName(@Argument String name) {
+    return formacionRepository.findByNameContainingIgnoreCaseAndDeletedFalse(name);
+}
 
      // ==========================================================
     // MUTATIONS
@@ -361,6 +381,40 @@ public Boolean deleteProjectPhysical(@Argument String id) {
     }
 
     return false;
+}
+
+@MutationMapping
+public Formacion createFormacion(@Argument Formacion formacion) {
+    return formacionRepository.save(formacion);
+}
+
+@MutationMapping
+public Formacion updateFormacion(@Argument String id,
+                                 @Argument Formacion formacion) {
+
+    return formacionRepository.findById(id)
+            .map(existing -> {
+                existing.setName(formacion.getName());
+                existing.setLink(formacion.getLink());
+                existing.setDescription(formacion.getDescription());
+                existing.setTags(formacion.getTags());
+                existing.setLocation(formacion.getLocation());
+                existing.setVisible(formacion.getVisible());
+                return formacionRepository.save(existing);
+            })
+            .orElseThrow(() -> new RuntimeException("Formacion not found"));
+}
+
+@MutationMapping
+public Formacion deleteFormacion(@Argument String id) {
+
+    return formacionRepository.findById(id)
+            .map(existing -> {
+                existing.setDeleted(true);
+                existing.setDeletedAt(LocalDateTime.now());
+                return formacionRepository.save(existing);
+            })
+            .orElseThrow(() -> new RuntimeException("Formacion not found"));
 }
 
 

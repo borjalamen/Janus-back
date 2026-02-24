@@ -53,6 +53,18 @@ type Project {
     createdAt: String
 }
 
+type Formacion {
+    id: ID!
+    name: String
+    link: String
+    description: String
+    tags: [String]
+    location: String
+    visible: Boolean
+    deleted: Boolean
+    deletedAt: String
+}
+
 type Query {
     hello: String
 
@@ -75,6 +87,10 @@ type Query {
     getAllProjects: [Project]!
     getProjectById(id: String!): Project
     searchProjectsByName(name: String!): [Project]!
+
+    # FORMACION 
+    getAllFormaciones: [Formacion]
+    searchFormacionByName(name: String!): [Formacion]
 }
 
 type Mutation {
@@ -92,6 +108,10 @@ type Mutation {
   updateBitacora(id: ID!, bitacora: BitacoraInput!): Bitacora
   softDeleteBitacora(id: String!): Boolean
   deleteBitacoraPhysical(id: String!): Boolean
+
+  createFormacion(formacion: FormacionInput!): Formacion
+  updateFormacion(id: ID!, formacion: FormacionInput!): Formacion
+  deleteFormacion(id: ID!): Formacion
 }
 
 input ProcedureInput {
@@ -129,3 +149,13 @@ input BitacoraInput {
   tags: [String]
   visible: Boolean
 }
+
+input FormacionInput {
+    name: String
+    link: String
+    description: String
+    tags: [String]
+    location: String
+    visible: Boolean
+}
+
