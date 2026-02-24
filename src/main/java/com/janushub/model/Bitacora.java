@@ -4,6 +4,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.fasterxml.jackson.datatype.jsr310.deser.LocalDateTimeDeserializer;
+import com.fasterxml.jackson.datatype.jsr310.ser.LocalDateTimeSerializer;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -21,9 +26,14 @@ public class Bitacora {
 
     private String contexto;
     private String error;
-    private List<Solucion> soluciones; // Array de soluciones (antes era String solucion)
-    private String entorno; // 'minsait' | 'preproduccion' | 'produccion'
+    private List<Solucion> soluciones;
+    private String entorno;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    @JsonDeserialize(using = LocalDateTimeDeserializer.class)
+    @JsonSerialize(using = LocalDateTimeSerializer.class)
     private LocalDateTime fecha;
+
     private List<String> tags;
     private boolean visible = true;
 }

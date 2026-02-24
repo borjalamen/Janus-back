@@ -8,7 +8,10 @@ import lombok.AllArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Solucion {
-    private int numero;
+  private int numero;
     private String descripcion;
     private String entorno; // 'minsait' | 'preproduccion' | 'produccion'
+    private String archivoNombre;
+    private String archivoBase64;
+    private String archivoTipo;
 }

@@ -13,8 +13,7 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/bitacora")
 public class BitacoraController {
-
-    private final BitacoraRepository repository;
+ private final BitacoraRepository repository;
 
     public BitacoraController(BitacoraRepository repository) {
         this.repository = repository;
@@ -83,7 +82,7 @@ public class BitacoraController {
       Optional <Bitacora> last = repository.findTopByOrderByIdDesc();
     int nextNumber = 1;
 
-    if (last != null && last.get().getId() != null && last.get().getId().startsWith("bitacora-")) {
+    if (last.isPresent() && last.get().getId() != null && last.get().getId().startsWith("bitacora-")) {
 
     
             String numberPart = last.get().getId().replace("bitacora-", "");
