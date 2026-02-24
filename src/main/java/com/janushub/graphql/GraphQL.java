@@ -66,6 +66,12 @@ public List<Bitacora> searchBitacoraByTexto(@Argument String texto) {
    return bitacoraRepository.searchByTexto(texto);
 }
 
+@QueryMapping
+public List<Bitacora> searchBitacoraByTitulo(@Argument String titulo) {
+    return bitacoraRepository.findByTituloContainingIgnoreCaseAndVisibleTrue(titulo);
+}
+
+
     @QueryMapping
     public List<Bitacora> bitacorasByProject(@Argument String idProyecto) {
         return bitacoraRepository.findByProyectoVisible(idProyecto);

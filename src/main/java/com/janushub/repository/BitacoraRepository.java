@@ -22,6 +22,8 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
     @Query("{ 'contexto': { $regex: ?0, $options: 'i' }, 'visible': true }")
 List<Bitacora> searchByTexto(String contexto);
 
+List<Bitacora> findByTituloContainingIgnoreCaseAndVisibleTrue(String titulo);
+
 
     // 3. Buscar por ID de Proyecto (Solo las visibles)
     @Query("{ 'idProyecto': ?0, 'visible': true }")
