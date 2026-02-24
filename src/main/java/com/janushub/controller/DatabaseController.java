@@ -18,6 +18,7 @@ import java.util.stream.Collectors;
 @RequestMapping("/api/db")
 public class DatabaseController {
 
+   
     private final MongoTemplate mongoTemplate;
 
     // Directorio donde se almacenan los backups
@@ -195,6 +196,30 @@ public class DatabaseController {
     }
 
     // =============================================================
+    //           SECCIÓN: COLECCIONES
+    // =============================================================
+
+    /**
+     * GET /api/db/colecciones
+     * Lista todas las colecciones reales de la BD con su conteo de documentos
+     */
+    @GetMapping("/colecciones")
+    public ResponseEntity<?> listarColecciones() {
+        Set<String> collectionNames = mongoTemplate.getCollectionNames();
+        List<Map<String, Object>> result = collectionNames.stream()
+            .filter(name -> !name.startsWith("system."))
+            .sorted()
+            .map(name -> {
+                Map<String, Object> info = new LinkedHashMap<>();
+                info.put("id", name);
+                info.put("registros", mongoTemplate.getCollection(name).countDocuments());
+                return info;
+            })
+            .collect(Collectors.toList());
+        return ResponseEntity.ok(result);
+    }
+
+    // =============================================================
     //           SECCIÓN: BACKUP
     // =============================================================
 
@@ -272,6 +297,60 @@ public class DatabaseController {
         } catch (IOException e) {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", "Error al crear backup: " + e.getMessage()));
+        }
+    }
+
+    /**
+     * POST /api/db/backup
+     * Body: {colecciones: ["users", "logbook", ...]}
+     * Backup de múltiples colecciones en un solo archivo JSON
+     */
+    @PostMapping("/backup")
+    public ResponseEntity<?> backupMultiple(@RequestBody Map<String, List<String>> body) {
+        List<String> colecciones = body.get("colecciones");
+        if (colecciones == null || colecciones.isEmpty()) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Debe proporcionar una lista de 'colecciones'"));
+        }
+
+        Set<String> collectionNames = mongoTemplate.getCollectionNames();
+        String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
+        String fileName = "backup_parcial_" + timestamp + ".json";
+        File backupFile = new File(BACKUP_DIR, fileName);
+
+        try {
+            StringBuilder sb = new StringBuilder();
+            sb.append("{\n");
+            sb.append("  \"tipo\": \"backup_parcial\",\n");
+            sb.append("  \"fecha\": \"").append(LocalDateTime.now().toString()).append("\",\n");
+            sb.append("  \"colecciones\": {\n");
+
+            List<String> coleccionesBackup = new ArrayList<>();
+            boolean first = true;
+            for (String colName : colecciones) {
+                if (!collectionNames.contains(colName)) continue;
+                List<Map> docs = mongoTemplate.findAll(Map.class, colName);
+                if (!first) sb.append(",\n");
+                sb.append("    \"").append(colName).append("\": ").append(docs.toString());
+                coleccionesBackup.add(colName);
+                first = false;
+            }
+
+            sb.append("\n  }\n}");
+
+            try (FileWriter writer = new FileWriter(backupFile)) {
+                writer.write(sb.toString());
+            }
+
+            return ResponseEntity.ok(Map.of(
+                "colecciones", coleccionesBackup,
+                "archivo", fileName,
+                "mensaje", "Backup de " + coleccionesBackup.size() + " colección(es) creado"
+            ));
+
+        } catch (IOException e) {
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Error al crear backup parcial: " + e.getMessage()));
         }
     }
 
