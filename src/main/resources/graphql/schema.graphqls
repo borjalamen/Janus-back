@@ -12,6 +12,7 @@ type User {
 
 type Bitacora {
     id: ID!
+    titulo: String
     idProyecto: String!
     contexto: String
     error: String
@@ -63,6 +64,7 @@ type Query {
     bitacoraById(id: ID!): Bitacora
     bitacorasByProject(idProyecto: String!): [Bitacora]!
     searchBitacoraByContexto(texto: String!): [Bitacora]!
+    searchBitacoraByTexto(texto: String!): [Bitacora]!
 
     # PROCEDURES
     allProcedures: [Procedure]!
@@ -119,6 +121,7 @@ input ProjectInput {
 
 input BitacoraInput {
   idProyecto: String
+  titulo: String
   contexto: String
   error: String
   solucion: String

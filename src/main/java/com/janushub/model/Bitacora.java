@@ -17,6 +17,8 @@ public class Bitacora {
 
     private String idProyecto;
 
+    private String titulo; 
+
     private String contexto;
     private String error;
     private List<Solucion> soluciones; // Array de soluciones (antes era String solucion)
