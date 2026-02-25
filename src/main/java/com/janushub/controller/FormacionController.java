@@ -85,9 +85,9 @@ public class FormacionController {
      * ═══════════════════════════════════════════════════════════════════════════════
      */
     @GetMapping("/all")
-    public List<Formacion> getAllFormations() {
-        return repository.findByDeletedFalse();
-    }
+   public List<Formacion> getAllFormations() {
+    return repository.findByDeletedFalseAndVisibleTrue();
+}
     
     /**
      * ENDPOINT DEBUG: Ver todas las formaciones sin filtro (incluye inactivas)

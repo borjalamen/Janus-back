@@ -5,20 +5,22 @@ import org.springframework.data.mongodb.repository.MongoRepository;
 import org.springframework.data.mongodb.repository.Query;
 import org.springframework.stereotype.Repository;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public interface FormacionRepository extends MongoRepository<Formacion, String> {
     
     // Buscar por nombre (todas las formaciones, incluyendo inactivas)
-    List<Formacion> findByNameContainingIgnoreCase(String name);
+    List<Formacion> findByDeletedFalseAndVisibleTrue();
     
     // Buscar solo formaciones activas (no eliminadas) - Query explícita para usar el campo de MongoDB
-    @Query("{ 'deleted': false }")
-    List<Formacion> findByDeletedFalse();
     
+   Optional<Formacion> findByIdAndDeletedFalse(String id);
     // Buscar por nombre solo formaciones activas - Query explícita
-    @Query("{ 'name': { $regex: ?0, $options: 'i' }, 'deleted': false }")
+    
     List<Formacion> findByNameContainingIgnoreCaseAndDeletedFalse(String name);
+
+    Formacion findTopByIdStartingWithOrderByIdDesc(String prefix);
     
     // (Opcional, si lo quieres mantener)
     List<Formacion> findByLocation(String location);
