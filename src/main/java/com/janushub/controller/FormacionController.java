@@ -153,7 +153,7 @@ public class FormacionController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Formacion> getFormationById(@PathVariable String id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedFalse(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -253,7 +253,7 @@ public class FormacionController {
      */
     @PutMapping("/update/{id}")
     public ResponseEntity<Formacion> updateFormation(@PathVariable String id, @RequestBody Formacion formationDetails) {
-    return repository.findById(id)
+    return repository.findByIdAndDeletedFalse(id)
             .map(formation -> {
                 
                 formation.setName(formationDetails.getName());
@@ -299,7 +299,7 @@ public class FormacionController {
      */
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteFormation(@PathVariable String id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedFalse(id)
                 .map(formation -> {
                     formation.setDeleted(true); // Borrado lógico
                     formation.setVisible(false);
@@ -341,7 +341,7 @@ public class FormacionController {
      */
     @DeleteMapping("/delete/physical/{id}")
     public ResponseEntity<?> deleteFormationPhysical(@PathVariable String id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedFalse(id)
                 .map(formation -> {
                     repository.delete(formation);
                     return ResponseEntity.ok().build();

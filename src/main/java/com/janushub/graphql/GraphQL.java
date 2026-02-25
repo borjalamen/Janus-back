@@ -411,7 +411,9 @@ public Formacion createFormacion(@Argument Formacion formacion) {
 @MutationMapping
 public Formacion updateFormacion(@Argument String id, @Argument Formacion input) {
 
-    return formacionRepository.findByIdAndDeletedFalse(id)
+   return formacionRepository.findByIdAndDeletedFalse(id)
+            .stream()
+            .findFirst()
             .map(existing -> {
 
                 existing.setName(input.getName());
