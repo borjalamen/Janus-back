@@ -6,8 +6,10 @@ import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.bson.Document;
 
 import java.io.*;
+import java.nio.file.Files;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -31,6 +33,28 @@ public class DatabaseController {
         File dir = new File(BACKUP_DIR);
         if (!dir.exists()) {
             dir.mkdirs();
+        }
+    }
+
+    /**
+     * Limita los backups de un tipo específico a un máximo de archivos.
+     * Elimina los más antiguos si se supera el límite.
+     */
+    private void limitarBackups(String prefix, int maxBackups) {
+        File dir = new File(BACKUP_DIR);
+        File[] files = dir.listFiles((d, name) -> name.startsWith(prefix) && name.endsWith(".json"));
+        
+        if (files == null || files.length <= maxBackups) {
+            return;
+        }
+
+        // Ordenar por fecha de modificación (más antiguos primero)
+        Arrays.sort(files, Comparator.comparingLong(File::lastModified));
+
+        // Eliminar los más antiguos hasta dejar solo maxBackups
+        int toDelete = files.length - maxBackups;
+        for (int i = 0; i < toDelete; i++) {
+            files[i].delete();
         }
     }
 
@@ -228,7 +252,7 @@ public class DatabaseController {
      * Lista todos los backups disponibles
      */
     @GetMapping("/backups")
-    public ResponseEntity<?> listarBackups() {
+     public ResponseEntity<?> listarBackups() {
         File dir = new File(BACKUP_DIR);
         File[] files = dir.listFiles((d, name) -> name.endsWith(".json"));
 
@@ -236,16 +260,47 @@ public class DatabaseController {
             return ResponseEntity.ok(Collections.emptyList());
         }
 
-        List<Map<String, String>> backups = Arrays.stream(files)
+        List<Map<String, Object>> backups = Arrays.stream(files)
             .map(f -> {
-                Map<String, String> info = new LinkedHashMap<>();
-                info.put("id", f.getName().replace(".json", ""));
+                String name = f.getName();
+                String id = name.replace(".json", "");
+
+                // Parsear tipo y colecciones del nombre del archivo
+                String tipo = "desconocido";
+                List<String> colecciones = new ArrayList<>();
+
+                if (name.startsWith("backup_completo_")) {
+                    tipo = "completo";
+                } else if (name.startsWith("backup_parcial_")) {
+                    tipo = "parcial";
+                    // Extraer colecciones: entre "backup_parcial_" y el timestamp "_YYYYMMDD_HHMMSS.json"
+                    // formato: backup_parcial_COL1-COL2_20260225_161700.json
+                    String rest = name.replace("backup_parcial_", "").replace(".json", "");
+                    // Quitar el timestamp final (ej: _20260225_161700)
+                    String colPart = rest.replaceAll("_\\d{8}_\\d{6}$", "");
+                    if (!colPart.isBlank()) {
+                        colecciones = Arrays.asList(colPart.split("-"));
+                    }
+                } else if (name.startsWith("backup_")) {
+                    tipo = "coleccion";
+                    String rest = name.replace("backup_", "").replace(".json", "");
+                    String colPart = rest.replaceAll("_\\d{8}_\\d{6}$", "");
+                    if (!colPart.isBlank()) colecciones = List.of(colPart);
+                }
+
+                long tamanoKb = Math.max(1, f.length() / 1024);
+
+                Map<String, Object> info = new LinkedHashMap<>();
+                info.put("id", id);
                 info.put("fecha", new java.text.SimpleDateFormat("yyyy-MM-dd HH:mm:ss")
                     .format(new Date(f.lastModified())));
-                info.put("descripcion", f.getName());
+                info.put("descripcion", name);
+                info.put("tipo", tipo);
+                info.put("colecciones", colecciones);
+                info.put("tamanoKb", tamanoKb);
                 return info;
             })
-            .sorted((a, b) -> b.get("fecha").compareTo(a.get("fecha")))
+            .sorted((a, b) -> b.get("fecha").toString().compareTo(a.get("fecha").toString()))
             .collect(Collectors.toList());
 
         return ResponseEntity.ok(backups);
@@ -315,7 +370,13 @@ public class DatabaseController {
 
         Set<String> collectionNames = mongoTemplate.getCollectionNames();
         String timestamp = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
-        String fileName = "backup_parcial_" + timestamp + ".json";
+        // Incluir nombres de colecciones en el archivo para poder buscarlo
+        String colNames = colecciones.stream()
+            .filter(collectionNames::contains)
+            .collect(Collectors.joining("-"));
+        if (colNames.length() > 60) colNames = colNames.substring(0, 60);
+        String fileName = "backup_parcial_" + colNames + "_" + timestamp + ".json";
+        
         File backupFile = new File(BACKUP_DIR, fileName);
 
         try {
@@ -341,6 +402,9 @@ public class DatabaseController {
             try (FileWriter writer = new FileWriter(backupFile)) {
                 writer.write(sb.toString());
             }
+
+            // Limitar backups parciales a 5
+            limitarBackups("backup_parcial_", 5);
 
             return ResponseEntity.ok(Map.of(
                 "colecciones", coleccionesBackup,
@@ -422,12 +486,78 @@ public class DatabaseController {
         if (!backupFile.exists()) {
             return ResponseEntity.notFound().build();
         }
+try {
+            // Leer el archivo como texto y parsearlo como Document BSON (Extended JSON)
+            String content = new String(Files.readAllBytes(backupFile.toPath()));
+            Document backupDoc = Document.parse(content);
 
-        return ResponseEntity.ok(Map.of(
-            "mensaje", "Restauración del backup '" + backupId + "' iniciada. Revise los datos.",
-            "backupId", backupId,
-            "archivo", backupFile.getName()
-        ));
+            // Obtener el mapa de colecciones del backup
+            Document coleccionesDoc = (Document) backupDoc.get("colecciones");
+            if (coleccionesDoc == null) {
+                return ResponseEntity.badRequest()
+                    .body(Map.of("error", "El archivo de backup no contiene colecciones válidas"));
+            }
+
+            // Si el frontend envió colecciones específicas, restaurar solo esas; si no, todas
+            Object colParam = body.get("colecciones");
+            Set<String> colsToRestore;
+            if (colParam instanceof List && !((List<?>) colParam).isEmpty()) {
+                colsToRestore = new HashSet<>((List<String>) colParam);
+            } else {
+                colsToRestore = coleccionesDoc.keySet();
+            }
+
+            List<String> restauradas = new ArrayList<>();
+            List<String> errores = new ArrayList<>();
+
+            for (String colName : colsToRestore) {
+                Object colData = coleccionesDoc.get(colName);
+                if (colData == null) {
+                    errores.add(colName + " (no encontrada en backup)");
+                    continue;
+                }
+
+                try {
+                    List<Document> docs = (List<Document>) colData;
+
+                    // Borrar todos los documentos de la colección (compatible con Atlas)
+                    mongoTemplate.getCollection(colName).deleteMany(new Document());
+
+                    if (!docs.isEmpty()) {
+                        mongoTemplate.getCollection(colName).insertMany(docs);
+                    }
+                    restauradas.add(colName + " (" + docs.size() + " docs)");
+                } catch (Exception ex) {
+                    System.err.println("[RESTORE ERROR] Colección " + colName + ": " + ex.getMessage());
+                    ex.printStackTrace();
+                    errores.add(colName + ": " + ex.getMessage());
+                }
+            }
+
+            Map<String, Object> resultado = new LinkedHashMap<>();
+            if (errores.isEmpty()) {
+                resultado.put("mensaje", "Restore completado correctamente");
+            } else if (!restauradas.isEmpty()) {
+                resultado.put("mensaje", "Restore completado con errores parciales");
+            } else {
+                // Todo falló: devolver 500
+                resultado.put("mensaje", "Restore fallido");
+                resultado.put("errores", errores);
+                return ResponseEntity.internalServerError().body(resultado);
+            }
+            resultado.put("backupId", backupId);
+            resultado.put("restauradas", restauradas);
+            if (!errores.isEmpty()) {
+                resultado.put("errores", errores);
+            }
+            return ResponseEntity.ok(resultado);
+
+        } catch (Exception e) {
+            System.err.println("[RESTORE FATAL] " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                .body(Map.of("error", "Error al restaurar: " + e.getMessage()));
+        }
     }
 
     /**

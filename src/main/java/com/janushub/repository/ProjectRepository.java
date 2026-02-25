@@ -10,13 +10,13 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends MongoRepository<Project, String> {
 
-    Optional<Project> findByCode(String code);
+     Optional<Project> findByCodigoProyecto(String codigoProyecto);
 
-    List<Project> findByNameContainingIgnoreCase(String name);
+    List<Project> findByNombreContainingIgnoreCase(String nombre);
 
-    List<Project> findByDepartamentOrganismeContainingIgnoreCase(String departamentOrganisme);
+    List<Project> findByDepartamentoContainingIgnoreCase(String departamento);
 
-    Project findTopByIdStartingWithOrderByIdDesc(String prefix); 
-    
+    Project findTopByIdStartingWithOrderByIdDesc(String prefix);
+
     List<Project> findByDeletedFalse();
 }

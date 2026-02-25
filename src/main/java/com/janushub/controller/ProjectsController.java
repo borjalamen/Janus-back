@@ -1,7 +1,9 @@
 package com.janushub.controller;
 
 import com.janushub.model.Project;
-import com.janushub.repository.ProjectRepository;
+import com.janushub.service.ProjectService;
+import com.janushub.service.ProjectService.ProjectStats;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -11,11 +13,12 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/projects")
+@CrossOrigin(origins = "http://localhost:4200,http://localhost:8080", allowedHeaders = "*")
 public class ProjectsController {
-     private final ProjectRepository repository;
+      private final ProjectService projectService;
 
-    public ProjectsController(ProjectRepository repository) {
-        this.repository = repository;
+    public ProjectsController(ProjectService projectService) {
+        this.projectService = projectService;
     }
 
     // =============================================================
@@ -24,9 +27,11 @@ public class ProjectsController {
 
     // URL: /api/projects/all
     @GetMapping("/all")
-    public List<Project> getAllProjects() {
-        return repository.findAll();
+    public ResponseEntity<List<Project>> getAllProjects() {
+        List<Project> projects = projectService.getAllProjects();
+        return ResponseEntity.ok(projects);
     }
+
 
      // =============================================================
     // 2. GET BY ID
@@ -34,11 +39,24 @@ public class ProjectsController {
 
     // URL: /api/projects/{id}
     @GetMapping("/{id}")
-    public ResponseEntity<Project> getProjectById(@PathVariable String id) {
-        return repository.findById(id)
-                .map(ResponseEntity::ok)
+     public ResponseEntity<Project> getProjectById(@PathVariable String id) {
+        Optional<Project> project = projectService.getProjectById(id);
+        return project.map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
+
+    /**
+     * GET: Obtener proyecto por código
+     * GET /api/projects/code/{code}
+     */
+    @GetMapping("/code/{code}")
+    public ResponseEntity<Project> getProjectByCode(@PathVariable String code) {
+        Optional<Project> project = projectService.getProjectByCode(code);
+        return project.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
+
+
 
     // =============================================================
     // 3. SEARCH BY NAME
@@ -46,9 +64,21 @@ public class ProjectsController {
 
     // URL: /api/projects/search/name/{name}
     @GetMapping("/search/name/{name}")
-    public List<Project> searchByName(@PathVariable String name) {
-        return repository.findByNameContainingIgnoreCase(name);
+    public ResponseEntity<List<Project>> searchByName(@PathVariable String name) {
+        List<Project> projects = projectService.searchByName(name);
+        return ResponseEntity.ok(projects);
     }
+
+    /**
+     * GET: Obtener estadísticas
+     * GET /api/projects/stats/summary
+     */
+    @GetMapping("/stats/summary")
+    public ResponseEntity<ProjectStats> getStats() {
+        ProjectStats stats = projectService.getStats();
+        return ResponseEntity.ok(stats);
+    }
+
 
      // =============================================================
     // 4. CREATE (ID project-XXX)
@@ -56,24 +86,15 @@ public class ProjectsController {
 
     // URL: /api/projects/create
     @PostMapping("/create")
-    public Project createProject(@RequestBody Project project) {
-
-        Project last = repository.findTopByIdStartingWithOrderByIdDesc("project-");
-
-        int nextNumber = 1;
-
-        if (last != null && last.getId() != null) {
-            String numberPart = last.getId().replace("project-", "");
-            nextNumber = Integer.parseInt(numberPart) + 1;
+    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+        try {
+            Project createdProject = projectService.createProject(project);
+            return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
         }
-
-        String newId = String.format("project-%03d", nextNumber);
-        project.setId(newId);
-
-        project.setCreatedAt(LocalDateTime.now());
-
-        return repository.save(project);
     }
+
 
     // =============================================================
     // 5. UPDATE
@@ -85,32 +106,24 @@ public class ProjectsController {
             @PathVariable String id,
             @RequestBody Project details) {
 
-        Optional<Project> projectOpt = repository.findById(id);
+      Optional<Project> updatedProject = projectService.updateProject(id, details);
+        return updatedProject.map(ResponseEntity::ok)
+                .orElse(ResponseEntity.notFound().build());
+    }
 
-        if (projectOpt.isPresent()) {
-
-            Project existing = projectOpt.get();
-
-            existing.setCode(details.getCode());
-            existing.setName(details.getName());
-            existing.setDepartamentOrganisme(details.getDepartamentOrganisme());
-            existing.setGestorResponsableSolucio(details.getGestorResponsableSolucio());
-            existing.setResponsableProjecte(details.getResponsableProjecte());
-            existing.setEquipDesenvolupament(details.getEquipDesenvolupament());
-            existing.setEquipProjectesInfra(details.getEquipProjectesInfra());
-            existing.setEquipProves(details.getEquipProves());
-            existing.setEquipAdminExplotacioXarxes(details.getEquipAdminExplotacioXarxes());
-            existing.setOficinaSeguretat(details.getOficinaSeguretat());
-            existing.setEquipQualitat(details.getEquipQualitat());
-            existing.setEquipAdminOperacions(details.getEquipAdminOperacions());
-            existing.setEquipAdminExplotacioSistemes(details.getEquipAdminExplotacioSistemes());
-            existing.setGestorIntegracioSolucions(details.getGestorIntegracioSolucions());
-
-            return ResponseEntity.ok(repository.save(existing));
+    /**
+     * DELETE: Soft delete - marcar como eliminado
+     * DELETE /api/projects/soft-delete/{id}
+     */
+    @DeleteMapping("/soft-delete/{id}")
+    public ResponseEntity<?> softDeleteProject(@PathVariable String id) {
+        boolean deleted = projectService.softDeleteProject(id);
+        if (deleted) {
+            return ResponseEntity.ok().body("Proyecto marcado como eliminado");
         }
-
         return ResponseEntity.notFound().build();
     }
+
 
      // =============================================================
     // 6. DELETE (HARD DELETE)
@@ -118,15 +131,11 @@ public class ProjectsController {
 
     // URL: /api/projects/delete/{id}
     @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteProject(@PathVariable String id) {
-
-        Optional<Project> projectOpt = repository.findById(id);
-
-        if (projectOpt.isPresent()) {
-            repository.delete(projectOpt.get());
-            return ResponseEntity.ok().build();
+   public ResponseEntity<?> deleteProject(@PathVariable String id) {
+        boolean deleted = projectService.deleteProject(id);
+        if (deleted) {
+            return ResponseEntity.ok().body("Proyecto eliminado permanentemente");
         }
-
         return ResponseEntity.notFound().build();
     }
     

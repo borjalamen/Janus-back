@@ -110,11 +110,10 @@ public List<Bitacora> searchBitacoraByTitulo(@Argument String titulo) {
         return projectRepository.findById(id).orElse(null);
     }
 
-    @QueryMapping
+   @QueryMapping
     public List<Project> searchProjectsByName(@Argument String name) {
-        return projectRepository.findByNameContainingIgnoreCase(name);
+        return projectRepository.findByNombreContainingIgnoreCase(name);
     }
-
      // ==========================================================
     // MUTATIONS
     // ==========================================================
@@ -234,20 +233,16 @@ public Project updateProject(@Argument String id, @Argument("project") Project p
     if (projectOpt.isPresent()) {
         Project existing = projectOpt.get();
 
-        existing.setCode(project.getCode());
-        existing.setName(project.getName());
-        existing.setDepartamentOrganisme(project.getDepartamentOrganisme());
-        existing.setGestorResponsableSolucio(project.getGestorResponsableSolucio());
-        existing.setResponsableProjecte(project.getResponsableProjecte());
-        existing.setEquipDesenvolupament(project.getEquipDesenvolupament());
-        existing.setEquipProjectesInfra(project.getEquipProjectesInfra());
-        existing.setEquipProves(project.getEquipProves());
-        existing.setEquipAdminExplotacioXarxes(project.getEquipAdminExplotacioXarxes());
-        existing.setOficinaSeguretat(project.getOficinaSeguretat());
-        existing.setEquipQualitat(project.getEquipQualitat());
-        existing.setEquipAdminOperacions(project.getEquipAdminOperacions());
-        existing.setEquipAdminExplotacioSistemes(project.getEquipAdminExplotacioSistemes());
-        existing.setGestorIntegracioSolucions(project.getGestorIntegracioSolucions());
+        existing.setCodigoProyecto(project.getCodigoProyecto());
+            existing.setNombre(project.getNombre());
+            existing.setDepartamento(project.getDepartamento());
+            existing.setLote(project.getLote());
+            existing.setResponsableProyecto(project.getResponsableProyecto());
+            existing.setResponsableTecnico(project.getResponsableTecnico());
+            existing.setUrlEntornoDesarrollo(project.getUrlEntornoDesarrollo());
+            existing.setUrlEntornoIntegracion(project.getUrlEntornoIntegracion());
+            existing.setUrlEntornoPreproduccion(project.getUrlEntornoPreproduccion());
+            existing.setUrlEntornoProduccion(project.getUrlEntornoProduccion());
 
         return projectRepository.save(existing);
     }
