@@ -390,7 +390,7 @@ public Boolean deleteProjectPhysical(@Argument String id) {
 @MutationMapping
 public Formacion createFormacion(@Argument Formacion formacion) {
 
-    Formacion last = formacionRepository.findTopByIdStartingWithOrderByIdDesc("formacion-");
+    Formacion last = formacionRepository.findTopByIdStartingWithOrderByIdDesc("Formacion-");
 
     int nextNumber = 1;
 
@@ -412,8 +412,7 @@ public Formacion createFormacion(@Argument Formacion formacion) {
 public Formacion updateFormacion(@Argument String id, @Argument Formacion input) {
 
    return formacionRepository.findByIdAndDeletedFalse(id)
-            .stream()
-            .findFirst()
+            
             .map(existing -> {
 
                 existing.setName(input.getName());
