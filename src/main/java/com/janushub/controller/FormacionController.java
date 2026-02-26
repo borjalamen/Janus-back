@@ -153,7 +153,7 @@ public class FormacionController {
      */
     @GetMapping("/{id}")
     public ResponseEntity<Formacion> getFormationById(@PathVariable String id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedFalse(id)
                 .map(ResponseEntity::ok)
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -201,6 +201,22 @@ public class FormacionController {
      */
     @PostMapping("/create")
     public Formacion createFormation(@RequestBody Formacion formation) {
+
+          String prefix = "Formacion-";
+
+    Formacion last = repository.findTopByIdStartingWithOrderByIdDesc(prefix);
+
+    int nextNumber = 1;
+
+    if (last != null) {
+        String lastId = last.getId().replace(prefix, "");
+        nextNumber = Integer.parseInt(lastId) + 1;
+    }
+    String newId = prefix + String.format("%03d", nextNumber);
+
+   
+
+    formation.setId(newId);
         formation.setDeleted(false);
         formation.setVisible(true);
         formation.setDeletedAt(null);
@@ -253,7 +269,7 @@ public class FormacionController {
      */
     @PutMapping("/update/{id}")
     public ResponseEntity<Formacion> updateFormation(@PathVariable String id, @RequestBody Formacion formationDetails) {
-    return repository.findById(id)
+    return repository.findByIdAndDeletedFalse(id)
             .map(formation -> {
                 
                 formation.setName(formationDetails.getName());
@@ -297,18 +313,7 @@ public class FormacionController {
      * ℹ️ NOTA: Esta operación NO elimina permanentemente el registro
      * ═══════════════════════════════════════════════════════════════════════════════
      */
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteFormation(@PathVariable String id) {
-        return repository.findById(id)
-                .map(formation -> {
-                    formation.setDeleted(true); // Borrado lógico
-                    formation.setVisible(false);
-                    formation.setDeletedAt(java.time.LocalDateTime.now());
-                    repository.save(formation);
-                    return ResponseEntity.ok().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
+
 
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
@@ -341,7 +346,7 @@ public class FormacionController {
      */
     @DeleteMapping("/delete/physical/{id}")
     public ResponseEntity<?> deleteFormationPhysical(@PathVariable String id) {
-        return repository.findById(id)
+        return repository.findByIdAndDeletedFalse(id)
                 .map(formation -> {
                     repository.delete(formation);
                     return ResponseEntity.ok().build();
@@ -453,4 +458,15 @@ public class FormacionController {
         repository.deleteAll();
         return ResponseEntity.ok("Deleted (physical) " + count + " formations");
     }
+
+    @DeleteMapping("/delete/{id}")
+public ResponseEntity<Boolean> deleteFormacionPhysical(@PathVariable String id) {
+
+    if (!repository.existsById(id)) {
+        return ResponseEntity.notFound().build();
+    }
+
+    repository.deleteById(id);
+    return ResponseEntity.ok(true);
+}
 }

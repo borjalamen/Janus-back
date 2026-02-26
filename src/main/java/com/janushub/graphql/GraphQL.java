@@ -304,16 +304,25 @@ public Boolean softDeleteProject(@Argument String id) {
     @MutationMapping
     public Bitacora createBitacora(@Argument Bitacora bitacora) {
 
-        Optional<Bitacora> last = bitacoraRepository.findTopByOrderByIdDesc();
+        String prefix = "Bitacora-";
+
+       Bitacora last = bitacoraRepository
+            .findTopByIdStartingWithOrderByIdDesc(prefix);
 
         int nextNumber = 1;
 
-        if (last != null && last.get().getId() != null && last.get().getId().startsWith("bitacora-")) {
-            String numberPart = last.get().getId().replace("bitacora-", "");
+        if (last != null && last.getId() != null && last.getId().startsWith("Bitacora-")) {
+            try {
+                String numberPart = last.getId().replace("Bitacora-", "");
             nextNumber = Integer.parseInt(numberPart) + 1;
-        }
 
-        String newId = String.format("bitacora-%03d", nextNumber);
+            } catch (NumberFormatException e) {
+            nextNumber = 1;
+            
+        }
+    }
+
+        String newId = String.format("Bitacora-%03d", nextNumber);
         bitacora.setId(newId);
 
         bitacora.setVisible(true);
@@ -390,16 +399,16 @@ public Boolean deleteProjectPhysical(@Argument String id) {
 @MutationMapping
 public Formacion createFormacion(@Argument Formacion formacion) {
 
-    Formacion last = formacionRepository.findTopByIdStartingWithOrderByIdDesc("formacion-");
+    Formacion last = formacionRepository.findTopByIdStartingWithOrderByIdDesc("Formacion-");
 
     int nextNumber = 1;
 
-    if (last != null && last.getId() != null && last.getId().startsWith("formacion-")) {
-        String numberPart = last.getId().replace("formacion-", "");
+    if (last != null && last.getId() != null && last.getId().startsWith("Formacion-")) {
+        String numberPart = last.getId().replace("Formacion-", "");
         nextNumber = Integer.parseInt(numberPart) + 1;
     }
 
-    String newId = String.format("formacion-%03d", nextNumber);
+    String newId = String.format("Formacion-%03d", nextNumber);
     formacion.setId(newId);
 
     formacion.setDeleted(false);
@@ -409,9 +418,10 @@ public Formacion createFormacion(@Argument Formacion formacion) {
 }
 
 @MutationMapping
-public Formacion updateFormacion(@Argument String id, @Argument Formacion input) {
+public Formacion updateFormacion(@Argument String id, @Argument("formacion") Formacion input) {
 
-    return formacionRepository.findByIdAndDeletedFalse(id)
+   return formacionRepository.findByIdAndDeletedFalse(id)
+            
             .map(existing -> {
 
                 existing.setName(input.getName());
@@ -439,5 +449,16 @@ public Boolean softDeleteFormacion(@Argument String id) {
                 return true;
             })
             .orElse(false);
+}
+
+@MutationMapping
+public Boolean deleteFormacionPhysical(@Argument String id) {
+
+    if (!formacionRepository.existsById(id)) {
+        return false;
+    }
+
+    formacionRepository.deleteById(id);
+    return true;
 }
 }
