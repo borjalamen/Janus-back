@@ -469,4 +469,15 @@ public class FormacionController {
         repository.deleteAll();
         return ResponseEntity.ok("Deleted (physical) " + count + " formations");
     }
+
+    @DeleteMapping("/delete/{id}")
+public ResponseEntity<Boolean> deleteFormacionPhysical(@PathVariable String id) {
+
+    if (!repository.existsById(id)) {
+        return ResponseEntity.notFound().build();
+    }
+
+    repository.deleteById(id);
+    return ResponseEntity.ok(true);
+}
 }

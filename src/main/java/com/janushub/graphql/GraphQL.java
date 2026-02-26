@@ -442,4 +442,15 @@ public Boolean softDeleteFormacion(@Argument String id) {
             })
             .orElse(false);
 }
+
+@MutationMapping
+public Boolean deleteFormacionPhysical(@Argument String id) {
+
+    if (!formacionRepository.existsById(id)) {
+        return false;
+    }
+
+    formacionRepository.deleteById(id);
+    return true;
+}
 }
