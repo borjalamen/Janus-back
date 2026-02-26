@@ -59,6 +59,9 @@ public class Project {
     @org.springframework.data.mongodb.core.mapping.Field("herramientasMind")
     private HerramientasMind herramientasMind;
     
+    // Documentos agregados durante creación
+    private List<ProjectDocument> documents;
+    
     // Información de auditoría
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
@@ -156,5 +159,15 @@ public class Project {
         private String url;
         private String tokenUser;
         private String tokenValue;
+    }
+    
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ProjectDocument {
+        private String nombre;
+        private String descripcion;
+        private String tipo;
+        private String path;  // Ruta del archivo en volumenDocumentos
     }
 }
