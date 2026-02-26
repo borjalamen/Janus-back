@@ -19,6 +19,8 @@ public interface BitacoraRepository extends MongoRepository<Bitacora, String> {
      @Query("{ '_id': ?0, 'visible': true }")
     Optional<Bitacora> findVisibleById(String id);
 
+    
+
     @Query("{ 'contexto': { $regex: ?0, $options: 'i' }, 'visible': true }")
 List<Bitacora> searchByTexto(String contexto);
 
@@ -34,7 +36,7 @@ List<Bitacora> findByTituloContainingIgnoreCaseAndVisibleTrue(String titulo);
     List<Bitacora> findByProyectoHidden(String idProyecto);
 
     
-    Optional<Bitacora> findTopByOrderByIdDesc();
+  Bitacora findTopByIdStartingWithOrderByIdDesc(String prefix);
 
 
 

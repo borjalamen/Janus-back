@@ -304,14 +304,23 @@ public Boolean softDeleteProject(@Argument String id) {
     @MutationMapping
     public Bitacora createBitacora(@Argument Bitacora bitacora) {
 
-        Optional<Bitacora> last = bitacoraRepository.findTopByOrderByIdDesc();
+        String prefix = "Bitacora-";
+
+       Bitacora last = bitacoraRepository
+            .findTopByIdStartingWithOrderByIdDesc(prefix);
 
         int nextNumber = 1;
 
-        if (last != null && last.get().getId() != null && last.get().getId().startsWith("bitacora-")) {
-            String numberPart = last.get().getId().replace("bitacora-", "");
+        if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+            try {
+                String numberPart = last.getId().replace("bitacora-", "");
             nextNumber = Integer.parseInt(numberPart) + 1;
+
+            } catch (NumberFormatException e) {
+            nextNumber = 1;
+            
         }
+    }
 
         String newId = String.format("bitacora-%03d", nextNumber);
         bitacora.setId(newId);
