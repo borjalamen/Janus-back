@@ -394,12 +394,12 @@ public Formacion createFormacion(@Argument Formacion formacion) {
 
     int nextNumber = 1;
 
-    if (last != null && last.getId() != null && last.getId().startsWith("formacion-")) {
-        String numberPart = last.getId().replace("formacion-", "");
+    if (last != null && last.getId() != null && last.getId().startsWith("Formacion-")) {
+        String numberPart = last.getId().replace("Formacion-", "");
         nextNumber = Integer.parseInt(numberPart) + 1;
     }
 
-    String newId = String.format("formacion-%03d", nextNumber);
+    String newId = String.format("Formacion-%03d", nextNumber);
     formacion.setId(newId);
 
     formacion.setDeleted(false);
