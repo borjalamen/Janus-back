@@ -201,6 +201,22 @@ public class FormacionController {
      */
     @PostMapping("/create")
     public Formacion createFormation(@RequestBody Formacion formation) {
+
+          String prefix = "Formacion-";
+
+    Formacion last = repository.findTopByIdStartingWithOrderByIdDesc(prefix);
+
+    int nextNumber = 1;
+
+    if (last != null) {
+        String lastId = last.getId().replace(prefix, "");
+        nextNumber = Integer.parseInt(lastId) + 1;
+    }
+    String newId = prefix + String.format("%03d", nextNumber);
+
+   
+
+    formation.setId(newId);
         formation.setDeleted(false);
         formation.setVisible(true);
         formation.setDeletedAt(null);
