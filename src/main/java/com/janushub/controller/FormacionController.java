@@ -313,18 +313,7 @@ public class FormacionController {
      * ℹ️ NOTA: Esta operación NO elimina permanentemente el registro
      * ═══════════════════════════════════════════════════════════════════════════════
      */
-    @DeleteMapping("/delete/{id}")
-    public ResponseEntity<?> deleteFormation(@PathVariable String id) {
-        return repository.findByIdAndDeletedFalse(id)
-                .map(formation -> {
-                    formation.setDeleted(true); // Borrado lógico
-                    formation.setVisible(false);
-                    formation.setDeletedAt(java.time.LocalDateTime.now());
-                    repository.save(formation);
-                    return ResponseEntity.ok().build();
-                })
-                .orElse(ResponseEntity.notFound().build());
-    }
+
 
     /**
      * ═══════════════════════════════════════════════════════════════════════════════
