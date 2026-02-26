@@ -311,9 +311,9 @@ public Boolean softDeleteProject(@Argument String id) {
 
         int nextNumber = 1;
 
-        if (last != null && last.getId() != null && last.getId().startsWith("bitacora-")) {
+        if (last != null && last.getId() != null && last.getId().startsWith("Bitacora-")) {
             try {
-                String numberPart = last.getId().replace("bitacora-", "");
+                String numberPart = last.getId().replace("Bitacora-", "");
             nextNumber = Integer.parseInt(numberPart) + 1;
 
             } catch (NumberFormatException e) {
@@ -322,7 +322,7 @@ public Boolean softDeleteProject(@Argument String id) {
         }
     }
 
-        String newId = String.format("bitacora-%03d", nextNumber);
+        String newId = String.format("Bitacora-%03d", nextNumber);
         bitacora.setId(newId);
 
         bitacora.setVisible(true);

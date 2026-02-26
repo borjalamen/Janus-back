@@ -96,7 +96,7 @@ public class BitacoraController {
             
     }
 
-    String newId = String.format("bitacora-%03d", nextNumber);
+    String newId = String.format("Bitacora-%03d", nextNumber);
     bitacora.setId(newId);
 
     
