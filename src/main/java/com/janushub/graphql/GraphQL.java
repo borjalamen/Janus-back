@@ -409,7 +409,7 @@ public Formacion createFormacion(@Argument Formacion formacion) {
 }
 
 @MutationMapping
-public Formacion updateFormacion(@Argument String id, @Argument Formacion input) {
+public Formacion updateFormacion(@Argument String id, @Argument("formacion") Formacion input) {
 
    return formacionRepository.findByIdAndDeletedFalse(id)
             
