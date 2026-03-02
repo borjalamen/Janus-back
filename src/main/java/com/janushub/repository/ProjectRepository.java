@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface ProjectRepository extends MongoRepository<Project, String> {
 
-     Optional<Project> findByCodigoProyecto(String codigoProyecto);
+    Optional<Project> findByCodigoProyecto(String codigoProyecto);
 
     List<Project> findByNombreContainingIgnoreCase(String nombre);
 

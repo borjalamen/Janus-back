@@ -8,6 +8,11 @@ import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.LocalDateTime;
 
+/**
+ * Entidad que representa una petición de "únete" almacenada en MongoDB.
+ * Cada solicitud queda registrada con estado PENDIENTE hasta que un
+ * administrador la apruebe o rechace.
+ */
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
@@ -17,16 +22,19 @@ public class Unete {
     @Id
     private String id;
 
+    // Datos del solicitante (enviados desde el formulario "únete")
     private String fullName;
     private String email;
-    private String role;
+    private String role;          // invitado, consultor, devops, admin
     private String projectCode;
     private String projectName;
     private String comments;
 
-    private String estado;
+    // Metadatos de gestión
+    private String estado;        // PENDIENTE, APROBADA, RECHAZADA
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 
+    // Comentario del administrador al aprobar/rechazar (opcional)
     private String adminComment;
 }

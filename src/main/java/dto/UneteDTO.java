@@ -3,7 +3,7 @@ package dto;
 import lombok.Data;
 
 /**
- * DTO que recibe los datos del formulario "unete" del frontend.
+ * DTO que recibe los datos del formulario "únete" del frontend.
  */
 @Data
 public class UneteDTO {

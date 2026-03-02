@@ -12,37 +12,36 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * Controlador REST para gestionar las peticiones de "unete".
+ * Controlador REST para gestionar las peticiones de "únete".
  *
- * Endpoints publicos (formulario "unete"):
- *   POST /api/contact/unete  - registra una nueva solicitud
+ * Endpoints públicos (formulario "únete"):
+ *   POST /api/contact/unete  → registra una nueva solicitud
  *
- * Endpoints de administracion:
- *   GET    /api/join-requests           - listar todas las peticiones
- *   GET    /api/join-requests/{id}      - obtener una peticion por ID
- *   GET    /api/join-requests/estado/{estado} - filtrar por estado
- *   PUT    /api/join-requests/{id}/approve   - aprobar peticion
- *   PUT    /api/join-requests/{id}/reject    - rechazar peticion
- *   DELETE /api/join-requests/{id}      - eliminar peticion
+ * Endpoints de administración:
+ *   GET    /api/join-requests           → listar todas las peticiones
+ *   GET    /api/join-requests/{id}      → obtener una petición por ID
+ *   GET    /api/join-requests/estado/{estado} → filtrar por estado
+ *   PUT    /api/join-requests/{id}/approve   → aprobar petición
+ *   PUT    /api/join-requests/{id}/reject    → rechazar petición
+ *   DELETE /api/join-requests/{id}      → eliminar petición
  */
 @RestController
 @RequiredArgsConstructor
 public class UneteController {
-
     private final UneteService uneteService;
 
     // =========================================================
-    // ENDPOINT PUBLICO - recibe la solicitud desde "unete"
+    // ENDPOINT PÚBLICO — recibe la solicitud desde "únete"
     // =========================================================
 
     /**
-     * El frontend envia POST /api/contact/unete con el formulario.
-     * Se registra la peticion con estado PENDIENTE.
+     * El frontend envía POST /api/contact/unete con el formulario.
+     * Se registra la petición con estado PENDIENTE.
      */
     @PostMapping("/api/contact/unete")
     public ResponseEntity<?> submitJoinRequest(@RequestBody UneteDTO dto) {
         try {
-            // Validaciones basicas
+            // Validaciones básicas
             if (dto.getFullName() == null || dto.getFullName().isBlank()) {
                 return ResponseEntity.badRequest().body("El nombre completo es obligatorio.");
             }
@@ -59,16 +58,16 @@ public class UneteController {
     }
 
     // =========================================================
-    // ENDPOINTS DE ADMINISTRACION
+    // ENDPOINTS DE ADMINISTRACIÓN
     // =========================================================
 
-    /** Lista todas las peticiones de "unete". */
+    /** Lista todas las peticiones de "únete". */
     @GetMapping("/api/join-requests")
     public List<Unete> getAllRequests() {
         return uneteService.getAllRequests();
     }
 
-    /** Obtiene una peticion por su ID. */
+    /** Obtiene una petición por su ID. */
     @GetMapping("/api/join-requests/{id}")
     public ResponseEntity<Unete> getRequestById(@PathVariable String id) {
         try {
@@ -85,7 +84,7 @@ public class UneteController {
     }
 
     /**
-     * Aprueba una peticion.
+     * Aprueba una petición.
      * Body opcional: { "adminComment": "Aprobado por el responsable" }
      */
     @PutMapping("/api/join-requests/{id}/approve")
@@ -102,7 +101,7 @@ public class UneteController {
     }
 
     /**
-     * Rechaza una peticion.
+     * Rechaza una petición.
      * Body opcional: { "adminComment": "No cumple los requisitos" }
      */
     @PutMapping("/api/join-requests/{id}/reject")
@@ -118,7 +117,7 @@ public class UneteController {
         }
     }
 
-    /** Elimina una peticion existente. */
+    /** Elimina una petición existente. */
     @DeleteMapping("/api/join-requests/{id}")
     public ResponseEntity<?> deleteRequest(@PathVariable String id) {
         try {
