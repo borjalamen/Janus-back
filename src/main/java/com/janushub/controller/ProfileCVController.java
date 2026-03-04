@@ -29,57 +29,61 @@ import lombok.RequiredArgsConstructor;
 public class ProfileCVController {
 
     private final UserService userService;
-    private final String baseDir = "/app/assets/multimedia";
 
-   @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-public ResponseEntity<?> uploadCv(
-        @RequestParam("file") MultipartFile file,
-        @RequestParam("username") String username) {
+    // Carpeta base on es guardaran els CVs
+    private final String uploadRoot = "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads";
 
-    if (file.isEmpty()) {
-        return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
-    }
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<?> uploadCv(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("username") String username) {
 
-    String contentType = file.getContentType();
-    if (contentType == null ||
-            (!contentType.equals(MediaType.APPLICATION_PDF_VALUE) &&
-             !contentType.equals("application/msword") &&
-             !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
-
-        return ResponseEntity.badRequest()
-                .body("Formato no permitido. Solo PDF o DOC/DOCX");
-    }
-
-    try {
-        // 1) esborrar CV antic si existeix
-        String oldCvPath = userService.getCvPath(username);
-        if (oldCvPath != null && !oldCvPath.isBlank()) {
-            Files.deleteIfExists(Paths.get(oldCvPath));
+        if (file.isEmpty()) {
+            return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
         }
 
-        // 2) carpeta de l'usuari
-        Path userDir = Paths.get(baseDir, username); // /app/assets/multimedia/{username}
-        Files.createDirectories(userDir);
+        String contentType = file.getContentType();
+        if (contentType == null ||
+                (!contentType.equals(MediaType.APPLICATION_PDF_VALUE) &&
+                 !contentType.equals("application/msword") &&
+                 !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
 
-        // 3) extensió
-        String extension =
-                contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
-                contentType.equals("application/msword") ? ".doc" : ".docx";
+            return ResponseEntity.badRequest()
+                    .body("Formato no permitido. Solo PDF o DOC/DOCX");
+        }
 
-        // 4) NOM FIX → sempre el mateix fitxer
-        String fileName = "cv" + extension;          // NO timestamp
-        Path filePath = userDir.resolve(fileName);   // .../{username}/cv.pdf
+        try {
+            // 1) esborrar CV antic si existeix
+            String oldCvPath = userService.getCvPath(username);
+            if (oldCvPath != null && !oldCvPath.isBlank()) {
+                Files.deleteIfExists(Paths.get(oldCvPath));
+            }
 
-        // 5) guardar nou CV (sobreescriu si cal)
-        Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
-        userService.updateCv(username, filePath.toString());
+            // 2) carpeta de l'usuari dins de uploads
+            Path userDir = Paths.get(uploadRoot, username); // .../uploads/{username}
+            Files.createDirectories(userDir);
 
-        return ResponseEntity.ok("CV guardado correctamente");
-    } catch (IOException e) {
-        e.printStackTrace();
-        return ResponseEntity.internalServerError().body(e.getMessage());
+            // 3) extensió
+            String extension =
+                    contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
+                    contentType.equals("application/msword") ? ".doc" : ".docx";
+
+            // 4) nom fix
+            String fileName = "cv" + extension;               // cv.pdf / cv.doc / cv.docx
+            Path filePath = userDir.resolve(fileName);        // .../uploads/{username}/cv.pdf
+
+            // 5) guardar nou CV
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Al servei guardem el path absolut (com ja feies)
+            userService.updateCv(username, filePath.toString());
+
+            return ResponseEntity.ok("CV guardado correctamente");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body(e.getMessage());
+        }
     }
-}
 
     @GetMapping
     public ResponseEntity<Resource> getCv(@RequestParam String username) throws IOException {

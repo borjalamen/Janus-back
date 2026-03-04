@@ -7,24 +7,37 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
+
+    // Carpeta del teu PC on es guarden avatars i CVs
+    private static final String UPLOAD_ROOT =
+            "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads/";
+
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        // Mejor soporte para desarrollo local en varios puertos y opciones de producción
+        // CORS per desenvolupament
         registry.addMapping("/**")
-            // Permite orígenes localhost en cualquier puerto y algunos orígenes comunes
-            .allowedOriginPatterns("http://localhost:*", "http://127.0.0.1:*", "http://[::1]:*", "http://*.local", "https://*.gencat.cat")
-            .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
-            .allowedHeaders("*")
-            // Expone cabeceras útiles al cliente (p. ej. para descargas o autenticación)
-            .exposedHeaders("Authorization", "Content-Disposition")
-            .allowCredentials(true)
-            .maxAge(3600);
+                .allowedOriginPatterns(
+                        "http://localhost:*",
+                        "http://127.0.0.1:*",
+                        "http://[::1]:*",
+                        "http://*.local",
+                        "https://*.gencat.cat"
+                )
+                .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
+                .allowedHeaders("*")
+                .exposedHeaders("Authorization", "Content-Disposition")
+                .allowCredentials(true)
+                .maxAge(3600);
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // Permite servir recursos estáticos si construyes el frontend dentro de /static
+        // Frontend (si algun cop hi poses el build a /static)
         registry.addResourceHandler("/**")
                 .addResourceLocations("classpath:/static/");
+
+        // Fitxers pujats (avatars, CV, etc.) sota /uploads/**
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:" + UPLOAD_ROOT);
     }
 }

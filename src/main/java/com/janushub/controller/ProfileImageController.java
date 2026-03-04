@@ -29,55 +29,58 @@ import lombok.RequiredArgsConstructor;
 public class ProfileImageController {
 
     private final UserService userService;
-    private final String baseDir = "/app/assets/multimedia";
+
+    // Carpeta base on es guardaran avatars
+    private final String uploadRoot = "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads";
 
     // ---------- SUBIR AVATAR ----------
     @PostMapping
-public ResponseEntity<?> uploadImage(
-        @RequestParam("file") MultipartFile imageFile,
-        @RequestParam("username") String username) {
+    public ResponseEntity<?> uploadImage(
+            @RequestParam("file") MultipartFile imageFile,
+            @RequestParam("username") String username) {
 
-    if (imageFile.isEmpty()) {
-        return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
-    }
-
-    String contentType = imageFile.getContentType();
-    if (contentType == null || !contentType.startsWith("image/")) {
-        return ResponseEntity.badRequest().body("Formato no permitido. Solo imágenes");
-    }
-
-    String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
-    if (extension == null || extension.isBlank()) {
-        extension = "png";
-    }
-
-    try {
-        // 1) esborrar avatar antic si existeix
-        String oldAvatarPath = userService.getAvatarPath(username);
-        if (oldAvatarPath != null && !oldAvatarPath.isBlank()) {
-            Files.deleteIfExists(Paths.get(oldAvatarPath));
+        if (imageFile.isEmpty()) {
+            return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
         }
 
-        // 2) carpeta de l'usuari
-        Path userDir = Paths.get(baseDir, username); // /app/assets/multimedia/{username}
-        Files.createDirectories(userDir);
+        String contentType = imageFile.getContentType();
+        if (contentType == null || !contentType.startsWith("image/")) {
+            return ResponseEntity.badRequest().body("Formato no permitido. Solo imágenes");
+        }
 
-        // 3) NOM FIX → sempre el mateix avatar
-        String fileName = "avatar." + extension.toLowerCase();   // avatar.png / avatar.jpg...
-        Path path = userDir.resolve(fileName);
+        String extension = FilenameUtils.getExtension(imageFile.getOriginalFilename());
+        if (extension == null || extension.isBlank()) {
+            extension = "png";
+        }
 
-        // 4) guardar nou avatar (sobreescriu si cal)
-        Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
-        userService.updateAvatar(username, path.toString());
+        try {
+            // 1) esborrar avatar antic si existeix
+            String oldAvatarPath = userService.getAvatarPath(username);
+            if (oldAvatarPath != null && !oldAvatarPath.isBlank()) {
+                Files.deleteIfExists(Paths.get(oldAvatarPath));
+            }
 
-        return ResponseEntity.ok("Imagen de perfil guardada correctamente");
-    } catch (IOException e) {
-        e.printStackTrace();
-        return ResponseEntity.internalServerError()
-                .body("Error al guardar la imagen de perfil");
+            // 2) carpeta de l'usuari dins uploads
+            Path userDir = Paths.get(uploadRoot, username); // .../uploads/{username}
+            Files.createDirectories(userDir);
+
+            // 3) Nom fix
+            String fileName = "avatar." + extension.toLowerCase(); // avatar.png / avatar.jpg, etc.
+            Path path = userDir.resolve(fileName);
+
+            // 4) guardar nou avatar
+            Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+
+            // Guardar path absolut a la BD, com ja feies
+            userService.updateAvatar(username, path.toString());
+
+            return ResponseEntity.ok("Imagen de perfil guardada correctamente");
+        } catch (IOException e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body("Error al guardar la imagen de perfil");
+        }
     }
-}
-
 
     // ---------- OBTENER AVATAR ----------
     @GetMapping
