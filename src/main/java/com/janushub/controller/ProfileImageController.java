@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import org.springframework.beans.factory.annotation.Value;
+
 import com.janushub.service.UserService;
 
 import lombok.RequiredArgsConstructor;
@@ -30,8 +32,8 @@ public class ProfileImageController {
 
     private final UserService userService;
 
-    // Carpeta base on es guardaran avatars
-    private final String uploadRoot = "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads";
+    @Value("${upload.root:uploads}")
+    private String uploadRoot;
 
     // ---------- SUBIR AVATAR ----------
     @PostMapping
@@ -60,8 +62,8 @@ public class ProfileImageController {
                 Files.deleteIfExists(Paths.get(oldAvatarPath));
             }
 
-            // 2) carpeta de l'usuari dins uploads
-            Path userDir = Paths.get(uploadRoot, username); // .../uploads/{username}
+            // 2) carpeta de l'usuari dins uploads (resolem a ruta absoluta)
+            Path userDir = Paths.get(uploadRoot).toAbsolutePath().resolve(username);
             Files.createDirectories(userDir);
 
             // 3) Nom fix

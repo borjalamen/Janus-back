@@ -8,9 +8,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // Carpeta del teu PC on es guarden avatars i CVs
-    private static final String UPLOAD_ROOT =
-            "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads/";
+    @org.springframework.beans.factory.annotation.Value("${upload.root:uploads}")
+    private String uploadRoot;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -37,7 +36,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .addResourceLocations("classpath:/static/");
 
         // Fitxers pujats (avatars, CV, etc.) sota /uploads/**
+        java.nio.file.Path absoluteUploads = java.nio.file.Paths.get(uploadRoot).toAbsolutePath();
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:" + UPLOAD_ROOT);
+                .addResourceLocations("file:" + absoluteUploads.toString().replace("\\", "/") + "/");
     }
 }
