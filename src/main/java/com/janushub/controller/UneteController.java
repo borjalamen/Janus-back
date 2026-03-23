@@ -1,5 +1,5 @@
 package com.janushub.controller;
- 
+
 import com.janushub.model.Unete;
 import com.janushub.service.UneteService;
 import dto.ApprovalResponseDTO;
@@ -8,33 +8,35 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
- 
+
 import java.util.List;
 import java.util.Map;
- 
+
 /**
  * Controlador REST para gestionar las peticiones de "únete".
  *
  * Endpoints públicos (formulario "únete"):
- *   POST /api/contact/unete  → registra una nueva solicitud
+ *   POST /api/contact/unete              → registra una nueva solicitud
  *
  * Endpoints de administración:
- *   GET    /api/join-requests           → listar todas las peticiones
- *   GET    /api/join-requests/{id}      → obtener una petición por ID
- *   GET    /api/join-requests/estado/{estado} → filtrar por estado
- *   PUT    /api/join-requests/{id}/approve   → aprobar petición
- *   PUT    /api/join-requests/{id}/reject    → rechazar petición
- *   DELETE /api/join-requests/{id}      → eliminar petición
+ *   GET    /api/join-requests                      → listar todas las peticiones
+ *   GET    /api/join-requests/{id}                 → obtener una petición por ID
+ *   GET    /api/join-requests/estado/{estado}      → filtrar por estado
+ *   GET    /api/join-requests/by-email/{email}     → obtener por email
+ *   PUT    /api/join-requests/{id}/approve         → aprobar petición
+ *   PUT    /api/join-requests/{id}/reject          → rechazar petición
+ *   DELETE /api/join-requests/{id}                 → eliminar petición
  */
 @RestController
 @RequiredArgsConstructor
 public class UneteController {
+
     private final UneteService uneteService;
- 
+
     // =========================================================
     // ENDPOINT PÚBLICO — recibe la solicitud desde "únete"
     // =========================================================
- 
+
     /**
      * El frontend envía POST /api/contact/unete con el formulario.
      * Se registra la petición con estado PENDIENTE.
@@ -50,17 +52,17 @@ public class UneteController {
             // Validaciones básicas (BAD_REQUEST - error del cliente)
             if (dto.getFullName() == null || dto.getFullName().isBlank()) {
                 return ResponseEntity.badRequest()
-                    .body("El nombre completo es obligatorio.");
+                        .body("El nombre completo es obligatorio.");
             }
             if (dto.getEmail() == null || dto.getEmail().isBlank()) {
                 return ResponseEntity.badRequest()
-                    .body("El email es obligatorio.");
+                        .body("El email es obligatorio.");
             }
- 
+
             // Crear la solicitud (puede fallar si email duplicado)
             Unete saved = uneteService.createRequest(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-           
+
         } catch (IllegalArgumentException e) {
             // Argumentos inválidos = BAD_REQUEST (error del cliente)
             return ResponseEntity.badRequest()
@@ -73,17 +75,17 @@ public class UneteController {
                     .body("Error al registrar la solicitud: " + e.getMessage());
         }
     }
- 
+
     // =========================================================
     // ENDPOINTS DE ADMINISTRACIÓN
     // =========================================================
- 
+
     /** Lista todas las peticiones de "únete". */
     @GetMapping("/api/join-requests")
     public List<Unete> getAllRequests() {
         return uneteService.getAllRequests();
     }
- 
+
     /** Obtiene una petición por su ID. */
     @GetMapping("/api/join-requests/{id}")
     public ResponseEntity<Unete> getRequestById(@PathVariable String id) {
@@ -93,13 +95,25 @@ public class UneteController {
             return ResponseEntity.notFound().build();
         }
     }
- 
+
     /** Filtra peticiones por estado (PENDIENTE, APROBADA, RECHAZADA). */
     @GetMapping("/api/join-requests/estado/{estado}")
     public List<Unete> getByEstado(@PathVariable String estado) {
         return uneteService.getRequestsByEstado(estado.toUpperCase());
     }
- 
+
+    /**
+     * Busca una petición por email (para que el front de "únete" consulte el estado).
+     */
+    @GetMapping("/api/join-requests/by-email/{email}")
+    public ResponseEntity<Unete> getByEmail(@PathVariable String email) {
+        Unete u = uneteService.getByEmail(email);
+        if (u == null) {
+            return ResponseEntity.notFound().build();
+        }
+        return ResponseEntity.ok(u);
+    }
+
     /**
      * Aprueba una petición y CREA EL USUARIO en la base de datos.
      * La contraseña se autogenera con el formato: [nombre]1234
@@ -131,7 +145,7 @@ public class UneteController {
                     .body("Error interno al procesar la solicitud: " + e.getMessage());
         }
     }
- 
+
     /**
      * Rechaza una petición.
      * Body opcional: { "adminComment": "No cumple los requisitos" }
@@ -148,7 +162,7 @@ public class UneteController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
- 
+
     /** Elimina una petición existente. */
     @DeleteMapping("/api/join-requests/{id}")
     public ResponseEntity<?> deleteRequest(@PathVariable String id) {
@@ -160,4 +174,3 @@ public class UneteController {
         }
     }
 }
- 
