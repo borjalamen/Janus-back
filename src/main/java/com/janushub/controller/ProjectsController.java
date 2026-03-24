@@ -125,12 +125,25 @@ public class ProjectsController {
 
     // URL: /api/projects/create
     @PostMapping("/create")
-    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+    public ResponseEntity<?> createProject(@RequestBody Project project) {
         try {
             Project createdProject = projectService.createProject(project);
             return ResponseEntity.status(HttpStatus.CREATED).body(createdProject);
+        } catch (IllegalArgumentException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+            String errorMessage = e.getMessage();
+            // Detectar error de duplicado de MongoDB
+            if (errorMessage != null && errorMessage.contains("non unique result")) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "No se puede crear el proyecto. El código del proyecto o el nombre ya existen en la base de datos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al crear el proyecto: " + errorMessage);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
         }
     }
 
@@ -141,13 +154,29 @@ public class ProjectsController {
 
     // URL: /api/projects/update/{id}
     @PutMapping("/update/{id}")
-    public ResponseEntity<Project> updateProject(
+    public ResponseEntity<?> updateProject(
             @PathVariable String id,
             @RequestBody Project details) {
-
-      Optional<Project> updatedProject = projectService.updateProject(id, details);
-        return updatedProject.map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        try {
+            Optional<Project> updatedProject = projectService.updateProject(id, details);
+            return updatedProject.map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
+        } catch (IllegalArgumentException e) {
+            Map<String, String> error = new HashMap<>();
+            error.put("error", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        } catch (Exception e) {
+            String errorMessage = e.getMessage();
+            // Detectar error de duplicado de MongoDB
+            if (errorMessage != null && errorMessage.contains("non unique result")) {
+                Map<String, String> error = new HashMap<>();
+                error.put("error", "No se puede actualizar el proyecto. El código del proyecto o el nombre ya existen en la base de datos.");
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+            }
+            Map<String, String> error = new HashMap<>();
+            error.put("error", "Error al actualizar el proyecto: " + errorMessage);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
     }
 
     /**

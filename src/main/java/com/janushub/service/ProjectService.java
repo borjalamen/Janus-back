@@ -50,11 +50,18 @@ public class ProjectService {
  
     /**
      * Crear nuevo proyecto
+     * Valida que el campo codigoProyecto no esté vacío y no sea duplicado
      */
     public Project createProject(Project project) {
-        // Generar ID automático si no existe código
-        if (project.getCodigoProyecto() == null || project.getCodigoProyecto().isEmpty()) {
-            project.setCodigoProyecto("PRJ-" + System.currentTimeMillis());
+        // Validar que codigoProyecto sea requerido y no esté vacío
+        if (project.getCodigoProyecto() == null || project.getCodigoProyecto().trim().isEmpty()) {
+            throw new IllegalArgumentException("El código del proyecto es obligatorio y no puede estar vacío");
+        }
+
+        // Validar que codigoProyecto no sea duplicado
+        Project existingProject = repository.findByCodigoProyecto(project.getCodigoProyecto()).orElse(null);
+        if (existingProject != null) {
+            throw new IllegalArgumentException("El proyecto con código '" + project.getCodigoProyecto() + "' ya está dado de alta en la base de datos");
         }
  
         // Generar ID interno si no existe
@@ -84,12 +91,23 @@ public class ProjectService {
  
     /**
      * Actualizar proyecto
+     * Valida que si se cambia el codigoProyecto, no sea duplicado
      */
     public Optional<Project> updateProject(String id, Project details) {
         Optional<Project> projectOpt = repository.findById(id);
        
         if (projectOpt.isPresent()) {
             Project existing = projectOpt.get();
+           
+            // Validar que si se cambia el codigoProyecto, no sea duplicado
+            if (details.getCodigoProyecto() != null && 
+                !details.getCodigoProyecto().isEmpty() && 
+                !details.getCodigoProyecto().equals(existing.getCodigoProyecto())) {
+                Project existingWithCode = repository.findByCodigoProyecto(details.getCodigoProyecto()).orElse(null);
+                if (existingWithCode != null) {
+                    throw new IllegalArgumentException("El proyecto con código '" + details.getCodigoProyecto() + "' ya está dado de alta en la base de datos");
+                }
+            }
            
             // Actualizar todos los campos
             existing.setCodigoProyecto(details.getCodigoProyecto());
