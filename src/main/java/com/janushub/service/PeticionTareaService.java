@@ -11,8 +11,8 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class PeticionTareaService {
-    
-private final PeticionTareaRepository repository;
+
+    private final PeticionTareaRepository repository;
 
     public PeticionTarea crear(PeticionTarea p) {
         p.setId(null);
@@ -44,4 +44,19 @@ private final PeticionTareaRepository repository;
         p.setUpdatedAt(LocalDateTime.now());
         return repository.save(p);
     }
-} 
+
+    // ================== NUEVO MÉTODO PARA PDF ==================
+
+    public byte[] generarPDF(String id) {
+        PeticionTarea p = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("PeticionTarea no encontrada: " + id));
+
+        // TODO: aquí va la lógica real de generación del PDF a partir de 'p'
+        // Ejemplos de lo que podrías hacer:
+        // return pdfGenerator.generarDesdePeticionTarea(p);
+        // o usar una librería como iText/OpenPDF para construir el PDF.
+
+        // De momento lanza excepción para que sepas que falta implementarlo:
+        throw new UnsupportedOperationException("generarPDF(String id) no implementado todavía");
+    }
+}
