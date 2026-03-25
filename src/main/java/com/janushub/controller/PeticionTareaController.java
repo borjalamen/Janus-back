@@ -8,9 +8,15 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Map;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.FileSystemResource;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/peticiones-tareas")
@@ -29,12 +35,32 @@ public class PeticionTareaController {
     }
 
     // ─────────────────────────────────────────────
-    //  POST /peticiones-tareas
-    //  Crea una nova petició
+    //  POST /peticiones-tareas (amb adjunts)
+    //  Crea una nova petició + guarda noms de fitxers
     // ─────────────────────────────────────────────
-    @PostMapping
-    public ResponseEntity<PeticionTarea> crear(@RequestBody PeticionTarea peticion) {
-        PeticionTarea creada = service.crear(peticion);
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    public ResponseEntity<PeticionTarea> crear(
+            @RequestPart("requesterName") String requesterName,
+            @RequestPart("requesterEmail") String requesterEmail,
+            @RequestPart("projectName") String projectName,
+            @RequestPart("projectCode") String projectCode,
+            @RequestPart("jiraTask") String jiraTask,
+            @RequestPart(value = "comments", required = false) String comments,
+            @RequestPart("devopsAssignee") String devopsAssignee,
+            @RequestPart(value = "deadline", required = false) String deadline,
+            @RequestPart(value = "files", required = false) List<MultipartFile> files
+    ) {
+        PeticionTarea creada = service.crearConAdjuntos(
+                requesterName,
+                requesterEmail,
+                projectName,
+                projectCode,
+                jiraTask,
+                comments,
+                devopsAssignee,
+                deadline,
+                files
+        );
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);
     }
 
@@ -88,4 +114,26 @@ public class PeticionTareaController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    @GetMapping("/{id}/attachments/{filename}")
+public ResponseEntity<Resource> descargarAdjunto(
+        @PathVariable String id,
+        @PathVariable String filename) {
+
+    PeticionTarea p = service.getById(id);
+
+    if (p.getAttachments() == null || !p.getAttachments().contains(filename)) {
+        return ResponseEntity.notFound().build();
+    }
+
+    Path filePath = Paths.get("uploads/peticiones-tareas").resolve(filename);
+    if (!Files.exists(filePath)) {
+        return ResponseEntity.notFound().build();
+    }
+
+    Resource resource = new FileSystemResource(filePath.toFile());
+    return ResponseEntity.ok()
+            .contentType(MediaType.APPLICATION_OCTET_STREAM)
+            .header(HttpHeaders.CONTENT_DISPOSITION, "inline; filename=\"" + filename + "\"")
+            .body(resource);
+}
 }
