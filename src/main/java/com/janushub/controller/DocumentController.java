@@ -10,8 +10,11 @@ import java.net.URLEncoder;
 import java.nio.file.*;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Stream;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════════
@@ -67,32 +70,66 @@ public class DocumentController {
      * o en el directorio actual. Si no existe, la crea en la raíz del proyecto.
      */
     private String findVolumenPath() {
-        // 1. Buscar en la ruta de ejecución (user.dir)
         String userDir = System.getProperty("user.dir");
-        Path volumenPath = Paths.get(userDir, "volumenDocumentos");
-        if (Files.exists(volumenPath) && Files.isDirectory(volumenPath)) {
-            return volumenPath.toString();
-        }
+        String overridePath = System.getenv("JANUS_VOLUMEN_PATH");
 
-        // 2. Buscar en directorios padres (hasta 3 niveles)
-        Path currentPath = Paths.get(userDir);
-        for (int i = 0; i < 3; i++) {
-            volumenPath = currentPath.resolve("volumenDocumentos");
-            if (Files.exists(volumenPath) && Files.isDirectory(volumenPath)) {
-                return volumenPath.toString();
+        if (overridePath != null && !overridePath.trim().isEmpty()) {
+            Path custom = Paths.get(overridePath.trim()).toAbsolutePath().normalize();
+            try {
+                Files.createDirectories(custom);
+                return custom.toString();
+            } catch (IOException e) {
+                System.err.println("No se pudo usar JANUS_VOLUMEN_PATH=" + custom + ": " + e.getMessage());
             }
-            currentPath = currentPath.getParent();
-            if (currentPath == null) break;
         }
 
-        // 3. Si no existe, crearla en el directorio actual
-        volumenPath = Paths.get(userDir, "volumenDocumentos");
-        try {
-            Files.createDirectories(volumenPath);
-        } catch (IOException e) {
-            System.err.println("No se pudo crear volumenDocumentos: " + e.getMessage());
+        Path base = Paths.get(userDir).toAbsolutePath().normalize();
+        List<Path> rawCandidates = new ArrayList<>();
+        rawCandidates.add(base.resolve("volumenDocumentos"));
+        rawCandidates.add(base.resolve("Janus-back").resolve("volumenDocumentos"));
+
+        Path currentPath = base;
+        for (int i = 0; i < 4 && currentPath != null; i++) {
+            rawCandidates.add(currentPath.resolve("volumenDocumentos"));
+            rawCandidates.add(currentPath.resolve("Janus-back").resolve("volumenDocumentos"));
+            currentPath = currentPath.getParent();
         }
-        return volumenPath.toString();
+
+        Set<Path> candidates = new LinkedHashSet<>();
+        for (Path candidate : rawCandidates) {
+            candidates.add(candidate.normalize());
+        }
+
+        Path firstExisting = null;
+        Path nonEmpty = null;
+
+        for (Path candidate : candidates) {
+            if (Files.exists(candidate) && Files.isDirectory(candidate)) {
+                if (firstExisting == null) {
+                    firstExisting = candidate;
+                }
+                try (Stream<Path> entries = Files.list(candidate)) {
+                    if (entries.findAny().isPresent()) {
+                        nonEmpty = candidate;
+                        break;
+                    }
+                } catch (IOException ignored) {
+                    // If folder cannot be listed, keep evaluating other candidates.
+                }
+            }
+        }
+
+        Path selected = nonEmpty != null ? nonEmpty : firstExisting;
+        if (selected == null) {
+            selected = base.resolve("volumenDocumentos");
+            try {
+                Files.createDirectories(selected);
+            } catch (IOException e) {
+                System.err.println("No se pudo crear volumenDocumentos: " + e.getMessage());
+            }
+        }
+
+        return selected.toString();
     }
 
     // ----------------- UPLOAD -----------------

@@ -119,6 +119,11 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <environmentVariables>
+                        <JANUS_VOLUMEN_PATH>${project.basedir}/volumenDocumentos</JANUS_VOLUMEN_PATH>
+                    </environmentVariables>
+                </configuration>
             </plugin>
         </plugins>
     </build>
