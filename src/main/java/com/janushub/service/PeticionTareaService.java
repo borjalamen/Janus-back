@@ -24,7 +24,7 @@ public class PeticionTareaService {
     // Mètode antic (JSON) — el pots deixar sense usar o eliminar si vols
     public PeticionTarea crear(PeticionTarea p) {
         p.setId(null);
-        p.setEstado("PENDIENTE");
+        p.setEstado("INICIADA");
         p.setCreatedAt(LocalDateTime.now());
         p.setUpdatedAt(LocalDateTime.now());
         p.setAdminComment(null);
@@ -93,7 +93,7 @@ public class PeticionTareaService {
     p.setAttachments(List.of());
 }
 
-        p.setEstado("PENDIENTE");
+        p.setEstado("INICIADA");
         p.setCreatedAt(LocalDateTime.now());
         p.setUpdatedAt(LocalDateTime.now());
         p.setAdminComment(null);
