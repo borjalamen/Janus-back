@@ -48,6 +48,7 @@ public class PeticionTareaController {
             @RequestPart(value = "comments", required = false) String comments,
             @RequestPart("devopsAssignee") String devopsAssignee,
             @RequestPart(value = "deadline", required = false) String deadline,
+            @RequestPart(value = "deadlineTime", required = false) String deadlineTime,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
     ) {
         PeticionTarea creada = service.crearConAdjuntos(
@@ -59,6 +60,7 @@ public class PeticionTareaController {
                 comments,
                 devopsAssignee,
                 deadline,
+                deadlineTime,
                 files
         );
         return ResponseEntity.status(HttpStatus.CREATED).body(creada);

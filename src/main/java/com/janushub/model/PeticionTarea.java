@@ -30,5 +30,6 @@ public class PeticionTarea {
     private String estado; // PENDIENTE | APROBADA | RECHAZADA
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private String deadlineTime;
     private String adminComment;
 } 

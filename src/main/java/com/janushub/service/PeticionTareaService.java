@@ -41,7 +41,9 @@ public class PeticionTareaService {
             String comments,
             String devopsAssignee,
             String deadlineIso,
+            String deadlineTime,
             List<MultipartFile> files
+            
     ) {
         PeticionTarea p = new PeticionTarea();
 
@@ -64,6 +66,7 @@ public class PeticionTareaService {
         } else {
             p.setDeadline(null);
         }
+        p.setDeadlineTime(deadlineTime);
 
         if (files != null && !files.isEmpty()) {
     try {
