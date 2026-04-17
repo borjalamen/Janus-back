@@ -20,7 +20,11 @@ public class WebConfig implements WebMvcConfigurer {
                         "http://127.0.0.1:*",
                         "http://[::1]:*",
                         "http://*.local",
-                        "https://*.gencat.cat"
+                        "https://*.gencat.cat",
+                        "http://*.gencat.cat",
+                        "https://*.gencat.intranet",
+                        "http://*.gencat.intranet",
+                        "*" 
                 )
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH")
                 .allowedHeaders("*")
