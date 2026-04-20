@@ -20,6 +20,7 @@ import java.io.IOException;
 public class PeticionTareaService {
 
     private final PeticionTareaRepository repository;
+    private final EmailNotificationService emailNotificationService;
 
     // Mètode antic (JSON) — el pots deixar sense usar o eliminar si vols
     public PeticionTarea crear(PeticionTarea p) {
@@ -28,7 +29,9 @@ public class PeticionTareaService {
         p.setCreatedAt(LocalDateTime.now());
         p.setUpdatedAt(LocalDateTime.now());
         p.setAdminComment(null);
-        return repository.save(p);
+        PeticionTarea saved = repository.save(p);
+        emailNotificationService.sendTaskRequestSubmitted(saved, false);
+        return saved;
     }
 
     // Nou mètode per crear peticions amb adjunts (FormData)
@@ -114,7 +117,9 @@ public class PeticionTareaService {
         p.setEstado("APROBADA");
         p.setAdminComment(adminComment);
         p.setUpdatedAt(LocalDateTime.now());
-        return repository.save(p);
+        PeticionTarea updated = repository.save(p);
+        emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        return updated;
     }
 
     public PeticionTarea reject(String id, String adminComment) {
@@ -123,7 +128,15 @@ public class PeticionTareaService {
         p.setEstado("RECHAZADA");
         p.setAdminComment(adminComment);
         p.setUpdatedAt(LocalDateTime.now());
-        return repository.save(p);
+        PeticionTarea updated = repository.save(p);
+        emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        return updated;
+    }
+
+    public void resendConfirmation(String id) {
+        PeticionTarea p = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("PeticionTarea no encontrada: " + id));
+        emailNotificationService.sendTaskRequestSubmitted(p, true);
     }
 
     // ================== NUEVO MÉTODO PARA PDF ==================

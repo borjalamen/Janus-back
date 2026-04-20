@@ -21,6 +21,7 @@ public class UneteService {
     private final UneteRepository uneteRepository;
     private final UserRepository userRepository;
     private final UserService userService;
+    private final EmailNotificationService emailNotificationService;
 
     /**
      * Registra una nueva peticion de "unete" con estado PENDIENTE.
@@ -50,7 +51,9 @@ public class UneteService {
         request.setEstado("PENDIENTE");
         request.setCreatedAt(LocalDateTime.now());
         request.setUpdatedAt(LocalDateTime.now());
-        return uneteRepository.save(request);
+        Unete saved = uneteRepository.save(request);
+        emailNotificationService.sendJoinRequestSubmitted(saved);
+        return saved;
     }
 
     /**
@@ -124,6 +127,8 @@ public class UneteService {
         request.setUpdatedAt(LocalDateTime.now());
         Unete updatedRequest = uneteRepository.save(request);
 
+        emailNotificationService.sendJoinRequestApproved(updatedRequest, username, autoPassword);
+
         ApprovalResponseDTO.UserCredentials credentials =
                 new ApprovalResponseDTO.UserCredentials(username, autoPassword, request.getEmail());
 
@@ -134,7 +139,9 @@ public class UneteService {
      * Rechaza una peticion.
      */
     public Unete rejectRequest(String id, String adminComment) {
-        return updateEstado(id, "RECHAZADA", adminComment);
+        Unete updated = updateEstado(id, "RECHAZADA", adminComment);
+        emailNotificationService.sendJoinRequestRejected(updated);
+        return updated;
     }
 
     /**

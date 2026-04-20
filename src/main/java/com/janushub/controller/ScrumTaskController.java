@@ -65,13 +65,11 @@ public class ScrumTaskController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<Void> delete(@PathVariable String id) {
-        return repository.findById(id)
-                .map(existing -> {
-                    existing.setVisible(false);
-                    existing.setUpdatedAt(Instant.now().toString());
-                    repository.save(existing);
-                    return ResponseEntity.noContent().<Void>build();
-                })
-                .orElse(ResponseEntity.notFound().build());
+        if (!repository.existsById(id)) {
+            return ResponseEntity.notFound().build();
+        }
+
+        repository.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 }

@@ -94,6 +94,16 @@ public class PeticionTareaController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/{id}/resend-confirmation")
+    public ResponseEntity<?> resendConfirmation(@PathVariable String id) {
+        try {
+            service.resendConfirmation(id);
+            return ResponseEntity.ok(Map.of("message", "Correo de confirmación reenviado"));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
     // ─────────────────────────────────────────────
     //  GET /peticiones-tareas/{id}/pdf
     //  Genera i retorna el PDF de la petició

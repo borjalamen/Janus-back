@@ -38,6 +38,11 @@ public class AuthController {
             return ResponseEntity.status(401).body("Error: Credenciales inválidas (demo).");
         }
 
+        String status = user.getStatus() != null ? user.getStatus().toUpperCase() : "ACTIVE";
+        if ("INACTIVE".equals(status) || "DISABLED".equals(status)) {
+            return ResponseEntity.status(403).body("Error: Usuario inhabilitado.");
+        }
+
         // ¡ÉXITO!
         Map<String, Object> response = new HashMap<>();
         response.put("username", user.getUsername());

@@ -7,6 +7,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 import java.util.List;
 
@@ -73,8 +74,10 @@ public class UserController {
     public ResponseEntity<?> deleteUser(@PathVariable String id) {
         return repository.findById(id)
                 .map(users -> {
-                    repository.delete(users);
-                    return ResponseEntity.ok().build();
+                    users.setStatus("INACTIVE");
+                    users.setUpdatedAt(LocalDateTime.now());
+                    Users updatedUser = repository.save(users);
+                    return ResponseEntity.ok(updatedUser);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -89,7 +92,8 @@ public class UserController {
                     String newStatus = statusMap.get("status");
                     
                     if (newStatus != null && !newStatus.isEmpty()) {
-                        users.setStatus(newStatus);
+                        users.setStatus(newStatus.toUpperCase());
+                        users.setUpdatedAt(LocalDateTime.now());
                         
                     }
                     
