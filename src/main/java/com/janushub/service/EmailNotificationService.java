@@ -118,7 +118,7 @@ public class EmailNotificationService {
                 "- JIRA: " + safeOrDefault(task.getJiraTask(), "No informado"),
                 "- Asignación: " + safeOrDefault(task.getDevopsAssignee(), "Cualquiera"),
                 "- Fecha límite: " + formatDate(task.getDeadline()),
-                "- Estado: " + safeOrDefault(task.getEstado(), "INICIADA"),
+                "- Estado: " + safeOrDefault(task.getEstado(), "PENDIENTE"),
                 "",
                 "Te notificaremos por correo cuando cambie el estado.",
                 "",
@@ -133,7 +133,7 @@ public class EmailNotificationService {
             return false;
         }
 
-        String status = safeOrDefault(task.getEstado(), "INICIADA").toUpperCase();
+        String status = safeOrDefault(task.getEstado(), "PENDIENTE").toUpperCase();
         String subject = "[JanusHub] Petición DevOps " + status;
         String body = String.join("\n",
                 "Hola " + safe(task.getRequesterName()) + ",",

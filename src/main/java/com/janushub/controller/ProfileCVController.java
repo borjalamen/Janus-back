@@ -5,9 +5,14 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Locale;
+import java.util.stream.Stream;
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -30,8 +35,58 @@ public class ProfileCVController {
 
     private final UserService userService;
 
-    // Carpeta base on es guardaran els CVs
-    private final String uploadRoot = "C:/Users/USUARIO/Documents/GitHub/Janus-back/uploads";
+    @Value("${upload.root:uploads}")
+    private String uploadRoot;
+
+    private static final List<String> CV_EXTENSIONS = List.of(".pdf", ".doc", ".docx");
+
+    private Path resolveUserDir(String username) {
+        if (username == null || username.isBlank()) {
+            throw new IllegalArgumentException("El parámetro 'username' es obligatorio");
+        }
+
+        Path baseDir = Paths.get(uploadRoot).toAbsolutePath().normalize();
+        Path userDir = baseDir.resolve(username.trim()).normalize();
+
+        if (!userDir.startsWith(baseDir)) {
+            throw new IllegalArgumentException("Username inválido");
+        }
+
+        return userDir;
+    }
+
+    private Path resolveCvPath(Path userDir) throws IOException {
+        for (String ext : CV_EXTENSIONS) {
+            Path candidate = userDir.resolve("cv" + ext);
+            if (Files.exists(candidate) && Files.isRegularFile(candidate)) {
+                return candidate;
+            }
+        }
+
+        if (!Files.exists(userDir) || !Files.isDirectory(userDir)) {
+            return null;
+        }
+
+        try (Stream<Path> files = Files.list(userDir)) {
+            return files
+                    .filter(Files::isRegularFile)
+                    .filter(path -> {
+                        String name = path.getFileName().toString().toLowerCase(Locale.ROOT);
+                        return name.startsWith("cv.")
+                                && (name.endsWith(".pdf") || name.endsWith(".doc") || name.endsWith(".docx"));
+                    })
+                    .findFirst()
+                    .orElse(null);
+        }
+    }
+
+    private String resolveContentType(Path path) throws IOException {
+        String contentType = Files.probeContentType(path);
+        if (contentType == null || contentType.isBlank()) {
+            return MediaType.APPLICATION_OCTET_STREAM_VALUE;
+        }
+        return contentType;
+    }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ResponseEntity<?> uploadCv(
@@ -53,30 +108,24 @@ public class ProfileCVController {
         }
 
         try {
-            // 1) esborrar CV antic si existeix
-            String oldCvPath = userService.getCvPath(username);
-            if (oldCvPath != null && !oldCvPath.isBlank()) {
-                Files.deleteIfExists(Paths.get(oldCvPath));
-            }
-
-            // 2) carpeta de l'usuari dins de uploads
-            Path userDir = Paths.get(uploadRoot, username); // .../uploads/{username}
+            Path userDir = resolveUserDir(username);
             Files.createDirectories(userDir);
 
-            // 3) extensió
+            Path oldCvPath = resolveCvPath(userDir);
+            if (oldCvPath != null) {
+                Files.deleteIfExists(oldCvPath);
+            }
+
             String extension =
                     contentType.equals(MediaType.APPLICATION_PDF_VALUE) ? ".pdf" :
                     contentType.equals("application/msword") ? ".doc" : ".docx";
 
-            // 4) nom fix
-            String fileName = "cv" + extension;               // cv.pdf / cv.doc / cv.docx
-            Path filePath = userDir.resolve(fileName);        // .../uploads/{username}/cv.pdf
+            String fileName = "cv" + extension;
+            Path filePath = userDir.resolve(fileName);
 
-            // 5) guardar nou CV
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Al servei guardem el path absolut (com ja feies)
-            userService.updateCv(username, filePath.toString());
+            userService.updateCv(username.trim(), filePath.toString());
 
             return ResponseEntity.ok("CV guardado correctamente");
         } catch (IOException e) {
@@ -87,33 +136,34 @@ public class ProfileCVController {
 
     @GetMapping
     public ResponseEntity<Resource> getCv(@RequestParam String username) throws IOException {
-        String cvPath = userService.getCvPath(username);
+        Path userDir = resolveUserDir(username);
+        Path path = resolveCvPath(userDir);
 
-        if (cvPath == null) {
-            return ResponseEntity.notFound().build();
-        }
-
-        Path path = Paths.get(cvPath);
-
-        if (!Files.exists(path)) {
+        if (path == null) {
             return ResponseEntity.notFound().build();
         }
 
         Resource resource = new UrlResource(path.toUri());
-        String contentType = Files.probeContentType(path);
+        String contentType = resolveContentType(path);
 
         return ResponseEntity.ok()
+                .header(HttpHeaders.CONTENT_DISPOSITION,
+                        "attachment; filename=\"" + path.getFileName().toString() + "\"")
                 .contentType(MediaType.parseMediaType(contentType))
                 .body(resource);
     }
 
     @DeleteMapping
     public ResponseEntity<?> deleteCv(@RequestParam String username) throws IOException {
-        String cvPath = userService.getCvPath(username);
+        Path userDir = resolveUserDir(username);
+        Path cvPath = resolveCvPath(userDir);
 
         if (cvPath != null) {
-            Files.deleteIfExists(Paths.get(cvPath));
-            userService.removeCv(username);
+            Files.deleteIfExists(cvPath);
+        }
+
+        if (userService.existsByUsername(username.trim())) {
+            userService.removeCv(username.trim());
         }
 
         return ResponseEntity.ok("CV eliminado correctamente");

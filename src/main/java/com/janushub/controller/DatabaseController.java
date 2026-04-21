@@ -4,9 +4,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
+import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.bson.Document;
+import com.mongodb.client.result.UpdateResult;
 
 import java.io.*;
 import java.nio.file.Files;
@@ -59,7 +61,7 @@ public class DatabaseController {
     }
 
     // =============================================================
-    //           SECCIÓN: BORRADO FÍSICO
+    //           SECCIÓN: BORRADO (LÓGICO / FÍSICO)
     // =============================================================
 
     /**
@@ -558,6 +560,91 @@ try {
             return ResponseEntity.internalServerError()
                 .body(Map.of("error", "Error al restaurar: " + e.getMessage()));
         }
+    }
+
+    /**
+     * Resuelve alias funcionales de tipo a nombre real de colección en MongoDB.
+     */
+    private String resolverNombreColeccion(String tipo) {
+        if (tipo == null) return "";
+
+        Map<String, String> tipoToColeccion = Map.of(
+            "usuarios", "users",
+            "documentos", "documents",
+            "logs", "logbook",
+            "formaciones", "formations",
+            "procedimientos", "procedures",
+            "proyectos", "projects",
+            "planificacion", "planning",
+            "infraestructura", "infraestructura",
+            "jenkins", "jenkins",
+            "multimedia", "media_videos"
+        );
+
+        return tipoToColeccion.getOrDefault(tipo.toLowerCase(), tipo);
+    }
+
+    /**
+     * Construye la operación de borrado lógico estándar para documentos.
+     */
+    private Update crearUpdateBorradoLogico() {
+        LocalDateTime now = LocalDateTime.now();
+        return new Update()
+            .set("visible", false)
+            .set("activo", false)
+            .set("active", false)
+            .set("deleted", true)
+            .set("status", "INACTIVE")
+            .set("updatedAt", now)
+            .set("deletedAt", now);
+    }
+
+    /**
+     * POST /api/db/borrado-logico
+     * Body: {tipos: [string]} - ej: ["usuarios", "documentos", "logs"]
+     * Aplica borrado lógico por tipos de colección.
+     */
+    @PostMapping("/borrado-logico")
+    public ResponseEntity<?> borradoLogico(@RequestBody Map<String, List<String>> body) {
+        List<String> tipos = body.get("tipos");
+        if (tipos == null || tipos.isEmpty()) {
+            return ResponseEntity.badRequest()
+                .body(Map.of("error", "Debe proporcionar una lista de 'tipos'"));
+        }
+
+        Set<String> collectionNames = mongoTemplate.getCollectionNames();
+        List<Map<String, Object>> coleccionesAfectadas = new ArrayList<>();
+        List<String> noEncontrados = new ArrayList<>();
+        long totalAfectados = 0;
+
+        for (String tipo : tipos) {
+            String colName = resolverNombreColeccion(tipo);
+            if (collectionNames.contains(colName)) {
+                UpdateResult result = mongoTemplate.updateMulti(
+                    new Query(),
+                    crearUpdateBorradoLogico(),
+                    colName
+                );
+                long afectados = result.getMatchedCount();
+                totalAfectados += afectados;
+                coleccionesAfectadas.add(Map.of(
+                    "coleccion", colName,
+                    "afectados", afectados
+                ));
+            } else {
+                noEncontrados.add(tipo);
+            }
+        }
+
+        Map<String, Object> response = new LinkedHashMap<>();
+        response.put("mensaje", "Borrado lógico completado");
+        response.put("totalAfectados", totalAfectados);
+        response.put("coleccionesAfectadas", coleccionesAfectadas);
+        if (!noEncontrados.isEmpty()) {
+            response.put("noEncontrados", noEncontrados);
+        }
+
+        return ResponseEntity.ok(response);
     }
 
     /**

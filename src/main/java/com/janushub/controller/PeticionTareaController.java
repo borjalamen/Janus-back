@@ -94,6 +94,34 @@ public class PeticionTareaController {
         return ResponseEntity.ok(updated);
     }
 
+    @PutMapping("/{id}/start")
+    public ResponseEntity<?> start(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, String> body) {
+
+        try {
+            String adminComment = (body != null) ? body.getOrDefault("adminComment", "") : "";
+            PeticionTarea updated = service.start(id, adminComment);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
+    @PutMapping("/{id}/finish")
+    public ResponseEntity<?> finish(
+            @PathVariable String id,
+            @RequestBody(required = false) Map<String, String> body) {
+
+        try {
+            String adminComment = (body != null) ? body.getOrDefault("adminComment", "") : "";
+            PeticionTarea updated = service.finish(id, adminComment);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException | IllegalStateException e) {
+            return ResponseEntity.badRequest().body(Map.of("message", e.getMessage()));
+        }
+    }
+
     @PutMapping("/{id}/resend-confirmation")
     public ResponseEntity<?> resendConfirmation(@PathVariable String id) {
         try {

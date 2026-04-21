@@ -25,7 +25,7 @@ public class PeticionTareaService {
     // Mètode antic (JSON) — el pots deixar sense usar o eliminar si vols
     public PeticionTarea crear(PeticionTarea p) {
         p.setId(null);
-        p.setEstado("INICIADA");
+        p.setEstado("PENDIENTE");
         p.setCreatedAt(LocalDateTime.now());
         p.setUpdatedAt(LocalDateTime.now());
         p.setAdminComment(null);
@@ -99,12 +99,14 @@ public class PeticionTareaService {
     p.setAttachments(List.of());
 }
 
-        p.setEstado("INICIADA");
+        p.setEstado("PENDIENTE");
         p.setCreatedAt(LocalDateTime.now());
         p.setUpdatedAt(LocalDateTime.now());
         p.setAdminComment(null);
 
-        return repository.save(p);
+        PeticionTarea saved = repository.save(p);
+        emailNotificationService.sendTaskRequestSubmitted(saved, false);
+        return saved;
     }
 
     public List<PeticionTarea> getAll() {
@@ -128,6 +130,46 @@ public class PeticionTareaService {
         p.setEstado("RECHAZADA");
         p.setAdminComment(adminComment);
         p.setUpdatedAt(LocalDateTime.now());
+        PeticionTarea updated = repository.save(p);
+        emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        return updated;
+    }
+
+    public PeticionTarea start(String id, String adminComment) {
+        PeticionTarea p = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("PeticionTarea no encontrada: " + id));
+
+        String estadoActual = String.valueOf(p.getEstado()).toUpperCase().trim();
+        if (!"APROBADA".equals(estadoActual)) {
+            throw new IllegalStateException("Solo se puede iniciar una petición en estado APROBADA.");
+        }
+
+        p.setEstado("INICIADA");
+        if (adminComment != null && !adminComment.isBlank()) {
+            p.setAdminComment(adminComment);
+        }
+        p.setUpdatedAt(LocalDateTime.now());
+
+        PeticionTarea updated = repository.save(p);
+        emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        return updated;
+    }
+
+    public PeticionTarea finish(String id, String adminComment) {
+        PeticionTarea p = repository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("PeticionTarea no encontrada: " + id));
+
+        String estadoActual = String.valueOf(p.getEstado()).toUpperCase().trim();
+        if (!"INICIADA".equals(estadoActual)) {
+            throw new IllegalStateException("Solo se puede finalizar una petición en estado INICIADA.");
+        }
+
+        p.setEstado("FINALIZADA");
+        if (adminComment != null && !adminComment.isBlank()) {
+            p.setAdminComment(adminComment);
+        }
+        p.setUpdatedAt(LocalDateTime.now());
+
         PeticionTarea updated = repository.save(p);
         emailNotificationService.sendTaskRequestStatusUpdate(updated);
         return updated;
