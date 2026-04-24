@@ -3,7 +3,9 @@ package com.janushub.websocket;
 import lombok.Data;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Data
 public class LiveSessionState {
@@ -48,12 +50,21 @@ public class LiveSessionState {
     public static class AcceptedTask {
         private String task;
         private double result;
+        /** userId → vote value for each participant */
+        private Map<String, Double> votes = new HashMap<>();
+        /** userId → display name */
+        private Map<String, String> voterNames = new HashMap<>();
 
         public AcceptedTask() {}
 
-        public AcceptedTask(String task, double result) {
+        public AcceptedTask(String task, double result,
+                            Map<String, Double> votes,
+                            Map<String, String> voterNames) {
             this.task = task;
             this.result = result;
+            this.votes = votes != null ? votes : new HashMap<>();
+            this.voterNames = voterNames != null ? voterNames : new HashMap<>();
         }
     }
 }
+

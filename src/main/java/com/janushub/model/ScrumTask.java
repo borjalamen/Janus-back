@@ -32,6 +32,9 @@ public class ScrumTask {
     private String updatedAt;
     private Boolean visible = true;
 
+    /** ID del sprint al que pertenece esta tarea (null = sin sprint) */
+    private String sprintId;
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor

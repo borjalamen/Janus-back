@@ -222,8 +222,18 @@ public class LiveEstimationWsHandler extends TextWebSocketHandler {
             return;
         }
 
+        // Capture each participant's individual vote before clearing
+        java.util.Map<String, Double> votes = new java.util.HashMap<>();
+        java.util.Map<String, String> voterNames = new java.util.HashMap<>();
+        for (LiveSessionState.ParticipantState p : state.getParticipants()) {
+            if (p.getVote() != null) {
+                votes.put(p.getId(), p.getVote());
+                voterNames.put(p.getId(), p.getName());
+            }
+        }
+
         state.getAcceptedTasks().add(
-                new LiveSessionState.AcceptedTask(state.getCurrentTask(), result));
+                new LiveSessionState.AcceptedTask(state.getCurrentTask(), result, votes, voterNames));
         state.setCurrentTask(null);
         state.setVotingStart(null);
         state.setPhase("LOBBY");

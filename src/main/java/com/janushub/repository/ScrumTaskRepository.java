@@ -9,4 +9,6 @@ import java.util.List;
 @Repository
 public interface ScrumTaskRepository extends MongoRepository<ScrumTask, String> {
     List<ScrumTask> findByVisibleTrue();
+    List<ScrumTask> findBySprintIdAndVisibleTrue(String sprintId);
+    List<ScrumTask> findBySprintIdIsNullAndVisibleTrue();
 }
