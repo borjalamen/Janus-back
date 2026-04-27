@@ -5,7 +5,10 @@ import com.janushub.repository.FormacionRepository;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * ═══════════════════════════════════════════════════════════════════════════════════
@@ -435,6 +438,51 @@ public class FormacionController {
         }
         repository.saveAll(all);
         return ResponseEntity.ok("Deleted (logical) " + all.size() + " formations");
+    }
+
+    // ═══════════════════════════════════════════════════════════════════════════════
+    // ENDPOINT: IMPORTAR FORMACIONES EN BULK (desde Excel/frontend)
+    // POST /api/formacion/import
+    // Body: [ { name, link, description, tags, location }, ... ]
+    // Response: { imported: N, skipped: N, errors: [ ... ] }
+    // ═══════════════════════════════════════════════════════════════════════════════
+    @PostMapping("/import")
+    public ResponseEntity<Map<String, Object>> importFormations(@RequestBody List<Formacion> formations) {
+        String prefix = "Formacion-";
+        Formacion last = repository.findTopByIdStartingWithOrderByIdDesc(prefix);
+        int nextNumber = 1;
+        if (last != null && last.getId() != null) {
+            String lastId = last.getId().replace(prefix, "");
+            try { nextNumber = Integer.parseInt(lastId) + 1; } catch (NumberFormatException ignored) {}
+        }
+
+        int imported = 0;
+        int skipped = 0;
+        List<String> errors = new ArrayList<>();
+
+        for (Formacion f : formations) {
+            if (f.getName() == null || f.getName().isBlank()) {
+                skipped++;
+                continue;
+            }
+            try {
+                String newId = prefix + String.format("%03d", nextNumber++);
+                f.setId(newId);
+                f.setDeleted(false);
+                f.setVisible(true);
+                f.setDeletedAt(null);
+                repository.save(f);
+                imported++;
+            } catch (Exception e) {
+                errors.add("Error en fila '" + f.getName() + "': " + e.getMessage());
+            }
+        }
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("imported", imported);
+        result.put("skipped", skipped);
+        result.put("errors", errors);
+        return ResponseEntity.ok(result);
     }
 
     /**
