@@ -49,30 +49,37 @@ public class UneteController {
     @PostMapping("/api/contact/unete")
     public ResponseEntity<?> submitJoinRequest(@RequestBody UneteDTO dto) {
         try {
-            // Validaciones básicas (BAD_REQUEST - error del cliente)
             if (dto.getFullName() == null || dto.getFullName().isBlank()) {
-                return ResponseEntity.badRequest()
-                        .body("El nombre completo es obligatorio.");
+                return ResponseEntity.badRequest().body("El nombre completo es obligatorio.");
             }
             if (dto.getEmail() == null || dto.getEmail().isBlank()) {
-                return ResponseEntity.badRequest()
-                        .body("El email es obligatorio.");
+                return ResponseEntity.badRequest().body("El email es obligatorio.");
             }
-
-            // Crear la solicitud (puede fallar si email duplicado)
             Unete saved = uneteService.createRequest(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(saved);
-
         } catch (IllegalArgumentException e) {
-            // Argumentos inválidos = BAD_REQUEST (error del cliente)
-            return ResponseEntity.badRequest()
-                    .body(e.getMessage());
+            return ResponseEntity.badRequest().body(e.getMessage());
         } catch (Exception e) {
-            // Otros errores = INTERNAL_SERVER_ERROR
             System.err.println("❌ Error al registrar solicitud de unete: " + e.getMessage());
-            e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error al registrar la solicitud: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Verifica el correo electrónico usando el token enviado al usuario.
+     * GET /api/contact/verify-email?token=UUID
+     */
+    @GetMapping("/api/contact/verify-email")
+    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
+        try {
+            Unete verified = uneteService.verifyEmail(token);
+            return ResponseEntity.ok(verified);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al verificar el correo: " + e.getMessage());
         }
     }
 

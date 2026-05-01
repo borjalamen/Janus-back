@@ -151,6 +151,29 @@ public class EmailNotificationService {
         return sendEmail(task.getRequesterEmail(), subject, body);
     }
 
+    public boolean sendEmailVerification(Unete request, String verifyUrl) {
+        if (request == null) {
+            return false;
+        }
+
+        String subject = "[JanusHub] Verifica tu dirección de correo";
+        String body = String.join("\n",
+                "Hola " + safe(request.getFullName()) + ",",
+                "",
+                "Hemos recibido tu solicitud de acceso a JanusHub.",
+                "Para completarla, verifica tu dirección de correo haciendo clic en el siguiente enlace:",
+                "",
+                verifyUrl,
+                "",
+                "Este enlace es válido durante 48 horas.",
+                "Si no solicitaste acceso, puedes ignorar este mensaje.",
+                "",
+                "Equipo JanusHub"
+        );
+
+        return sendEmail(request.getEmail(), subject, body);
+    }
+
     private boolean sendEmail(String to, String subject, String body) {
         if (to == null || to.isBlank()) {
             LOGGER.warn("No se envía email porque el destinatario está vacío. Asunto: {}", subject);

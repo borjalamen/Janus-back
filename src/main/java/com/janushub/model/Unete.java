@@ -31,9 +31,13 @@ public class Unete {
     private String comments;
 
     // Metadatos de gestión
-    private String estado;        // PENDIENTE, APROBADA, RECHAZADA
+    private String estado;        // INICIADA, PENDIENTE, APROBADA, RECHAZADA
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+
+    // Verificación de correo electrónico
+    private String emailToken;            // UUID generado al crear la solicitud
+    private LocalDateTime emailVerifiedAt; // Momento en que el usuario verificó el correo
 
     // Comentario del administrador al aprobar/rechazar (opcional)
     private String adminComment;
