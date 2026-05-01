@@ -26,8 +26,11 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.janushub.model.Herramienta;
+import com.janushub.model.Infraestructura;
+import com.janushub.model.Procedure;
 import com.janushub.model.Project;
 import com.janushub.repository.HerramientaRepository;
+import com.janushub.repository.InfraestructuraRepository;
 import com.janushub.repository.ProceduresRepository;
 import com.janushub.repository.ProjectRepository;
 import com.janushub.repository.UserRepository;
@@ -83,10 +86,11 @@ public class OpenAiService {
     private final ObjectMapper mapper = new ObjectMapper();
 
     // ── Repositorios para RAG dinámico ───────────────────────────────────────
-    @Autowired private ProjectRepository    projectRepository;
-    @Autowired private HerramientaRepository herramientaRepository;
-    @Autowired private ProceduresRepository  proceduresRepository;
-    @Autowired private UserRepository        userRepository;
+    @Autowired private ProjectRepository      projectRepository;
+    @Autowired private HerramientaRepository   herramientaRepository;
+    @Autowired private ProceduresRepository    proceduresRepository;
+    @Autowired private InfraestructuraRepository infraestructuraRepository;
+    @Autowired private UserRepository          userRepository;
 
     /** Roles que tienen acceso a datos reales de la plataforma. */
     private static final Set<String> PRIVILEGED_ROLES = Set.of("admin", "devops");
@@ -338,26 +342,40 @@ public class OpenAiService {
     // ── Agente: instrucciones y ejecución de acciones ────────────────────────
 
     private static final String AGENT_INSTRUCTIONS =
-        "CAPACIDADES DE AGENTE: Tienes acceso directo a la base de datos de JanusHub y puedes ejecutar acciones reales.\n" +
-        "Cuando el usuario te pida CREAR, MODIFICAR o ELIMINAR algo, hazlo directamente con el bloque ACTION.\n\n" +
-        "--- CREAR herramienta ---\n" +
+        "CAPACIDADES DE AGENTE: Tienes acceso directo a la base de datos de JanusHub y puedes ejecutar acciones reales en: " +
+        "Herramientas, Proyectos, Procedimientos e Infraestructuras.\n" +
+        "Cuando el usuario te pida CREAR, MODIFICAR o ELIMINAR cualquiera de estos recursos, inclúyelo directamente en un bloque ACTION.\n\n" +
+
+        "=== HERRAMIENTAS ===\n" +
+        "CREATE_HERRAMIENTA: {\"action\":\"CREATE_HERRAMIENTA\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
+        "UPDATE_HERRAMIENTA: {\"action\":\"UPDATE_HERRAMIENTA\",\"id\":\"\",\"name\":\"<nombre exacto>\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
+        "DELETE_HERRAMIENTA: {\"action\":\"DELETE_HERRAMIENTA\",\"id\":\"\",\"name\":\"<nombre exacto>\"}\n\n" +
+
+        "=== PROYECTOS ===\n" +
+        "CREATE_PROYECTO: {\"action\":\"CREATE_PROYECTO\",\"codigoProyecto\":\"PRJ-XXX\",\"nombre\":\"...\",\"departamento\":\"...\",\"lote\":\"...\",\"responsableProyecto\":\"...\",\"responsableTecnico\":\"...\"}\n" +
+        "UPDATE_PROYECTO: {\"action\":\"UPDATE_PROYECTO\",\"id\":\"\",\"codigoProyecto\":\"<código exacto si no tienes id>\",\"nombre\":\"...\",\"departamento\":\"...\",\"responsableProyecto\":\"...\",\"responsableTecnico\":\"...\"}\n" +
+        "DELETE_PROYECTO: {\"action\":\"DELETE_PROYECTO\",\"id\":\"\",\"codigoProyecto\":\"<código exacto si no tienes id>\"}\n\n" +
+
+        "=== PROCEDIMIENTOS ===\n" +
+        "CREATE_PROCEDIMIENTO: {\"action\":\"CREATE_PROCEDIMIENTO\",\"titulo\":\"...\",\"descripcion\":\"...\",\"departamento\":\"...\",\"tags\":[\"...\"]}\n" +
+        "UPDATE_PROCEDIMIENTO: {\"action\":\"UPDATE_PROCEDIMIENTO\",\"id\":\"\",\"titulo\":\"<título exacto si no tienes id>\",\"descripcion\":\"...\",\"departamento\":\"...\",\"tags\":[\"...\"]}\n" +
+        "DELETE_PROCEDIMIENTO: {\"action\":\"DELETE_PROCEDIMIENTO\",\"id\":\"\",\"titulo\":\"<título exacto si no tienes id>\"}\n\n" +
+
+        "=== INFRAESTRUCTURA ===\n" +
+        "CREATE_INFRA: {\"action\":\"CREATE_INFRA\",\"ip\":\"...\",\"host\":\"...\",\"so\":\"...\",\"estado\":\"activo\",\"cpu\":\"...\",\"ram\":\"...\",\"capacidad\":\"...\",\"cpd\":\"...\",\"tags\":[\"...\"]}\n" +
+        "UPDATE_INFRA: {\"action\":\"UPDATE_INFRA\",\"id\":\"\",\"ip\":\"<IP exacta si no tienes id>\",\"host\":\"...\",\"so\":\"...\",\"estado\":\"...\",\"cpu\":\"...\",\"ram\":\"...\",\"capacidad\":\"...\",\"tags\":[\"...\"]}\n" +
+        "DELETE_INFRA: {\"action\":\"DELETE_INFRA\",\"id\":\"\",\"ip\":\"<IP exacta si no tienes id>\"}\n\n" +
+
+        "REGLAS GLOBALES:\n" +
+        "1) Incluye el bloque ACTION solo cuando el usuario haya pedido EXPLÍCITAMENTE crear/modificar/eliminar.\n" +
+        "2) Para UPDATE/DELETE: usa id si lo conoces; si no, usa el campo identificador (name, codigoProyecto, titulo o ip) con el valor EXACTO.\n" +
+        "3) NUNCA escribas literales como '<id>' o '<nombre>' — si no tienes el dato, usa cadena vacía y rellena el campo identificador.\n" +
+        "4) Tags siempre en inglés y en minúsculas.\n" +
+        "5) Pon el bloque ACTION AL FINAL de tu respuesta, sin explicarlo.\n" +
+        "6) Formato del bloque, siempre así:\n" +
         "<<<ACTION>>>\n" +
-        "{\"action\":\"CREATE_HERRAMIENTA\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
-        "<<<END_ACTION>>>\n\n" +
-        "--- MODIFICAR herramienta (usa el id que conoces; si no lo tienes, usa el campo \"name\" con el nombre exacto) ---\n" +
-        "<<<ACTION>>>\n" +
-        "{\"action\":\"UPDATE_HERRAMIENTA\",\"id\":\"<id MongoDB o vacío>\",\"name\":\"<nombre exacto si no tienes id>\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
-        "<<<END_ACTION>>>\n\n" +
-        "--- ELIMINAR herramienta ---\n" +
-        "<<<ACTION>>>\n" +
-        "{\"action\":\"DELETE_HERRAMIENTA\",\"id\":\"<id MongoDB o vacío>\",\"name\":\"<nombre exacto si no tienes id>\"}\n" +
-        "<<<END_ACTION>>>\n\n" +
-        "Reglas: " +
-        "1) Solo incluye el bloque cuando el usuario haya pedido EXPLÍCITAMENTE crear/modificar/eliminar. " +
-        "2) Para UPDATE y DELETE usa el id si lo sabes; si no, usa el campo name con el nombre EXACTO tal como aparece en el listado. " +
-        "3) Nunca pongas literales como '<ID de la herramienta>' — si no sabes el id, deja id vacío y rellena name. " +
-        "4) Tags deben ser términos técnicos en inglés (ej: [\"build\",\"java\",\"dependencies\",\"devops\"]). " +
-        "5) Incluye SIEMPRE el bloque aunque ya hayas explicado los pasos.";
+        "{...json...}\n" +
+        "<<<END_ACTION>>>";
 
     private static final Pattern ACTION_PATTERN =
         Pattern.compile("<<<ACTION>>>\\s*(\\{.*?\\})\\s*<<<END_ACTION>>>", Pattern.DOTALL);
@@ -383,9 +401,22 @@ public class OpenAiService {
             String action = (String) actionMap.get("action");
 
             actionResult = switch (action) {
-                case "CREATE_HERRAMIENTA" -> createHerramientaFromJson(actionMap);
+                // ── Herramientas ──────────────────────────────────────────────
+                case "CREATE_HERRAMIENTA"                         -> createHerramientaFromJson(actionMap);
                 case "UPDATE_HERRAMIENTA", "MODIFICAR_HERRAMIENTA" -> updateHerramientaFromJson(actionMap);
                 case "DELETE_HERRAMIENTA", "ELIMINAR_HERRAMIENTA" -> deleteHerramientaFromJson(actionMap);
+                // ── Proyectos ─────────────────────────────────────────────────
+                case "CREATE_PROYECTO"                            -> createProyectoFromJson(actionMap);
+                case "UPDATE_PROYECTO", "MODIFICAR_PROYECTO"      -> updateProyectoFromJson(actionMap);
+                case "DELETE_PROYECTO", "ELIMINAR_PROYECTO"       -> deleteProyectoFromJson(actionMap);
+                // ── Procedimientos ────────────────────────────────────────────
+                case "CREATE_PROCEDIMIENTO"                       -> createProcedimientoFromJson(actionMap);
+                case "UPDATE_PROCEDIMIENTO", "MODIFICAR_PROCEDIMIENTO" -> updateProcedimientoFromJson(actionMap);
+                case "DELETE_PROCEDIMIENTO", "ELIMINAR_PROCEDIMIENTO"  -> deleteProcedimientoFromJson(actionMap);
+                // ── Infraestructura ───────────────────────────────────────────
+                case "CREATE_INFRA"                               -> createInfraFromJson(actionMap);
+                case "UPDATE_INFRA", "MODIFICAR_INFRA"            -> updateInfraFromJson(actionMap);
+                case "DELETE_INFRA", "ELIMINAR_INFRA"             -> deleteInfraFromJson(actionMap);
                 default -> "⚠️ Acción desconocida: " + action;
             };
         } catch (Exception e) {
@@ -459,6 +490,176 @@ public class OpenAiService {
             log.info("IAnusHub eliminó herramienta '{}' (id={})", h.getName(), h.getId());
             return "✅ Herramienta **" + h.getName() + "** eliminada correctamente.";
         }).orElse("⚠️ No se encontró ninguna herramienta con ese nombre o ID. Revisa que el nombre sea exacto.");
+    }
+
+    // ── Agente: CRUD Proyectos ────────────────────────────────────────────────
+
+    private java.util.Optional<Project> resolveProyecto(Map<?, ?> data) {
+        String id     = (String) data.get("id");
+        String codigo = (String) data.get("codigoProyecto");
+        if (id != null && !id.isBlank() && !id.contains("<")) {
+            var byId = projectRepository.findById(id);
+            if (byId.isPresent()) return byId;
+        }
+        if (codigo != null && !codigo.isBlank() && !codigo.contains("<")) {
+            return projectRepository.findByCodigoProyecto(codigo);
+        }
+        return java.util.Optional.empty();
+    }
+
+    private String createProyectoFromJson(Map<?, ?> data) {
+        Project p = new Project();
+        p.setCodigoProyecto((String) data.get("codigoProyecto"));
+        p.setNombre((String) data.get("nombre"));
+        p.setDepartamento((String) data.get("departamento"));
+        p.setLote((String) data.get("lote"));
+        p.setResponsableProyecto((String) data.get("responsableProyecto"));
+        p.setResponsableTecnico((String) data.get("responsableTecnico"));
+        Project saved = projectRepository.save(p);
+        log.info("IAnusHub creó proyecto '{}' (id={})", saved.getNombre(), saved.getId());
+        return "✅ Proyecto **" + saved.getNombre() + "** creado correctamente (ID: `" + saved.getId() + "`).";
+    }
+
+    private String updateProyectoFromJson(Map<?, ?> data) {
+        return resolveProyecto(data).map(p -> {
+            if (data.get("nombre") != null)               p.setNombre((String) data.get("nombre"));
+            if (data.get("departamento") != null)         p.setDepartamento((String) data.get("departamento"));
+            if (data.get("lote") != null)                 p.setLote((String) data.get("lote"));
+            if (data.get("responsableProyecto") != null)  p.setResponsableProyecto((String) data.get("responsableProyecto"));
+            if (data.get("responsableTecnico") != null)   p.setResponsableTecnico((String) data.get("responsableTecnico"));
+            Project saved = projectRepository.save(p);
+            log.info("IAnusHub modificó proyecto '{}' (id={})", saved.getNombre(), saved.getId());
+            return "✅ Proyecto **" + saved.getNombre() + "** actualizado correctamente.";
+        }).orElse("⚠️ No se encontró ningún proyecto con ese código o ID.");
+    }
+
+    private String deleteProyectoFromJson(Map<?, ?> data) {
+        return resolveProyecto(data).map(p -> {
+            p.setDeleted(true);
+            projectRepository.save(p);
+            log.info("IAnusHub marcó como eliminado el proyecto '{}' (id={})", p.getNombre(), p.getId());
+            return "✅ Proyecto **" + p.getNombre() + "** eliminado correctamente.";
+        }).orElse("⚠️ No se encontró ningún proyecto con ese código o ID.");
+    }
+
+    // ── Agente: CRUD Procedimientos ───────────────────────────────────────────
+
+    private java.util.Optional<Procedure> resolveProcedimiento(Map<?, ?> data) {
+        String id     = (String) data.get("id");
+        String titulo = (String) data.get("titulo");
+        if (id != null && !id.isBlank() && !id.contains("<")) {
+            var byId = proceduresRepository.findById(id);
+            if (byId.isPresent()) return byId;
+        }
+        if (titulo != null && !titulo.isBlank() && !titulo.contains("<")) {
+            return proceduresRepository.searchByTitulo(titulo).stream().findFirst();
+        }
+        return java.util.Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String createProcedimientoFromJson(Map<?, ?> data) {
+        Procedure p = new Procedure();
+        p.setTitulo((String) data.get("titulo"));
+        p.setDescripcion((String) data.get("descripcion"));
+        p.setDepartamento((String) data.get("departamento"));
+        Object tagsObj = data.get("tags");
+        if (tagsObj instanceof List) {
+            p.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+        }
+        Procedure saved = proceduresRepository.save(p);
+        log.info("IAnusHub creó procedimiento '{}' (id={})", saved.getTitulo(), saved.getId());
+        return "✅ Procedimiento **" + saved.getTitulo() + "** creado correctamente (ID: `" + saved.getId() + "`).";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String updateProcedimientoFromJson(Map<?, ?> data) {
+        return resolveProcedimiento(data).map(p -> {
+            if (data.get("titulo") != null)      p.setTitulo((String) data.get("titulo"));
+            if (data.get("descripcion") != null) p.setDescripcion((String) data.get("descripcion"));
+            if (data.get("departamento") != null) p.setDepartamento((String) data.get("departamento"));
+            Object tagsObj = data.get("tags");
+            if (tagsObj instanceof List) {
+                p.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+            }
+            Procedure saved = proceduresRepository.save(p);
+            log.info("IAnusHub modificó procedimiento '{}' (id={})", saved.getTitulo(), saved.getId());
+            return "✅ Procedimiento **" + saved.getTitulo() + "** actualizado correctamente.";
+        }).orElse("⚠️ No se encontró ningún procedimiento con ese título o ID.");
+    }
+
+    private String deleteProcedimientoFromJson(Map<?, ?> data) {
+        return resolveProcedimiento(data).map(p -> {
+            p.setDeleted(true);
+            proceduresRepository.save(p);
+            log.info("IAnusHub marcó como eliminado el procedimiento '{}' (id={})", p.getTitulo(), p.getId());
+            return "✅ Procedimiento **" + p.getTitulo() + "** eliminado correctamente.";
+        }).orElse("⚠️ No se encontró ningún procedimiento con ese título o ID.");
+    }
+
+    // ── Agente: CRUD Infraestructura ──────────────────────────────────────────
+
+    private java.util.Optional<Infraestructura> resolveInfra(Map<?, ?> data) {
+        String id = (String) data.get("id");
+        String ip = (String) data.get("ip");
+        if (id != null && !id.isBlank() && !id.contains("<")) {
+            var byId = infraestructuraRepository.findById(id);
+            if (byId.isPresent()) return byId;
+        }
+        if (ip != null && !ip.isBlank() && !ip.contains("<")) {
+            return infraestructuraRepository.findByIpAndDeletedFalse(ip);
+        }
+        return java.util.Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String createInfraFromJson(Map<?, ?> data) {
+        Infraestructura infra = new Infraestructura();
+        infra.setIp((String) data.get("ip"));
+        infra.setHost((String) data.get("host"));
+        infra.setSo((String) data.get("so"));
+        infra.setEstado(data.get("estado") != null ? (String) data.get("estado") : "activo");
+        infra.setCpu((String) data.get("cpu"));
+        infra.setRam((String) data.get("ram"));
+        infra.setCapacidad((String) data.get("capacidad"));
+        infra.setCpd((String) data.get("cpd"));
+        infra.setDeleted(false);
+        Object tagsObj = data.get("tags");
+        if (tagsObj instanceof List) {
+            infra.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+        }
+        Infraestructura saved = infraestructuraRepository.save(infra);
+        log.info("IAnusHub creó infraestructura '{}' (id={})", saved.getIp(), saved.getId());
+        return "✅ Infraestructura **" + saved.getHost() + "** (" + saved.getIp() + ") creada correctamente (ID: `" + saved.getId() + "`).";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String updateInfraFromJson(Map<?, ?> data) {
+        return resolveInfra(data).map(infra -> {
+            if (data.get("host") != null)     infra.setHost((String) data.get("host"));
+            if (data.get("so") != null)       infra.setSo((String) data.get("so"));
+            if (data.get("estado") != null)   infra.setEstado((String) data.get("estado"));
+            if (data.get("cpu") != null)      infra.setCpu((String) data.get("cpu"));
+            if (data.get("ram") != null)      infra.setRam((String) data.get("ram"));
+            if (data.get("capacidad") != null) infra.setCapacidad((String) data.get("capacidad"));
+            if (data.get("cpd") != null)      infra.setCpd((String) data.get("cpd"));
+            Object tagsObj = data.get("tags");
+            if (tagsObj instanceof List) {
+                infra.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+            }
+            Infraestructura saved = infraestructuraRepository.save(infra);
+            log.info("IAnusHub modificó infraestructura '{}' (id={})", saved.getIp(), saved.getId());
+            return "✅ Infraestructura **" + saved.getHost() + "** actualizada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna infraestructura con esa IP o ID.");
+    }
+
+    private String deleteInfraFromJson(Map<?, ?> data) {
+        return resolveInfra(data).map(infra -> {
+            infra.setDeleted(true);
+            infraestructuraRepository.save(infra);
+            log.info("IAnusHub marcó como eliminada la infraestructura '{}' (id={})", infra.getIp(), infra.getId());
+            return "✅ Infraestructura **" + infra.getHost() + "** eliminada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna infraestructura con esa IP o ID.");
     }
 
     // ── RAG dinámico: datos reales de la BD ─────────────────────────────────
