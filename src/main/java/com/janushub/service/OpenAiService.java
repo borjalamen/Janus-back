@@ -11,14 +11,23 @@ import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.janushub.model.Herramienta;
+import com.janushub.model.Project;
+import com.janushub.repository.HerramientaRepository;
+import com.janushub.repository.ProceduresRepository;
+import com.janushub.repository.ProjectRepository;
+import com.janushub.repository.UserRepository;
 
 import jakarta.annotation.PostConstruct;
 
@@ -67,6 +76,15 @@ public class OpenAiService {
 
     private final ObjectMapper mapper = new ObjectMapper();
 
+    // ── Repositorios para RAG dinámico ───────────────────────────────────────
+    @Autowired private ProjectRepository    projectRepository;
+    @Autowired private HerramientaRepository herramientaRepository;
+    @Autowired private ProceduresRepository  proceduresRepository;
+    @Autowired private UserRepository        userRepository;
+
+    /** Roles que tienen acceso a datos reales de la plataforma. */
+    private static final Set<String> PRIVILEGED_ROLES = Set.of("admin", "devops");
+
     /**
      * Al arrancar, carga el MD y lo parsea en secciones (H2/H3).
      * No se incluye el MD completo en cada petición: se inyectan solo
@@ -85,6 +103,10 @@ public class OpenAiService {
      * y las añade como contexto en el mensaje de usuario.
      */
     public String query(String question, String username) throws Exception {
+        return query(question, username, "");
+    }
+
+    public String query(String question, String username, String role) throws Exception {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException(
                 "Groq API key no configurada. Añade 'groq.api.key' en application.properties " +
@@ -94,9 +116,17 @@ public class OpenAiService {
 
         String personalizedSystem = buildSystemPrompt(username);
         String relevantContext = findRelevantContext(question, 3);
-        String userContent = relevantContext.isBlank()
-            ? question
-            : "CONTEXTO DE JANUSHUB (usa solo esta documentación para responder):\n" + relevantContext + "\n\nPREGUNTA DEL USUARIO: " + question;
+        String liveData = buildLiveDataContext(question, role);
+
+        StringBuilder userContentSb = new StringBuilder();
+        if (!relevantContext.isBlank()) {
+            userContentSb.append("CONTEXTO DE JANUSHUB (documentación):\n").append(relevantContext).append("\n\n");
+        }
+        if (!liveData.isBlank()) {
+            userContentSb.append("DATOS EN TIEMPO REAL DE LA PLATAFORMA:\n").append(liveData).append("\n\n");
+        }
+        userContentSb.append("PREGUNTA: ").append(question);
+        String userContent = userContentSb.toString();
 
         List<Map<String, String>> messages = List.of(
             Map.of("role", "system", "content", personalizedSystem),
@@ -286,6 +316,85 @@ public class OpenAiService {
                   "usando su nombre cuando sea natural hacerlo.";
         };
         return BASE_SYSTEM_PROMPT + "\n\n" + personal;
+    }
+
+    // ── RAG dinámico: datos reales de la BD ─────────────────────────────────
+
+    /**
+     * Si el usuario tiene rol privilegiado (admin/devops) y la pregunta
+     * parece requerir datos reales, consulta la BD e inyecta los resultados.
+     */
+    private String buildLiveDataContext(String question, String role) {
+        if (role == null || !PRIVILEGED_ROLES.contains(role.toLowerCase())) {
+            return "";
+        }
+
+        String q = question.toLowerCase();
+        StringBuilder sb = new StringBuilder();
+
+        // ── Proyectos ───────────────────────────────────────────────────────
+        boolean asksProjects = q.matches(".*\\b(proyecto|projects?|cuántos|cuantos|lote|departamento|department|imputacion|lista de proyecto)\\b.*");
+        if (asksProjects) {
+            try {
+                List<Project> projects = projectRepository.findByDeletedFalse();
+                sb.append("Proyectos activos (").append(projects.size()).append(" en total):\n");
+                projects.forEach(p -> {
+                    sb.append("- [").append(p.getCodigoProyecto()).append("] ")
+                      .append(p.getNombre())
+                      .append(" | Lote: ").append(p.getLote())
+                      .append(" | Departamento: ").append(p.getDepartamento());
+                    if (p.getResponsableProyecto() != null)
+                        sb.append(" | Resp: ").append(p.getResponsableProyecto());
+                    sb.append("\n");
+                });
+                sb.append("\n");
+            } catch (Exception e) {
+                log.warn("Error consultando proyectos para RAG: {}", e.getMessage());
+            }
+        }
+
+        // ── Herramientas ────────────────────────────────────────────────────
+        boolean asksTools = q.matches(".*\\b(herramienta|herramientas|tools?|sonar|nexus|jenkins|mailhog|sonarqube)\\b.*");
+        if (asksTools) {
+            try {
+                List<Herramienta> tools = herramientaRepository.findByVisibleTrue();
+                sb.append("Herramientas disponibles (").append(tools.size()).append("):\n");
+                tools.forEach(h -> sb.append("- ").append(h.getName())
+                    .append(": ").append(h.getDescription())
+                    .append(" [tags: ").append(String.join(", ", h.getTags())).append("]\n"));
+                sb.append("\n");
+            } catch (Exception e) {
+                log.warn("Error consultando herramientas para RAG: {}", e.getMessage());
+            }
+        }
+
+        // ── Procedimientos ──────────────────────────────────────────────────
+        boolean asksProc = q.matches(".*\\b(procedimiento|procedure|proceso|how-?to|manual|guia|gu\u00eda)\\b.*");
+        if (asksProc) {
+            try {
+                var procs = proceduresRepository.findByIsDeletedFalse();
+                sb.append("Procedimientos registrados (").append(procs.size()).append("):\n");
+                procs.stream().limit(20).forEach(p ->
+                    sb.append("- ").append(p.getTitulo()).append("\n"));
+                if (procs.size() > 20) sb.append("  ... y ").append(procs.size() - 20).append(" más.\n");
+                sb.append("\n");
+            } catch (Exception e) {
+                log.warn("Error consultando procedimientos para RAG: {}", e.getMessage());
+            }
+        }
+
+        // ── Usuarios ────────────────────────────────────────────────────────
+        boolean asksUsers = q.matches(".*\\b(usuario|usuarios|user|users|miembros|equipo|team|cuántos usuarios|cuantos usuarios)\\b.*");
+        if (asksUsers) {
+            try {
+                long total = userRepository.count();
+                sb.append("Usuarios registrados en la plataforma: ").append(total).append("\n\n");
+            } catch (Exception e) {
+                log.warn("Error consultando usuarios para RAG: {}", e.getMessage());
+            }
+        }
+
+        return sb.toString().trim();
     }
 
     private String loadMdFromClasspath() {
