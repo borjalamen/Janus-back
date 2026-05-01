@@ -23,12 +23,13 @@ public class AiController {
     @PostMapping("/query")
     public ResponseEntity<?> query(@RequestBody Map<String,Object> body){
         String question = (String) body.get("question");
+        String username = (String) body.getOrDefault("username", "");
         if(question == null || question.isBlank()){
             return ResponseEntity.badRequest().body(Map.of("error","question required"));
         }
 
         try{
-            String answer = openAiService.query(question);
+            String answer = openAiService.query(question, username);
             return ResponseEntity.ok(Map.of("answer", answer));
         }catch(Exception e){
             e.printStackTrace();

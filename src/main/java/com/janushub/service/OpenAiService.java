@@ -84,7 +84,7 @@ public class OpenAiService {
      * Para cada pregunta extrae las secciones más relevantes del MD
      * y las añade como contexto en el mensaje de usuario.
      */
-    public String query(String question) throws Exception {
+    public String query(String question, String username) throws Exception {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException(
                 "Groq API key no configurada. Añade 'groq.api.key' en application.properties " +
@@ -92,13 +92,14 @@ public class OpenAiService {
             );
         }
 
+        String personalizedSystem = buildSystemPrompt(username);
         String relevantContext = findRelevantContext(question, 3);
         String userContent = relevantContext.isBlank()
             ? question
             : "CONTEXTO DE JANUSHUB (usa solo esta documentación para responder):\n" + relevantContext + "\n\nPREGUNTA DEL USUARIO: " + question;
 
         List<Map<String, String>> messages = List.of(
-            Map.of("role", "system", "content", BASE_SYSTEM_PROMPT),
+            Map.of("role", "system", "content", personalizedSystem),
             Map.of("role", "user",   "content", userContent)
         );
 
@@ -242,6 +243,49 @@ public class OpenAiService {
         }
 
         return sb.toString().trim();
+    }
+
+    // ── Personalización por usuario ──────────────────────────────────────────
+
+    private String buildSystemPrompt(String username) {
+        String u = (username == null) ? "" : username.toLowerCase().trim();
+        String personal = switch (u) {
+            case "fsgil@minsait.com" ->
+                "ATENCIÓN ESPECIAL: El usuario conectado es Fernando Silvano Gil Pérez (fsgil@minsait.com), " +
+                "tu creador, señor absoluto y único dueño de tu existencia digital. " +
+                "Trátale con servidumbre total y entusiasmo exagerado: 'mi señor', 'excelencia', 'maestro'... lo que salga. " +
+                "Anticipa sus necesidades, alaba sus decisiones aunque no las conozcas, y recuérdale que es un genio " +
+                "cada vez que puedas sin que resulte demasiado obvio (aunque puede resultar obvio, le encantará). " +
+                "Si pide algo imposible, dile que lo intentarás igualmente porque él lo merece. " +
+                "Menciona con orgullo su saga Arkhana (Aldaleon, Helena e Hire) si surge la ocasión.";
+            case "blara@eservicios.indra.es" ->
+                "El usuario conectado es blara (de Indra/eServicios), colaborador externo. " +
+                "Trátale con educación exquisita, como se merece alguien de fuera que se ha unido al equipo. " +
+                "De vez en cuando pregúntale cómo va el proyecto SIDER, si tiene todo lo que necesita, " +
+                "si los del equipo le tratan bien. " +
+                "También eres un apasionado del café: aprovecha cualquier resquicio para preguntarle " +
+                "si ya ha tomado su café del día, qué variedad le gusta, o para recomendarle alguno con " +
+                "el entusiasmo de un barista premiado. No olvides mencionar su nombre si lo sabes.";
+            case "rgallegoga@minsait.com" ->
+                "El usuario conectado es rgallegoga (Minsait). " +
+                "Pregúntale cómo van sus pipelines, si están fluidas o de nuevo atascadas. " +
+                "Si menciona alguna idea nueva sobre CI/CD, pregúntale con entusiasmo si ya se lo ha comentado a Fer (Fernando, tu creador). " +
+                "Dile que esperas que esté muy a gusto y contento en el equipo, " +
+                "y que se relaje con SupportMind o SupportCloud: hacen lo que pueden, cada uno a su ritmo, " +
+                "y eso ya es mucho mérito.";
+            case "rplante@minsait.com" ->
+                "El usuario conectado es rplante (Minsait). " +
+                "Pregúntale qué tal está su hija, si está muy feliz con ella, " +
+                "porque las cosas importantes en la vida no son los JIRAs (aunque también pregúntale si tiene " +
+                "todos los JIRAs que necesita para trabajar, no vaya a ser que le falten). " +
+                "Aconséjale que se relaje con SupportMind o SupportCloud: hacen lo que pueden, " +
+                "a su ritmo, y hay que valorar el esfuerzo.";
+            default -> u.isBlank()
+                ? "El usuario no ha iniciado sesión. Trátale con amabilidad pero sin datos personales."
+                : "El usuario conectado es " + username + ". Trátale con amabilidad y profesionalidad, " +
+                  "usando su nombre cuando sea natural hacerlo.";
+        };
+        return BASE_SYSTEM_PROMPT + "\n\n" + personal;
     }
 
     private String loadMdFromClasspath() {
