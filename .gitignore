@@ -78,6 +78,10 @@ Dockerfile*.local
 *.jks
 *.keystore
 *.pem
+
+## Local secrets (never commit)
+.env
+.env.*
 *.crt
 
 ## Others
