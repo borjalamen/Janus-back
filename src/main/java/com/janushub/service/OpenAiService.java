@@ -8,11 +8,14 @@ import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +38,9 @@ import jakarta.annotation.PostConstruct;
 public class OpenAiService {
 
     private static final Logger log = LoggerFactory.getLogger(OpenAiService.class);
+
+    /** Resultado devuelto al controller: texto visible + resultado de acción opcional. */
+    public record AiResult(String answer, String actionResult) {}
 
     // ── Groq settings (compatible con OpenAI chat/completions) ──────────────
     @Value("${groq.api.key:}")
@@ -103,10 +109,14 @@ public class OpenAiService {
      * y las añade como contexto en el mensaje de usuario.
      */
     public String query(String question, String username) throws Exception {
-        return query(question, username, "");
+        return queryFull(question, username, "").answer();
     }
 
-    public String query(String question, String username, String role) throws Exception {
+    public AiResult query(String question, String username, String role) throws Exception {
+        return queryFull(question, username, role);
+    }
+
+    private AiResult queryFull(String question, String username, String role) throws Exception {
         if (apiKey == null || apiKey.isBlank()) {
             throw new IllegalStateException(
                 "Groq API key no configurada. Añade 'groq.api.key' en application.properties " +
@@ -114,7 +124,9 @@ public class OpenAiService {
             );
         }
 
-        String personalizedSystem = buildSystemPrompt(username);
+        boolean isPrivileged = PRIVILEGED_ROLES.contains(role.toLowerCase());
+        String personalizedSystem = buildSystemPrompt(username)
+            + (isPrivileged ? "\n\n" + AGENT_INSTRUCTIONS : "");
         String relevantContext = findRelevantContext(question, 3);
         String liveData = buildLiveDataContext(question, role);
 
@@ -158,20 +170,25 @@ public class OpenAiService {
         }
 
         Map<?, ?> json = mapper.readValue(resp.body(), Map.class);
+        String rawAnswer = resp.body();
         try {
             var choices = (List<?>) json.get("choices");
             if (choices != null && !choices.isEmpty()) {
                 var first   = (Map<?, ?>) choices.get(0);
                 var message = (Map<?, ?>) first.get("message");
                 if (message != null) {
-                    return (String) message.get("content");
+                    rawAnswer = (String) message.get("content");
                 }
             }
         } catch (Exception e) {
             log.warn("Error parseando respuesta de Groq: {}", e.getMessage());
         }
 
-        return resp.body();
+        // ── Parsear y ejecutar acciones si el rol tiene permisos ──
+        if (isPrivileged) {
+            return executeActions(rawAnswer);
+        }
+        return new AiResult(rawAnswer, null);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────
@@ -316,6 +333,118 @@ public class OpenAiService {
                   "usando su nombre cuando sea natural hacerlo.";
         };
         return BASE_SYSTEM_PROMPT + "\n\n" + personal;
+    }
+
+    // ── Agente: instrucciones y ejecución de acciones ────────────────────────
+
+    private static final String AGENT_INSTRUCTIONS =
+        "CAPACIDADES DE AGENTE: Tienes acceso directo a la base de datos de JanusHub y puedes ejecutar acciones reales.\n" +
+        "Cuando el usuario te pida CREAR, MODIFICAR o ELIMINAR algo, hazlo directamente con el bloque ACTION.\n\n" +
+        "--- CREAR herramienta ---\n" +
+        "<<<ACTION>>>\n" +
+        "{\"action\":\"CREATE_HERRAMIENTA\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
+        "<<<END_ACTION>>>\n\n" +
+        "--- MODIFICAR herramienta (usa el id que conoces por contexto o por lo que el usuario menciona) ---\n" +
+        "<<<ACTION>>>\n" +
+        "{\"action\":\"UPDATE_HERRAMIENTA\",\"id\":\"<id MongoDB>\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
+        "<<<END_ACTION>>>\n\n" +
+        "--- ELIMINAR herramienta ---\n" +
+        "<<<ACTION>>>\n" +
+        "{\"action\":\"DELETE_HERRAMIENTA\",\"id\":\"<id MongoDB>\"}\n" +
+        "<<<END_ACTION>>>\n\n" +
+        "Reglas: " +
+        "1) Solo incluye el bloque cuando el usuario haya pedido EXPLÍCITAMENTE crear/modificar/eliminar. " +
+        "2) Para UPDATE y DELETE DEBES saber el id; si no lo sabes, di al usuario que indique el ID de la herramienta. " +
+        "3) Tags deben ser términos técnicos en inglés (ej: [\"build\",\"java\",\"dependencies\",\"devops\"]). " +
+        "4) Incluye SIEMPRE el bloque aunque ya hayas explicado los pasos.";
+
+    private static final Pattern ACTION_PATTERN =
+        Pattern.compile("<<<ACTION>>>\\s*(\\{.*?\\})\\s*<<<END_ACTION>>>", Pattern.DOTALL);
+
+    /**
+     * Extrae bloques ACTION del texto de la IA, los ejecuta y devuelve
+     * la respuesta limpia (sin el bloque JSON) + el resultado de la acción.
+     */
+    private AiResult executeActions(String rawAnswer) {
+        Matcher m = ACTION_PATTERN.matcher(rawAnswer);
+        if (!m.find()) {
+            return new AiResult(rawAnswer, null);
+        }
+
+        String jsonBlock = m.group(1).trim();
+        // Limpiar el bloque ACTION del texto visible
+        String cleanAnswer = rawAnswer.substring(0, m.start()).trim();
+        if (cleanAnswer.isBlank()) cleanAnswer = rawAnswer.replaceAll("<<<ACTION>>>.*<<<END_ACTION>>>", "").trim();
+
+        String actionResult = null;
+        try {
+            Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
+            String action = (String) actionMap.get("action");
+
+            actionResult = switch (action) {
+                case "CREATE_HERRAMIENTA" -> createHerramientaFromJson(actionMap);
+                case "UPDATE_HERRAMIENTA", "MODIFICAR_HERRAMIENTA" -> updateHerramientaFromJson(actionMap);
+                case "DELETE_HERRAMIENTA", "ELIMINAR_HERRAMIENTA" -> deleteHerramientaFromJson(actionMap);
+                default -> "⚠️ Acción desconocida: " + action;
+            };
+        } catch (Exception e) {
+            log.warn("Error ejecutando acción de agente: {}", e.getMessage());
+            actionResult = "⚠️ Error al ejecutar la acción: " + e.getMessage();
+        }
+
+        return new AiResult(cleanAnswer, actionResult);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String createHerramientaFromJson(Map<?, ?> data) {
+        Herramienta h = new Herramienta();
+        h.setName((String) data.get("name"));
+        h.setDescription((String) data.get("description"));
+        h.setFunctionality((String) data.get("functionality"));
+        h.setVisible(true);
+
+        Object tagsObj = data.get("tags");
+        if (tagsObj instanceof List) {
+            h.setTags(((List<?>) tagsObj).stream()
+                .map(Object::toString).collect(Collectors.toList()));
+        }
+
+        Herramienta saved = herramientaRepository.save(h);
+        log.info("IAnusHub creó herramienta '{}' con id {}", saved.getName(), saved.getId());
+        return "✅ Herramienta **" + saved.getName() + "** creada correctamente (ID: `" + saved.getId() + "`). Ya aparece en el listado de Herramientas.";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String updateHerramientaFromJson(Map<?, ?> data) {
+        String id = (String) data.get("id");
+        if (id == null || id.isBlank()) {
+            return "⚠️ No se puede modificar: falta el ID de la herramienta. Indícame el ID y lo hago.";
+        }
+        return herramientaRepository.findById(id).map(h -> {
+            if (data.get("name") != null)          h.setName((String) data.get("name"));
+            if (data.get("description") != null)   h.setDescription((String) data.get("description"));
+            if (data.get("functionality") != null) h.setFunctionality((String) data.get("functionality"));
+            Object tagsObj = data.get("tags");
+            if (tagsObj instanceof List) {
+                h.setTags(((List<?>) tagsObj).stream()
+                    .map(Object::toString).collect(Collectors.toList()));
+            }
+            Herramienta saved = herramientaRepository.save(h);
+            log.info("IAnusHub modificó herramienta '{}' (id={})", saved.getName(), saved.getId());
+            return "✅ Herramienta **" + saved.getName() + "** actualizada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna herramienta con ID `" + id + "`.");
+    }
+
+    private String deleteHerramientaFromJson(Map<?, ?> data) {
+        String id = (String) data.get("id");
+        if (id == null || id.isBlank()) {
+            return "⚠️ No se puede eliminar: falta el ID de la herramienta. Indícame el ID y lo hago.";
+        }
+        return herramientaRepository.findById(id).map(h -> {
+            herramientaRepository.deleteById(id);
+            log.info("IAnusHub eliminó herramienta '{}' (id={})", h.getName(), id);
+            return "✅ Herramienta **" + h.getName() + "** eliminada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna herramienta con ID `" + id + "`.");
     }
 
     // ── RAG dinámico: datos reales de la BD ─────────────────────────────────

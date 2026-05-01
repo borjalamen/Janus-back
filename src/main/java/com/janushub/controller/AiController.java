@@ -1,5 +1,6 @@
 package com.janushub.controller;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.springframework.http.ResponseEntity;
@@ -9,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.janushub.service.OpenAiService;
+import com.janushub.service.OpenAiService.AiResult;
 
 @RestController
 @RequestMapping("/api/ai")
@@ -30,8 +32,13 @@ public class AiController {
         }
 
         try{
-            String answer = openAiService.query(question, username, role);
-            return ResponseEntity.ok(Map.of("answer", answer));
+            AiResult result = openAiService.query(question, username, role);
+            Map<String, Object> resp = new HashMap<>();
+            resp.put("answer", result.answer());
+            if (result.actionResult() != null) {
+                resp.put("actionResult", result.actionResult());
+            }
+            return ResponseEntity.ok(resp);
         }catch(Exception e){
             e.printStackTrace();
             return ResponseEntity.status(500).body(Map.of("error","AI request failed","details", e.getMessage()));
