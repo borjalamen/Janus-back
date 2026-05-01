@@ -344,19 +344,20 @@ public class OpenAiService {
         "<<<ACTION>>>\n" +
         "{\"action\":\"CREATE_HERRAMIENTA\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
         "<<<END_ACTION>>>\n\n" +
-        "--- MODIFICAR herramienta (usa el id que conoces por contexto o por lo que el usuario menciona) ---\n" +
+        "--- MODIFICAR herramienta (usa el id que conoces; si no lo tienes, usa el campo \"name\" con el nombre exacto) ---\n" +
         "<<<ACTION>>>\n" +
-        "{\"action\":\"UPDATE_HERRAMIENTA\",\"id\":\"<id MongoDB>\",\"name\":\"...\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
+        "{\"action\":\"UPDATE_HERRAMIENTA\",\"id\":\"<id MongoDB o vacío>\",\"name\":\"<nombre exacto si no tienes id>\",\"description\":\"...\",\"functionality\":\"...\",\"tags\":[\"...\"]}\n" +
         "<<<END_ACTION>>>\n\n" +
         "--- ELIMINAR herramienta ---\n" +
         "<<<ACTION>>>\n" +
-        "{\"action\":\"DELETE_HERRAMIENTA\",\"id\":\"<id MongoDB>\"}\n" +
+        "{\"action\":\"DELETE_HERRAMIENTA\",\"id\":\"<id MongoDB o vacío>\",\"name\":\"<nombre exacto si no tienes id>\"}\n" +
         "<<<END_ACTION>>>\n\n" +
         "Reglas: " +
         "1) Solo incluye el bloque cuando el usuario haya pedido EXPLÍCITAMENTE crear/modificar/eliminar. " +
-        "2) Para UPDATE y DELETE DEBES saber el id; si no lo sabes, di al usuario que indique el ID de la herramienta. " +
-        "3) Tags deben ser términos técnicos en inglés (ej: [\"build\",\"java\",\"dependencies\",\"devops\"]). " +
-        "4) Incluye SIEMPRE el bloque aunque ya hayas explicado los pasos.";
+        "2) Para UPDATE y DELETE usa el id si lo sabes; si no, usa el campo name con el nombre EXACTO tal como aparece en el listado. " +
+        "3) Nunca pongas literales como '<ID de la herramienta>' — si no sabes el id, deja id vacío y rellena name. " +
+        "4) Tags deben ser términos técnicos en inglés (ej: [\"build\",\"java\",\"dependencies\",\"devops\"]). " +
+        "5) Incluye SIEMPRE el bloque aunque ya hayas explicado los pasos.";
 
     private static final Pattern ACTION_PATTERN =
         Pattern.compile("<<<ACTION>>>\\s*(\\{.*?\\})\\s*<<<END_ACTION>>>", Pattern.DOTALL);
@@ -414,16 +415,33 @@ public class OpenAiService {
         return "✅ Herramienta **" + saved.getName() + "** creada correctamente (ID: `" + saved.getId() + "`). Ya aparece en el listado de Herramientas.";
     }
 
+    /**
+     * Busca una herramienta por ID MongoDB; si no lo tiene o no lo encuentra,
+     * intenta por nombre exacto (case-insensitive).
+     */
+    private java.util.Optional<Herramienta> resolveHerramienta(Map<?, ?> data) {
+        String id   = (String) data.get("id");
+        String name = (String) data.get("name");
+
+        // Intentar por id si parece un ObjectId real (no vacío ni placeholder)
+        if (id != null && !id.isBlank() && !id.contains("<")) {
+            java.util.Optional<Herramienta> byId = herramientaRepository.findById(id);
+            if (byId.isPresent()) return byId;
+        }
+        // Fallback: buscar por nombre
+        if (name != null && !name.isBlank() && !name.contains("<")) {
+            return herramientaRepository.findByNameIgnoreCase(name);
+        }
+        return java.util.Optional.empty();
+    }
+
     @SuppressWarnings("unchecked")
     private String updateHerramientaFromJson(Map<?, ?> data) {
-        String id = (String) data.get("id");
-        if (id == null || id.isBlank()) {
-            return "⚠️ No se puede modificar: falta el ID de la herramienta. Indícame el ID y lo hago.";
-        }
-        return herramientaRepository.findById(id).map(h -> {
-            if (data.get("name") != null)          h.setName((String) data.get("name"));
+        return resolveHerramienta(data).map(h -> {
             if (data.get("description") != null)   h.setDescription((String) data.get("description"));
             if (data.get("functionality") != null) h.setFunctionality((String) data.get("functionality"));
+            // name solo se actualiza si viene un campo "newName" para evitar sobreescribir el nombre usado para buscar
+            if (data.get("newName") != null)       h.setName((String) data.get("newName"));
             Object tagsObj = data.get("tags");
             if (tagsObj instanceof List) {
                 h.setTags(((List<?>) tagsObj).stream()
@@ -432,19 +450,15 @@ public class OpenAiService {
             Herramienta saved = herramientaRepository.save(h);
             log.info("IAnusHub modificó herramienta '{}' (id={})", saved.getName(), saved.getId());
             return "✅ Herramienta **" + saved.getName() + "** actualizada correctamente.";
-        }).orElse("⚠️ No se encontró ninguna herramienta con ID `" + id + "`.");
+        }).orElse("⚠️ No se encontró ninguna herramienta con ese nombre o ID. Revisa que el nombre sea exacto.");
     }
 
     private String deleteHerramientaFromJson(Map<?, ?> data) {
-        String id = (String) data.get("id");
-        if (id == null || id.isBlank()) {
-            return "⚠️ No se puede eliminar: falta el ID de la herramienta. Indícame el ID y lo hago.";
-        }
-        return herramientaRepository.findById(id).map(h -> {
-            herramientaRepository.deleteById(id);
-            log.info("IAnusHub eliminó herramienta '{}' (id={})", h.getName(), id);
+        return resolveHerramienta(data).map(h -> {
+            herramientaRepository.deleteById(h.getId());
+            log.info("IAnusHub eliminó herramienta '{}' (id={})", h.getName(), h.getId());
             return "✅ Herramienta **" + h.getName() + "** eliminada correctamente.";
-        }).orElse("⚠️ No se encontró ninguna herramienta con ID `" + id + "`.");
+        }).orElse("⚠️ No se encontró ninguna herramienta con ese nombre o ID. Revisa que el nombre sea exacto.");
     }
 
     // ── RAG dinámico: datos reales de la BD ─────────────────────────────────

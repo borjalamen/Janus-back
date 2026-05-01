@@ -9,4 +9,5 @@ import java.util.List;
 @Repository
 public interface HerramientaRepository extends MongoRepository<Herramienta, String> {
     List<Herramienta> findByVisibleTrue();
+    java.util.Optional<Herramienta> findByNameIgnoreCase(String name);
 }
