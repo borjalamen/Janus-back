@@ -20,6 +20,8 @@ public interface FormacionRepository extends MongoRepository<Formacion, String> 
     
     List<Formacion> findByNameContainingIgnoreCaseAndDeletedFalse(String name);
 
+    Optional<Formacion> findByNameIgnoreCaseAndDeletedFalse(String name);
+
     Formacion findTopByIdStartingWithOrderByIdDesc(String prefix);
     
     // (Opcional, si lo quieres mantener)

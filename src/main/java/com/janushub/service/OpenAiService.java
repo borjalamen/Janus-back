@@ -25,10 +25,12 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.janushub.model.Formacion;
 import com.janushub.model.Herramienta;
 import com.janushub.model.Infraestructura;
 import com.janushub.model.Procedure;
 import com.janushub.model.Project;
+import com.janushub.repository.FormacionRepository;
 import com.janushub.repository.HerramientaRepository;
 import com.janushub.repository.InfraestructuraRepository;
 import com.janushub.repository.ProceduresRepository;
@@ -86,11 +88,12 @@ public class OpenAiService {
     private final ObjectMapper mapper = new ObjectMapper();
 
     // ── Repositorios para RAG dinámico ───────────────────────────────────────
-    @Autowired private ProjectRepository      projectRepository;
-    @Autowired private HerramientaRepository   herramientaRepository;
-    @Autowired private ProceduresRepository    proceduresRepository;
-    @Autowired private InfraestructuraRepository infraestructuraRepository;
-    @Autowired private UserRepository          userRepository;
+    @Autowired private ProjectRepository        projectRepository;
+    @Autowired private HerramientaRepository     herramientaRepository;
+    @Autowired private ProceduresRepository      proceduresRepository;
+    @Autowired private InfraestructuraRepository  infraestructuraRepository;
+    @Autowired private FormacionRepository        formacionRepository;
+    @Autowired private UserRepository            userRepository;
 
     /** Roles que tienen acceso a datos reales de la plataforma. */
     private static final Set<String> PRIVILEGED_ROLES = Set.of("admin", "devops");
@@ -366,6 +369,12 @@ public class OpenAiService {
         "UPDATE_INFRA: {\"action\":\"UPDATE_INFRA\",\"id\":\"\",\"ip\":\"<IP exacta si no tienes id>\",\"host\":\"...\",\"so\":\"...\",\"estado\":\"...\",\"cpu\":\"...\",\"ram\":\"...\",\"capacidad\":\"...\",\"tags\":[\"...\"]}\n" +
         "DELETE_INFRA: {\"action\":\"DELETE_INFRA\",\"id\":\"\",\"ip\":\"<IP exacta si no tienes id>\"}\n\n" +
 
+        "=== FORMACIÓN (TRAINING) ===\n" +
+        "CREATE_FORMACION: {\"action\":\"CREATE_FORMACION\",\"name\":\"...\",\"link\":\"https://...\",\"description\":\"...\",\"tags\":[\"...\"],\"location\":\"Online\"}\n" +
+        "UPDATE_FORMACION: {\"action\":\"UPDATE_FORMACION\",\"id\":\"\",\"name\":\"<nombre exacto si no tienes id>\",\"link\":\"...\",\"description\":\"...\",\"tags\":[\"...\"],\"location\":\"...\"}\n" +
+        "DELETE_FORMACION: {\"action\":\"DELETE_FORMACION\",\"id\":\"\",\"name\":\"<nombre exacto si no tienes id>\"}\n" +
+        "DELETE_ALL_FORMACION: {\"action\":\"DELETE_ALL_FORMACION\"} — BORRA TODAS las formaciones activas de una vez.\n\n" +
+
         "REGLAS GLOBALES:\n" +
         "1) Incluye el bloque ACTION solo cuando el usuario haya pedido EXPLÍCITAMENTE crear/modificar/eliminar.\n" +
         "2) Para UPDATE/DELETE: usa id si lo conoces; si no, usa el campo identificador (name, codigoProyecto, titulo o ip) con el valor EXACTO.\n" +
@@ -417,6 +426,11 @@ public class OpenAiService {
                 case "CREATE_INFRA"                               -> createInfraFromJson(actionMap);
                 case "UPDATE_INFRA", "MODIFICAR_INFRA"            -> updateInfraFromJson(actionMap);
                 case "DELETE_INFRA", "ELIMINAR_INFRA"             -> deleteInfraFromJson(actionMap);
+                // ── Formación ─────────────────────────────────────────────
+                case "CREATE_FORMACION"                           -> createFormacionFromJson(actionMap);
+                case "UPDATE_FORMACION", "MODIFICAR_FORMACION"    -> updateFormacionFromJson(actionMap);
+                case "DELETE_FORMACION", "ELIMINAR_FORMACION"     -> deleteFormacionFromJson(actionMap);
+                case "DELETE_ALL_FORMACION", "ELIMINAR_TODAS_FORMACIONES" -> deleteAllFormacionFromJson(actionMap);
                 default -> "⚠️ Acción desconocida: " + action;
             };
         } catch (Exception e) {
@@ -662,6 +676,80 @@ public class OpenAiService {
         }).orElse("⚠️ No se encontró ninguna infraestructura con esa IP o ID.");
     }
 
+    // ── Agente: CRUD Formación ────────────────────────────────────────────────
+
+    private java.util.Optional<Formacion> resolveFormacion(Map<?, ?> data) {
+        String id   = (String) data.get("id");
+        String name = (String) data.get("name");
+        if (id != null && !id.isBlank() && !id.contains("<")) {
+            var byId = formacionRepository.findByIdAndDeletedFalse(id);
+            if (byId.isPresent()) return byId;
+        }
+        if (name != null && !name.isBlank() && !name.contains("<")) {
+            return formacionRepository.findByNameIgnoreCaseAndDeletedFalse(name);
+        }
+        return java.util.Optional.empty();
+    }
+
+    @SuppressWarnings("unchecked")
+    private String createFormacionFromJson(Map<?, ?> data) {
+        Formacion f = new Formacion();
+        f.setName((String) data.get("name"));
+        f.setLink((String) data.get("link"));
+        f.setDescription((String) data.get("description"));
+        f.setLocation(data.get("location") != null ? (String) data.get("location") : "Online");
+        f.setVisible(true);
+        f.setDeleted(false);
+        Object tagsObj = data.get("tags");
+        if (tagsObj instanceof List) {
+            f.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+        }
+        Formacion saved = formacionRepository.save(f);
+        log.info("IAnusHub creó formación '{}' (id={})", saved.getName(), saved.getId());
+        return "✅ Formación **" + saved.getName() + "** creada correctamente (ID: `" + saved.getId() + "`). Ya aparece en el listado de Training.";
+    }
+
+    @SuppressWarnings("unchecked")
+    private String updateFormacionFromJson(Map<?, ?> data) {
+        return resolveFormacion(data).map(f -> {
+            if (data.get("newName") != null)    f.setName((String) data.get("newName"));
+            if (data.get("link") != null)        f.setLink((String) data.get("link"));
+            if (data.get("description") != null) f.setDescription((String) data.get("description"));
+            if (data.get("location") != null)    f.setLocation((String) data.get("location"));
+            Object tagsObj = data.get("tags");
+            if (tagsObj instanceof List) {
+                f.setTags(((List<?>) tagsObj).stream().map(Object::toString).collect(Collectors.toList()));
+            }
+            Formacion saved = formacionRepository.save(f);
+            log.info("IAnusHub modificó formación '{}' (id={})", saved.getName(), saved.getId());
+            return "✅ Formación **" + saved.getName() + "** actualizada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna formación con ese nombre o ID. Revisa que el nombre sea exacto.");
+    }
+
+    private String deleteFormacionFromJson(Map<?, ?> data) {
+        return resolveFormacion(data).map(f -> {
+            f.setDeleted(true);
+            formacionRepository.save(f);
+            log.info("IAnusHub marcó como eliminada la formación '{}' (id={})", f.getName(), f.getId());
+            return "✅ Formación **" + f.getName() + "** eliminada correctamente.";
+        }).orElse("⚠️ No se encontró ninguna formación con ese nombre o ID. Revisa que el nombre sea exacto.");
+    }
+
+    private String deleteAllFormacionFromJson(Map<?, ?> data) {
+        try {
+            List<Formacion> activas = formacionRepository.findByDeletedFalseAndVisibleTrue();
+            if (activas.isEmpty()) {
+                return "ℹ️ No hay formaciones activas que eliminar.";
+            }
+            activas.forEach(f -> f.setDeleted(true));
+            formacionRepository.saveAll(activas);
+            log.info("IAnusHub marcó como eliminadas {} formaciones", activas.size());
+            return "✅ Se han eliminado **" + activas.size() + "** formaciones correctamente.";
+        } catch (Exception e) {
+            return "⚠️ Error al eliminar todas las formaciones: " + e.getMessage();
+        }
+    }
+
     // ── RAG dinámico: datos reales de la BD ─────────────────────────────────
 
     /**
@@ -735,6 +823,28 @@ public class OpenAiService {
                 sb.append("Usuarios registrados en la plataforma: ").append(total).append("\n\n");
             } catch (Exception e) {
                 log.warn("Error consultando usuarios para RAG: {}", e.getMessage());
+            }
+        }
+
+        // ── Formación ───────────────────────────────────────────────────────
+        boolean asksFormacion = q.matches(".*\\b(formaci[oó]n|formaciones|curso|cursos|training|course|courses|aprendizaje|capacitaci[oó]n)\\b.*");
+        if (asksFormacion) {
+            try {
+                List<Formacion> cursos = formacionRepository.findByDeletedFalseAndVisibleTrue();
+                sb.append("Formaciones/cursos activos (").append(cursos.size()).append(" en total):\n");
+                cursos.forEach(f -> {
+                    sb.append("- **").append(f.getName()).append("**");
+                    if (f.getDescription() != null && !f.getDescription().isBlank())
+                        sb.append(": ").append(f.getDescription());
+                    if (f.getLink() != null && !f.getLink().isBlank())
+                        sb.append(" | Link: ").append(f.getLink());
+                    if (f.getTags() != null && !f.getTags().isEmpty())
+                        sb.append(" | Tags: ").append(String.join(", ", f.getTags()));
+                    sb.append("\n");
+                });
+                sb.append("\n");
+            } catch (Exception e) {
+                log.warn("Error consultando formaciones para RAG: {}", e.getMessage());
             }
         }
 
