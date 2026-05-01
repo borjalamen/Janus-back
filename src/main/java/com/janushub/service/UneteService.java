@@ -8,14 +8,12 @@ import com.janushub.service.NotificationService;
 import dto.ApprovalResponseDTO;
 import dto.UneteDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +25,8 @@ public class UneteService {
     private final EmailNotificationService emailNotificationService;
     private final NotificationService notificationService;
 
-    @Value("${app.base-url:http://localhost:4200}")
-    private String baseUrl;
-
     /**
-     * Registra una nueva peticion de "unete" con estado PENDIENTE.
+     * Registra una nueva peticion de "unete" con estado INICIADA.
      * Valida que el email sea válido y no esté duplicado en usuarios existentes.
      */
     public Unete createRequest(UneteDTO dto) {
@@ -56,55 +51,37 @@ public class UneteService {
         request.setProjectName(dto.getProjectName() != null ? dto.getProjectName() : "");
         request.setComments(dto.getComments() != null ? dto.getComments() : "");
         request.setEstado("INICIADA");
-        request.setEmailToken(UUID.randomUUID().toString());
         request.setCreatedAt(LocalDateTime.now());
         request.setUpdatedAt(LocalDateTime.now());
         Unete saved = uneteRepository.save(request);
 
-        String verifyUrl = baseUrl + "/verificar?token=" + saved.getEmailToken();
-        emailNotificationService.sendEmailVerification(saved, verifyUrl);
+        notificationService.broadcastToRoles(
+                java.util.List.of("ADMIN", "DEVOPS"),
+                "JOIN_NUEVA",
+                "Nueva solicitud de acceso",
+                saved.getFullName() + " quiere unirse al equipo",
+                "/administracion"
+        );
 
         return saved;
     }
 
     /**
-     * Verifica el email de una solicitud usando el token recibido por correo.
-     * Cambia el estado de INICIADA a PENDIENTE y notifica a los administradores.
+     * El administrador acepta manualmente una solicitud INICIADA,
+     * pasándola a PENDIENTE sin necesitar que el usuario haga clic en el enlace.
      */
-    public Unete verifyEmail(String token) {
-        if (token == null || token.isBlank()) {
-            throw new IllegalArgumentException("Token de verificación inválido.");
-        }
-
-        Unete request = uneteRepository.findByEmailToken(token)
-                .orElseThrow(() -> new IllegalArgumentException("El enlace de verificación no es válido o ha expirado."));
-
-        if ("PENDIENTE".equals(request.getEstado())
-                || "APROBADA".equals(request.getEstado())
-                || "RECHAZADA".equals(request.getEstado())) {
-            // Ya fue verificado anteriormente — devolvemos el estado actual sin error
-            return request;
-        }
+    public Unete acceptInitiatedByAdmin(String id) {
+        Unete request = uneteRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Solicitud no encontrada: " + id));
 
         if (!"INICIADA".equals(request.getEstado())) {
-            throw new IllegalArgumentException("Esta solicitud no está en estado válido para verificación.");
+            throw new IllegalArgumentException("Solo se pueden aceptar solicitudes en estado INICIADA.");
         }
 
         request.setEstado("PENDIENTE");
         request.setEmailVerifiedAt(LocalDateTime.now());
         request.setUpdatedAt(LocalDateTime.now());
-        Unete saved = uneteRepository.save(request);
-
-        // Notificar a ADMIN y DEVOPS vía WebSocket
-        notificationService.broadcastToRoles(
-                java.util.List.of("ADMIN", "DEVOPS"),
-                "JOIN_NUEVA",
-                "Nueva solicitud de acceso",
-                saved.getFullName() + " ha verificado su correo y quiere unirse al equipo",
-                "/administracion"
-        );
-
-        return saved;
+        return uneteRepository.save(request);
     }
 
     /**

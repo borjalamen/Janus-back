@@ -66,23 +66,6 @@ public class UneteController {
         }
     }
 
-    /**
-     * Verifica el correo electrónico usando el token enviado al usuario.
-     * GET /api/contact/verify-email?token=UUID
-     */
-    @GetMapping("/api/contact/verify-email")
-    public ResponseEntity<?> verifyEmail(@RequestParam String token) {
-        try {
-            Unete verified = uneteService.verifyEmail(token);
-            return ResponseEntity.ok(verified);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.badRequest().body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al verificar el correo: " + e.getMessage());
-        }
-    }
-
     // =========================================================
     // ENDPOINTS DE ADMINISTRACIÓN
     // =========================================================
@@ -178,6 +161,21 @@ public class UneteController {
             return ResponseEntity.ok().build();
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    /**
+     * El admin acepta manualmente una solicitud INICIADA, pasándola a PENDIENTE.
+     * Esto equivale a hacer la verificación de correo en nombre del usuario.
+     * PUT /api/join-requests/{id}/accept-initiated
+     */
+    @PutMapping("/api/join-requests/{id}/accept-initiated")
+    public ResponseEntity<?> acceptInitiated(@PathVariable String id) {
+        try {
+            Unete updated = uneteService.acceptInitiatedByAdmin(id);
+            return ResponseEntity.ok(updated);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 }
