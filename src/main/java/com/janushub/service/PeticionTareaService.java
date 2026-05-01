@@ -21,6 +21,7 @@ public class PeticionTareaService {
 
     private final PeticionTareaRepository repository;
     private final EmailNotificationService emailNotificationService;
+    private final NotificationService notificationService;
 
     // Mètode antic (JSON) — el pots deixar sense usar o eliminar si vols
     public PeticionTarea crear(PeticionTarea p) {
@@ -31,6 +32,13 @@ public class PeticionTareaService {
         p.setAdminComment(null);
         PeticionTarea saved = repository.save(p);
         emailNotificationService.sendTaskRequestSubmitted(saved, false);
+        notificationService.broadcastToRoles(
+                List.of("ADMIN", "DEVOPS"),
+                "PETICION_NUEVA",
+                "Nueva petición",
+                "Petición de " + saved.getRequesterName() + " para " + saved.getProjectName(),
+                "/peticion"
+        );
         return saved;
     }
 
@@ -106,6 +114,13 @@ public class PeticionTareaService {
 
         PeticionTarea saved = repository.save(p);
         emailNotificationService.sendTaskRequestSubmitted(saved, false);
+        notificationService.broadcastToRoles(
+                List.of("ADMIN", "DEVOPS"),
+                "PETICION_NUEVA",
+                "Nueva petición",
+                "Petición de " + saved.getRequesterName() + " para " + saved.getProjectName(),
+                "/peticion"
+        );
         return saved;
     }
 
@@ -121,6 +136,12 @@ public class PeticionTareaService {
         p.setUpdatedAt(LocalDateTime.now());
         PeticionTarea updated = repository.save(p);
         emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        notificationService.broadcast(
+                "PETICION_ESTADO",
+                "Petición aprobada",
+                "La petición de " + updated.getRequesterName() + " ha sido aprobada",
+                "/peticion"
+        );
         return updated;
     }
 
@@ -132,6 +153,12 @@ public class PeticionTareaService {
         p.setUpdatedAt(LocalDateTime.now());
         PeticionTarea updated = repository.save(p);
         emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        notificationService.broadcast(
+                "PETICION_ESTADO",
+                "Petición rechazada",
+                "La petición de " + updated.getRequesterName() + " ha sido rechazada",
+                "/peticion"
+        );
         return updated;
     }
 
@@ -152,6 +179,12 @@ public class PeticionTareaService {
 
         PeticionTarea updated = repository.save(p);
         emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        notificationService.broadcast(
+                "PETICION_ESTADO",
+                "Petición iniciada",
+                "La petición de " + updated.getRequesterName() + " ha sido iniciada",
+                "/peticion"
+        );
         return updated;
     }
 
@@ -172,6 +205,12 @@ public class PeticionTareaService {
 
         PeticionTarea updated = repository.save(p);
         emailNotificationService.sendTaskRequestStatusUpdate(updated);
+        notificationService.broadcast(
+                "PETICION_ESTADO",
+                "Petición finalizada",
+                "La petición de " + updated.getRequesterName() + " ha sido finalizada",
+                "/peticion"
+        );
         return updated;
     }
 

@@ -3,6 +3,7 @@ package com.janushub.controller;
 import com.janushub.model.ScrumTask;
 import com.janushub.repository.ScrumSprintRepository;
 import com.janushub.repository.ScrumTaskRepository;
+import com.janushub.service.NotificationService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -15,10 +16,13 @@ public class ScrumTaskController {
 
     private final ScrumTaskRepository repository;
     private final ScrumSprintRepository sprintRepository;
+    private final NotificationService notificationService;
 
-    public ScrumTaskController(ScrumTaskRepository repository, ScrumSprintRepository sprintRepository) {
+    public ScrumTaskController(ScrumTaskRepository repository, ScrumSprintRepository sprintRepository,
+                               NotificationService notificationService) {
         this.repository = repository;
         this.sprintRepository = sprintRepository;
+        this.notificationService = notificationService;
     }
 
     /** Returns tasks for the active sprint, or all visible tasks if no sprint is active */
@@ -56,7 +60,14 @@ public class ScrumTaskController {
                     .ifPresent(sprint -> task.setSprintId(sprint.getId()));
         }
 
-        return repository.save(task);
+        ScrumTask saved = repository.save(task);
+        notificationService.broadcast(
+                "SCRUM_TAREA_NUEVA",
+                "Nueva tarea Scrum",
+                "Tarea creada: " + saved.getTitle(),
+                "/scrum"
+        );
+        return saved;
     }
 
     @PutMapping("/update/{id}")
@@ -76,7 +87,14 @@ public class ScrumTaskController {
                         details.setSprintId(existing.getSprintId());
                     }
                     details.setUpdatedAt(Instant.now().toString());
-                    return ResponseEntity.ok(repository.save(details));
+                    ScrumTask saved = repository.save(details);
+                    notificationService.broadcast(
+                            "SCRUM_TAREA_ACTUALIZADA",
+                            "Tarea Scrum actualizada",
+                            "Tarea actualizada: " + saved.getTitle() + " [" + saved.getStatus() + "]",
+                            "/scrum"
+                    );
+                    return ResponseEntity.ok(saved);
                 })
                 .orElse(ResponseEntity.notFound().build());
     }
@@ -87,6 +105,12 @@ public class ScrumTaskController {
             return ResponseEntity.notFound().build();
         }
         repository.deleteById(id);
+        notificationService.broadcast(
+                "SCRUM_TAREA_ELIMINADA",
+                "Tarea Scrum eliminada",
+                "Una tarea del sprint ha sido eliminada",
+                "/scrum"
+        );
         return ResponseEntity.noContent().build();
     }
 }

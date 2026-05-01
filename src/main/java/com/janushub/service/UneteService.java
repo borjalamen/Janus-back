@@ -4,6 +4,7 @@ import com.janushub.model.Unete;
 import com.janushub.model.Users;
 import com.janushub.repository.UneteRepository;
 import com.janushub.repository.UserRepository;
+import com.janushub.service.NotificationService;
 import dto.ApprovalResponseDTO;
 import dto.UneteDTO;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class UneteService {
     private final UserRepository userRepository;
     private final UserService userService;
     private final EmailNotificationService emailNotificationService;
+    private final NotificationService notificationService;
 
     /**
      * Registra una nueva peticion de "unete" con estado PENDIENTE.
@@ -53,6 +55,13 @@ public class UneteService {
         request.setUpdatedAt(LocalDateTime.now());
         Unete saved = uneteRepository.save(request);
         emailNotificationService.sendJoinRequestSubmitted(saved);
+        notificationService.broadcastToRoles(
+                java.util.List.of("ADMIN", "DEVOPS"),
+                "JOIN_NUEVA",
+                "Nueva solicitud de acceso",
+                saved.getFullName() + " quiere unirse al equipo",
+                "/administracion"
+        );
         return saved;
     }
 
