@@ -134,6 +134,7 @@ public class OpenAiService {
         String safeRole = (role == null) ? "" : role;
         boolean isPrivileged = PRIVILEGED_ROLES.contains(safeRole.toLowerCase());
         String personalizedSystem = buildSystemPrompt(username)
+            + "\n\n" + FILL_INSTRUCTIONS
             + (isPrivileged ? "\n\n" + AGENT_INSTRUCTIONS : "");
         String relevantContext = findRelevantContext(question, 3);
         String liveData = buildLiveDataContext(question, safeRole);
@@ -196,7 +197,7 @@ public class OpenAiService {
         if (isPrivileged) {
             return executeActions(rawAnswer);
         }
-        return new AiResult(rawAnswer, null);
+        return executeFillOnlyActions(rawAnswer);
     }
 
     // ── Helpers ─────────────────────────────────────────────────────────────
@@ -387,6 +388,22 @@ public class OpenAiService {
         "{...json...}\n" +
         "<<<END_ACTION>>>";
 
+    // ── Instrucciones de relleno de estimación (disponibles para todos los roles) ────
+    private static final String FILL_INSTRUCTIONS =
+        "=== RELLENO DE FORMULARIO DE ESTIMACIÓN ===\n" +
+        "Cuando el usuario te pida crear, generar o rellenar una estimación (puede adjuntar un txt, descripción, lista de tareas...),\n" +
+        "analiza los datos y genera un bloque ACTION con FILL_ESTIMACION AL FINAL de tu respuesta.\n" +
+        "Formato: FILL_ESTIMACION: {\"action\":\"FILL_ESTIMACION\",\"estimationName\":\"...\",\"projectCode\":\"PRJ-XXX o vacío\",\n" +
+        "\"projectName\":\"...\",\"requester\":\"...\",\"requesterEmail\":\"...\",\"notes\":\"Resumen ejecutivo del trabajo\",\n" +
+        "\"weeks\":[\"Semana 1\",\"Semana 2\"],\"tasks\":[{\"title\":\"Nombre tarea\",\"estimates\":[8,4]}]}\n" +
+        "REGLAS:\n" +
+        "1) El array 'estimates' de cada tarea debe tener exactamente la misma longitud que 'weeks'.\n" +
+        "2) Los valores de 'estimates' son horas de trabajo dedicadas esa semana a esa tarea.\n" +
+        "3) Genera tantas tareas y semanas como sean necesarias según el contexto proporcionado.\n" +
+        "4) Si el usuario no especifica solicitante o email, déjalos vacíos.\n" +
+        "5) El bloque ACTION siempre va AL FINAL, con el formato:\n" +
+        "<<<ACTION>>>\n{...json...}\n<<<END_ACTION>>>";
+
     private static final Pattern ACTION_PATTERN =
         Pattern.compile("<<<ACTION>>>\\s*(\\{.*?\\})\\s*<<<END_ACTION>>>", Pattern.DOTALL);
 
@@ -437,6 +454,8 @@ public class OpenAiService {
                 case "UPDATE_FORMACION", "MODIFICAR_FORMACION"    -> updateFormacionFromJson(actionMap);
                 case "DELETE_FORMACION", "ELIMINAR_FORMACION"     -> deleteFormacionFromJson(actionMap);
                 case "DELETE_ALL_FORMACION", "ELIMINAR_TODAS_FORMACIONES" -> deleteAllFormacionFromJson(actionMap);
+                // ── Estimación ────────────────────────────────────────────
+                case "FILL_ESTIMACION"                                    -> fillEstimacionFromJson(actionMap);
                 default -> "⚠️ Acción desconocida: " + action;
             };
         } catch (Exception e) {
@@ -739,6 +758,90 @@ public class OpenAiService {
             log.info("IAnusHub marcó como eliminada la formación '{}' (id={})", f.getName(), f.getId());
             return "✅ Formación **" + f.getName() + "** eliminada correctamente.";
         }).orElse("⚠️ No se encontró ninguna formación con ese nombre o ID. Revisa que el nombre sea exacto.");
+    }
+
+    /**
+     * Para usuarios sin rol privilegiado: solo ejecuta FILL_ESTIMACION (no escribe en BD).
+     */
+    private AiResult executeFillOnlyActions(String rawAnswer) {
+        Matcher m = ACTION_PATTERN.matcher(rawAnswer);
+        if (!m.find()) return new AiResult(rawAnswer, null);
+
+        String jsonBlock = m.group(1).trim();
+        String cleanAnswer = rawAnswer.substring(0, m.start()).trim();
+        if (cleanAnswer.isBlank()) cleanAnswer = rawAnswer.replaceAll("<<<ACTION>>>.*<<<END_ACTION>>>", "").trim();
+
+        try {
+            Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
+            String action = (String) actionMap.get("action");
+            if ("FILL_ESTIMACION".equals(action)) {
+                return new AiResult(cleanAnswer, fillEstimacionFromJson(actionMap));
+            }
+        } catch (Exception e) {
+            log.warn("Error ejecutando fill action: {}", e.getMessage());
+        }
+        return new AiResult(rawAnswer, null);
+    }
+
+    @SuppressWarnings("unchecked")
+    private String fillEstimacionFromJson(Map<?, ?> data) {
+        try {
+            Map<String, Object> result = new LinkedHashMap<>();
+            result.put("estimationName", data.getOrDefault("estimationName", ""));
+            result.put("projectCode",    data.getOrDefault("projectCode", ""));
+            result.put("projectName",    data.getOrDefault("projectName", ""));
+            result.put("requester",      data.getOrDefault("requester", ""));
+            result.put("requesterEmail", data.getOrDefault("requesterEmail", ""));
+            result.put("notes",          data.getOrDefault("notes", ""));
+
+            // Weeks: puede llegar como lista de strings o como número entero
+            Object weeksObj = data.get("weeks");
+            List<String> weeks;
+            if (weeksObj instanceof List) {
+                weeks = ((List<?>) weeksObj).stream().map(Object::toString).collect(Collectors.toList());
+            } else if (weeksObj instanceof Number) {
+                int n = ((Number) weeksObj).intValue();
+                weeks = new ArrayList<>();
+                for (int i = 1; i <= n; i++) weeks.add("Semana " + i);
+            } else {
+                weeks = new ArrayList<>(List.of("Semana 1"));
+            }
+            result.put("weeks", weeks);
+
+            // Tasks
+            Object tasksObj = data.get("tasks");
+            List<Map<String, Object>> tasks = new ArrayList<>();
+            if (tasksObj instanceof List) {
+                for (Object t : (List<?>) tasksObj) {
+                    if (!(t instanceof Map)) continue;
+                    Map<?, ?> tm = (Map<?, ?>) t;
+                    Map<String, Object> task = new LinkedHashMap<>();
+                    task.put("title", tm.getOrDefault("title", "Tarea sin nombre"));
+                    Object est = tm.get("estimates");
+                    List<Integer> estimates;
+                    if (est instanceof List) {
+                        estimates = ((List<?>) est).stream()
+                            .map(e -> e instanceof Number ? ((Number) e).intValue() : 0)
+                            .collect(Collectors.toList());
+                        // Ajustar longitud si no coincide con weeks
+                        while (estimates.size() < weeks.size()) estimates.add(0);
+                    } else {
+                        estimates = new ArrayList<>();
+                        weeks.forEach(w -> estimates.add(0));
+                    }
+                    task.put("estimates", estimates);
+                    tasks.add(task);
+                }
+            }
+            result.put("tasks", tasks);
+
+            String json = mapper.writeValueAsString(result);
+            log.info("IAnusHub genera estimación: {} tareas, {} semanas", tasks.size(), weeks.size());
+            return "FILL_ESTIMACION_DATA:" + json;
+        } catch (Exception e) {
+            log.warn("Error serializando FILL_ESTIMACION: {}", e.getMessage());
+            return "⚠️ Error generando la estimación: " + e.getMessage();
+        }
     }
 
     private String deleteAllFormacionFromJson(Map<?, ?> data) {
