@@ -131,11 +131,12 @@ public class OpenAiService {
             );
         }
 
-        boolean isPrivileged = PRIVILEGED_ROLES.contains(role.toLowerCase());
+        String safeRole = (role == null) ? "" : role;
+        boolean isPrivileged = PRIVILEGED_ROLES.contains(safeRole.toLowerCase());
         String personalizedSystem = buildSystemPrompt(username)
             + (isPrivileged ? "\n\n" + AGENT_INSTRUCTIONS : "");
         String relevantContext = findRelevantContext(question, 3);
-        String liveData = buildLiveDataContext(question, role);
+        String liveData = buildLiveDataContext(question, safeRole);
 
         StringBuilder userContentSb = new StringBuilder();
         if (!relevantContext.isBlank()) {
@@ -408,6 +409,11 @@ public class OpenAiService {
         try {
             Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
             String action = (String) actionMap.get("action");
+
+            if (action == null) {
+                actionResult = "⚠️ Acción no reconocida: el bloque ACTION no contiene campo 'action'.";
+                return new AiResult(cleanAnswer, actionResult);
+            }
 
             actionResult = switch (action) {
                 // ── Herramientas ──────────────────────────────────────────────
