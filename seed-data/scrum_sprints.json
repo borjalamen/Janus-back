@@ -1,0 +1,35 @@
+[
+  {
+    "_id": { "$oid": "663a0800000000000000a801" },
+    "sprintKey": "PRJ001-S1",
+    "startDate": "2025-04-07",
+    "endDate": "2025-04-18",
+    "active": false,
+    "totalTasks": 8,
+    "doneTasks": 7,
+    "totalHours": 80.0,
+    "doneHours": 72.0,
+    "snapshots": [
+      { "date": "2025-04-07", "remainingTasks": 8, "doneTasks": 0, "totalTasks": 8, "remainingHours": 80.0, "doneHours": 0.0, "totalHours": 80.0 },
+      { "date": "2025-04-09", "remainingTasks": 6, "doneTasks": 2, "totalTasks": 8, "remainingHours": 60.0, "doneHours": 20.0, "totalHours": 80.0 },
+      { "date": "2025-04-11", "remainingTasks": 4, "doneTasks": 4, "totalTasks": 8, "remainingHours": 40.0, "doneHours": 40.0, "totalHours": 80.0 },
+      { "date": "2025-04-14", "remainingTasks": 2, "doneTasks": 6, "totalTasks": 8, "remainingHours": 16.0, "doneHours": 64.0, "totalHours": 80.0 },
+      { "date": "2025-04-18", "remainingTasks": 1, "doneTasks": 7, "totalTasks": 8, "remainingHours": 8.0, "doneHours": 72.0, "totalHours": 80.0 }
+    ]
+  },
+  {
+    "_id": { "$oid": "663a0800000000000000a802" },
+    "sprintKey": "PRJ001-S2",
+    "startDate": "2025-04-22",
+    "endDate": "2025-05-09",
+    "active": true,
+    "totalTasks": 6,
+    "doneTasks": 2,
+    "totalHours": 60.0,
+    "doneHours": 20.0,
+    "snapshots": [
+      { "date": "2025-04-22", "remainingTasks": 6, "doneTasks": 0, "totalTasks": 6, "remainingHours": 60.0, "doneHours": 0.0, "totalHours": 60.0 },
+      { "date": "2025-04-25", "remainingTasks": 4, "doneTasks": 2, "totalTasks": 6, "remainingHours": 40.0, "doneHours": 20.0, "totalHours": 60.0 }
+    ]
+  }
+]

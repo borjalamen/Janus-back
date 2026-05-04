@@ -1,0 +1,58 @@
+[
+  {
+    "_id": { "$oid": "663a0400000000000000a401" },
+    "env": "Dev",
+    "project": "PRJ001",
+    "date": "2025-05-06",
+    "startTime": "22:00",
+    "endTime": "23:30",
+    "devOps": "rgallegoga",
+    "notes": "Despliegue release 2.1 backend en entorno dev. Ventana de 90 minutos.",
+    "jiraUrl": "https://jira.indra.es/browse/PC-341",
+    "responsable": "rgallegoga",
+    "periodDays": null,
+    "eventType": "DEPLOY"
+  },
+  {
+    "_id": { "$oid": "663a0400000000000000a402" },
+    "env": "Dev",
+    "project": "PRJ001",
+    "date": "2025-05-08",
+    "startTime": "10:00",
+    "endTime": "11:00",
+    "devOps": "fsgil",
+    "notes": "Revisión de arquitectura con el equipo. Sin afectación de servicio.",
+    "jiraUrl": null,
+    "responsable": "fsgil",
+    "periodDays": null,
+    "eventType": "REUNION"
+  },
+  {
+    "_id": { "$oid": "663a0400000000000000a403" },
+    "env": "Integración",
+    "project": "PRJ001",
+    "date": "2025-05-12",
+    "startTime": "20:00",
+    "endTime": "22:00",
+    "devOps": "rplante",
+    "notes": "Migración de datos a nueva colección MongoDB. Backup previo obligatorio.",
+    "jiraUrl": "https://jira.indra.es/browse/PC-355",
+    "responsable": "rplante",
+    "periodDays": null,
+    "eventType": "MAINTENANCE"
+  },
+  {
+    "_id": { "$oid": "663a0400000000000000a404" },
+    "env": "Dev",
+    "project": "PRJ002",
+    "date": "2025-05-07",
+    "startTime": "09:00",
+    "endTime": "09:30",
+    "devOps": "blara",
+    "notes": "Daily Scrum Sprint 1 - SGD.",
+    "jiraUrl": null,
+    "responsable": "blara",
+    "periodDays": 1,
+    "eventType": "DAILY"
+  }
+]

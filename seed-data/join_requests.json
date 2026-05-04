@@ -1,0 +1,32 @@
+[
+  {
+    "_id": { "$oid": "663a0c00000000000000ac01" },
+    "fullName": "Marta Pérez Sánchez",
+    "email": "mperez@empresa.es",
+    "role": "consultor",
+    "projectCode": "PRJ001",
+    "projectName": "Portal Ciudadano Digital",
+    "comments": "Me interesa unirme como consultora de arquitectura. Tengo experiencia en proyectos similares con OpenShift.",
+    "estado": "PENDIENTE",
+    "createdAt": { "$date": "2025-04-28T10:30:00.000Z" },
+    "updatedAt": { "$date": "2025-04-28T10:30:00.000Z" },
+    "emailToken": "token-abc123def456",
+    "emailVerifiedAt": { "$date": "2025-04-28T10:35:00.000Z" },
+    "adminComment": null
+  },
+  {
+    "_id": { "$oid": "663a0c00000000000000ac02" },
+    "fullName": "Jordi Vila Mas",
+    "email": "jvila@consultoraexterna.com",
+    "role": "devops",
+    "projectCode": "PRJ002",
+    "projectName": "Sistema de Gestión Documental",
+    "comments": "Solicito acceso como DevOps de refuerzo para el proyecto SGD. Disponible desde junio.",
+    "estado": "APROBADA",
+    "createdAt": { "$date": "2025-04-20T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-04-22T11:00:00.000Z" },
+    "emailToken": "token-xyz789uvw012",
+    "emailVerifiedAt": { "$date": "2025-04-20T09:10:00.000Z" },
+    "adminComment": "Aprobado. Acceso concedido desde 01/06/2025. Coordinarse con rgallegoga."
+  }
+]

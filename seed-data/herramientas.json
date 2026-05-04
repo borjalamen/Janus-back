@@ -1,0 +1,78 @@
+[
+  {
+    "_id": { "$oid": "663a0100000000000000a101" },
+    "name": "Jenkins",
+    "description": "Servidor de integración continua y entrega continua (CI/CD).",
+    "functionality": "Automatización de builds, tests y despliegues mediante pipelines declarativos o scriptados.",
+    "tags": ["ci/cd", "automatización", "build", "deploy"],
+    "installSteps": [
+      {
+        "text": "1. Descargar el WAR oficial desde https://www.jenkins.io/download/",
+        "attachments": []
+      },
+      {
+        "text": "2. Ejecutar: java -jar jenkins.war --httpPort=8080",
+        "attachments": []
+      },
+      {
+        "text": "3. Acceder a http://localhost:8080 y completar el wizard de instalación con el password inicial de /var/lib/jenkins/secrets/initialAdminPassword",
+        "attachments": []
+      }
+    ],
+    "projects": ["PRJ001", "PRJ002"],
+    "projectsString": "PRJ001, PRJ002",
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "663a0100000000000000a102" },
+    "name": "SonarQube",
+    "description": "Plataforma de análisis estático de código para detectar bugs, vulnerabilidades y code smells.",
+    "functionality": "Integrable con Jenkins/Maven/Gradle. Genera informes de calidad de código con métricas de cobertura, duplicaciones y complejidad ciclomática.",
+    "tags": ["calidad", "análisis", "seguridad", "código"],
+    "installSteps": [
+      {
+        "text": "1. Descargar SonarQube Community Edition desde https://www.sonarsource.com/products/sonarqube/downloads/",
+        "attachments": []
+      },
+      {
+        "text": "2. Descomprimir y ejecutar bin/<OS>/sonar.sh start",
+        "attachments": []
+      },
+      {
+        "text": "3. Acceder a http://localhost:9000. Credenciales por defecto: admin/admin",
+        "attachments": []
+      },
+      {
+        "text": "4. Generar token en Administration > Security > Tokens y configurarlo en el pom.xml o en Jenkins.",
+        "attachments": []
+      }
+    ],
+    "projects": ["PRJ001", "PRJ002"],
+    "projectsString": "PRJ001, PRJ002",
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "663a0100000000000000a103" },
+    "name": "Nexus Repository",
+    "description": "Gestor de repositorios de artefactos para Maven, npm, Docker y otros formatos.",
+    "functionality": "Almacena y sirve artefactos de build. Actúa como proxy de repositorios externos (Maven Central, npmjs). Permite tener repositorios privados de imágenes Docker.",
+    "tags": ["artefactos", "maven", "npm", "docker", "repositorio"],
+    "installSteps": [
+      {
+        "text": "1. Descargar Nexus OSS desde https://help.sonatype.com/repomanager3/product-information/download",
+        "attachments": []
+      },
+      {
+        "text": "2. Descomprimir y ejecutar nexus-3.x.x-xx/bin/nexus run",
+        "attachments": []
+      },
+      {
+        "text": "3. Acceder a http://localhost:8081. Password admin en /nexus-data/admin.password",
+        "attachments": []
+      }
+    ],
+    "projects": ["PRJ001"],
+    "projectsString": "PRJ001",
+    "visible": true
+  }
+]

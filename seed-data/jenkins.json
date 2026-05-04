@@ -1,0 +1,37 @@
+[
+  {
+    "_id": { "$oid": "663a0300000000000000a301" },
+    "idProyecto": "PRJ001",
+    "nombre": "PC-build-backend",
+    "url": "https://jenkins.indra.es/job/PRJ001/job/PC-build-backend",
+    "status": "SUCCESS"
+  },
+  {
+    "_id": { "$oid": "663a0300000000000000a302" },
+    "idProyecto": "PRJ001",
+    "nombre": "PC-build-frontend",
+    "url": "https://jenkins.indra.es/job/PRJ001/job/PC-build-frontend",
+    "status": "SUCCESS"
+  },
+  {
+    "_id": { "$oid": "663a0300000000000000a303" },
+    "idProyecto": "PRJ001",
+    "nombre": "PC-deploy-dev",
+    "url": "https://jenkins.indra.es/job/PRJ001/job/PC-deploy-dev",
+    "status": "FAILURE"
+  },
+  {
+    "_id": { "$oid": "663a0300000000000000a304" },
+    "idProyecto": "PRJ002",
+    "nombre": "SGD-build",
+    "url": "https://jenkins.indra.es/job/PRJ002/job/SGD-build",
+    "status": "SUCCESS"
+  },
+  {
+    "_id": { "$oid": "663a0300000000000000a305" },
+    "idProyecto": "PRJ002",
+    "nombre": "SGD-deploy-dev",
+    "url": "https://jenkins.indra.es/job/PRJ002/job/SGD-deploy-dev",
+    "status": "UNSTABLE"
+  }
+]

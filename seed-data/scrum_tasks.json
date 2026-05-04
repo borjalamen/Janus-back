@@ -1,0 +1,64 @@
+[
+  {
+    "_id": { "$oid": "663a0900000000000000a901" },
+    "title": "Implementar endpoint /api/auth/refresh-token",
+    "estimate": "8h",
+    "priority": 1,
+    "description": "Crear el endpoint de refresco de JWT para evitar que el usuario tenga que hacer login cada hora.",
+    "assignee": "rgallegoga",
+    "color": "#4CAF50",
+    "status": "DONE",
+    "comments": [
+      { "id": "c001", "author": "fsgil", "text": "Usar refresh token con expiración de 7 días. Invalidar en logout.", "createdAt": "2025-04-22T10:00:00" }
+    ],
+    "createdAt": "2025-04-22T09:00:00",
+    "updatedAt": "2025-04-25T16:00:00",
+    "visible": true,
+    "sprintId": "663a0800000000000000a802"
+  },
+  {
+    "_id": { "$oid": "663a0900000000000000a902" },
+    "title": "Fix bug #PC-371: error 500 en carga masiva de documentos",
+    "estimate": "4h",
+    "priority": 1,
+    "description": "El endpoint /api/documents/bulk falla con 500 cuando se suben más de 10 ficheros simultáneamente. Revisar límites multipart y concurrencia.",
+    "assignee": "rplante",
+    "color": "#F44336",
+    "status": "IN_PROGRESS",
+    "comments": [],
+    "createdAt": "2025-04-23T09:00:00",
+    "updatedAt": "2025-04-28T11:00:00",
+    "visible": true,
+    "sprintId": "663a0800000000000000a802"
+  },
+  {
+    "_id": { "$oid": "663a0900000000000000a903" },
+    "title": "Añadir pipeline de análisis DAST con OWASP ZAP",
+    "estimate": "16h",
+    "priority": 2,
+    "description": "Integrar OWASP ZAP en el pipeline de Jenkins para ejecutar análisis de seguridad dinámica (DAST) antes de los despliegues en integración.",
+    "assignee": "blara",
+    "color": "#FF9800",
+    "status": "TODO",
+    "comments": [],
+    "createdAt": "2025-04-23T09:00:00",
+    "updatedAt": "2025-04-23T09:00:00",
+    "visible": true,
+    "sprintId": "663a0800000000000000a802"
+  },
+  {
+    "_id": { "$oid": "663a0900000000000000a904" },
+    "title": "Documentar procedimiento de rollback en OpenShift",
+    "estimate": "4h",
+    "priority": 3,
+    "description": "Redactar el procedimiento estándar de rollback de deployments en OpenShift y añadirlo al JanusHub.",
+    "assignee": "fsgil",
+    "color": "#2196F3",
+    "status": "TODO",
+    "comments": [],
+    "createdAt": "2025-04-24T09:00:00",
+    "updatedAt": "2025-04-24T09:00:00",
+    "visible": true,
+    "sprintId": "663a0800000000000000a802"
+  }
+]

@@ -1,0 +1,60 @@
+[
+  {
+    "_id": { "$oid": "663a0200000000000000a201" },
+    "deleted": false,
+    "codProyecto": ["PRJ001"],
+    "ip": "172.19.208.100",
+    "estado": "ACTIVO",
+    "so": "RHEL 8.6",
+    "firewall": "iptables",
+    "cpu": "8 vCPU",
+    "ram": "16 GB",
+    "capacidad": "200 GB SSD",
+    "tags": ["backend", "produccion", "prj001"],
+    "cpd": "CPD Madrid Norte",
+    "host": "vm-prj001-back-01.indra.es",
+    "auth": [
+      { "user": "devops", "passw": "D3v0ps2025!" },
+      { "user": "root", "passw": "R00t2025!!" }
+    ],
+    "jdk": [
+      { "nombre": "JDK 21 (Eclipse Temurin)", "ruta": "/usr/lib/jvm/temurin-21" }
+    ],
+    "services": [
+      { "nombre": "janus-back", "ruta": "/opt/janus/backend" },
+      { "nombre": "nginx", "ruta": "/etc/nginx" }
+    ],
+    "crc": null
+  },
+  {
+    "_id": { "$oid": "663a0200000000000000a202" },
+    "deleted": false,
+    "codProyecto": ["PRJ001", "PRJ002"],
+    "ip": "172.19.208.104",
+    "estado": "ACTIVO",
+    "so": "RHEL 8.6",
+    "firewall": "firewalld",
+    "cpu": "4 vCPU",
+    "ram": "8 GB",
+    "capacidad": "100 GB SSD",
+    "tags": ["bbdd", "mongodb", "compartido"],
+    "cpd": "CPD Madrid Norte",
+    "host": "vm-bbdd-01.indra.es",
+    "auth": [
+      { "user": "mongoadmin", "passw": "M0ng04dm1n!" }
+    ],
+    "jdk": [],
+    "services": [
+      { "nombre": "mongod", "ruta": "/var/lib/mongo" }
+    ],
+    "crc": {
+      "cpu": "2 vCPU",
+      "ram": "4 GB",
+      "capacidad": "50 GB",
+      "auth": [{ "user": "crc-admin", "passw": "Crc2025!" }],
+      "other": [
+        { "key": "OpenShift CRC version", "value": "2.x", "version": "4.14" }
+      ]
+    }
+  }
+]

@@ -1,0 +1,22 @@
+[
+  {
+    "_id": { "$oid": "663a0a00000000000000aa11" },
+    "title": "Demo CI/CD Pipeline PRJ001",
+    "description": "Grabación de la demo interna mostrando el pipeline completo de build, análisis y despliegue del Portal Ciudadano en OpenShift dev.",
+    "file": "videos/demo-cicd-prj001.mp4",
+    "thumbnail": "videos/thumbs/demo-cicd-prj001.jpg",
+    "duration": "12:34",
+    "createdAt": { "$date": "2025-03-10T11:00:00.000Z" },
+    "updatedAt": { "$date": "2025-03-10T11:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "663a0a00000000000000aa12" },
+    "title": "Onboarding JanusHub - Guía de uso",
+    "description": "Vídeo de onboarding para nuevos miembros del equipo explicando las funcionalidades principales de JanusHub.",
+    "file": "videos/onboarding-janushub.mp4",
+    "thumbnail": "videos/thumbs/onboarding-janushub.jpg",
+    "duration": "08:15",
+    "createdAt": { "$date": "2025-04-01T10:00:00.000Z" },
+    "updatedAt": { "$date": "2025-04-01T10:00:00.000Z" }
+  }
+]

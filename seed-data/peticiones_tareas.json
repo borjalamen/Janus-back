@@ -1,0 +1,36 @@
+[
+  {
+    "_id": { "$oid": "663a0500000000000000a501" },
+    "requesterName": "Carlos Méndez",
+    "requesterEmail": "cmendez@cliente.es",
+    "projectName": "Portal Ciudadano Digital",
+    "projectCode": "PRJ001",
+    "jiraTask": "PC-380",
+    "devopsAssignee": "rgallegoga",
+    "deadline": { "$date": "2025-05-15T18:00:00.000Z" },
+    "comments": "Necesitamos urgente el despliegue del hotfix de seguridad en el endpoint de autenticación.",
+    "attachments": [],
+    "estado": "APROBADA",
+    "createdAt": { "$date": "2025-05-04T08:30:00.000Z" },
+    "updatedAt": { "$date": "2025-05-04T10:00:00.000Z" },
+    "deadlineTime": "18:00",
+    "adminComment": "Aprobado. Coordinar con rplante para la ventana de despliegue."
+  },
+  {
+    "_id": { "$oid": "663a0500000000000000a502" },
+    "requesterName": "Ana Torres",
+    "requesterEmail": "atorres@cliente.es",
+    "projectName": "Sistema de Gestión Documental",
+    "projectCode": "PRJ002",
+    "jiraTask": "SGD-45",
+    "devopsAssignee": null,
+    "deadline": { "$date": "2025-05-20T12:00:00.000Z" },
+    "comments": "Solicito configuración de un nuevo entorno de preproducción para el proyecto SGD.",
+    "attachments": [],
+    "estado": "PENDIENTE",
+    "createdAt": { "$date": "2025-05-04T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-05-04T09:00:00.000Z" },
+    "deadlineTime": "12:00",
+    "adminComment": null
+  }
+]

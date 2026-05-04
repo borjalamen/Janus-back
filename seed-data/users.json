@@ -1,0 +1,58 @@
+[
+  {
+    "_id": { "$oid": "6639a100000000000000aa01" },
+    "username": "fsgil",
+    "password": "$2b$10$RrKDtmqaIL.iCwUHnvVFEuS/NBJUQZgnWUnCM9q.F.hYv8krNBlTW",
+    "roles": ["ADMIN", "DEVOPS"],
+    "fullName": "Fernando Silvano Gil Pérez",
+    "email": "fsgil@minsait.com",
+    "phone": "+34 600 000 001",
+    "status": "ACTIVE",
+    "createdAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "avatarPath": null,
+    "cvPath": null
+  },
+  {
+    "_id": { "$oid": "6639a100000000000000aa02" },
+    "username": "rgallegoga",
+    "password": "$2b$10$XKSn39ERQaExoCaQlPo4/eF4fo4bmUngO78GdRzvnz.KptW6FVEe.",
+    "roles": ["DEVOPS"],
+    "fullName": "Raúl Gallego García",
+    "email": "rgallegoga@minsait.com",
+    "phone": "+34 600 000 002",
+    "status": "ACTIVE",
+    "createdAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "avatarPath": null,
+    "cvPath": null
+  },
+  {
+    "_id": { "$oid": "6639a100000000000000aa03" },
+    "username": "rplante",
+    "password": "$2b$10$/vPDWjv57iGQNun571F0ju.W29IcSdnsMaEPAi/bFRMGV6/hBT806",
+    "roles": ["DEVOPS"],
+    "fullName": "Rubén Plante",
+    "email": "rplante@minsait.com",
+    "phone": "+34 600 000 003",
+    "status": "ACTIVE",
+    "createdAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "avatarPath": null,
+    "cvPath": null
+  },
+  {
+    "_id": { "$oid": "6639a100000000000000aa04" },
+    "username": "blara",
+    "password": "$2b$10$L.x2wchQxzaW2CuKcp87k.ItuvqE6Zx2SY1UpiWawpjbe6BzxcMb.",
+    "roles": ["DEVOPS"],
+    "fullName": "Borja Lara",
+    "email": "blara@eservicios.indra.es",
+    "phone": "+34 600 000 004",
+    "status": "ACTIVE",
+    "createdAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-01-10T09:00:00.000Z" },
+    "avatarPath": null,
+    "cvPath": null
+  }
+]

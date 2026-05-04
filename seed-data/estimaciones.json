@@ -1,0 +1,79 @@
+[
+  {
+    "_id": { "$oid": "6639d100000000000000dd01" },
+    "estimationName": "Estimación Q1 2025 - Portal Ciudadano",
+    "projectCode": "PRJ001",
+    "projectName": "Portal Ciudadano Digital",
+    "requester": "Francisco S. Gil",
+    "requesterEmail": "fsgil@minsait.com",
+    "notes": "Estimación para el primer trimestre. Incluye release 2.1 y migración BD.",
+    "comments": [
+      {
+        "id": "cmt001",
+        "author": "rgallegoga",
+        "text": "Revisar dependencias con el equipo de QA antes de cerrar cifras.",
+        "createdAt": "2025-01-20T11:00:00"
+      }
+    ],
+    "weeks": ["S1 (06/01)", "S2 (13/01)", "S3 (20/01)", "S4 (27/01)", "S5 (03/02)", "S6 (10/02)"],
+    "tasks": [
+      {
+        "id": "tsk001",
+        "title": "Análisis y diseño",
+        "estimates": [8, 8, 0, 0, 0, 0]
+      },
+      {
+        "id": "tsk002",
+        "title": "Desarrollo backend",
+        "estimates": [0, 16, 24, 16, 8, 0]
+      },
+      {
+        "id": "tsk003",
+        "title": "Desarrollo frontend",
+        "estimates": [0, 8, 16, 24, 8, 0]
+      },
+      {
+        "id": "tsk004",
+        "title": "Testing y QA",
+        "estimates": [0, 0, 8, 8, 16, 8]
+      },
+      {
+        "id": "tsk005",
+        "title": "Despliegue y validación",
+        "estimates": [0, 0, 0, 0, 8, 16]
+      }
+    ],
+    "createdAt": "2025-01-15T09:00:00",
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "6639d100000000000000dd02" },
+    "estimationName": "Estimación Setup Inicial - SGD",
+    "projectCode": "PRJ002",
+    "projectName": "Sistema de Gestión Documental",
+    "requester": "Roberto Gallego García",
+    "requesterEmail": "rgallegoga@minsait.com",
+    "notes": "Estimación para la puesta en marcha del entorno de desarrollo y CI/CD.",
+    "comments": [],
+    "weeks": ["S1 (03/02)", "S2 (10/02)", "S3 (17/02)"],
+    "tasks": [
+      {
+        "id": "tsk006",
+        "title": "Configuración infraestructura",
+        "estimates": [16, 8, 0]
+      },
+      {
+        "id": "tsk007",
+        "title": "Pipeline CI/CD Jenkins",
+        "estimates": [8, 16, 8]
+      },
+      {
+        "id": "tsk008",
+        "title": "Configuración SonarQube",
+        "estimates": [0, 8, 8]
+      }
+    ],
+    "createdAt": "2025-02-01T10:00:00",
+    "visible": true
+  }
+]

@@ -1,0 +1,28 @@
+[
+  {
+    "_id": { "$oid": "663a0b00000000000000ab01" },
+    "title": "Arquitectura Técnica Portal Ciudadano v1.0",
+    "description": "Documento de arquitectura técnica de la solución. Incluye diagramas de componentes, secuencia y modelo de datos.",
+    "fileId": "arch-pc-v1.0.pdf",
+    "ruta": "documents/PRJ001/arch-pc-v1.0.pdf",
+    "version": "1.0",
+    "autor": "fsgil",
+    "validadoPor": "fsgil",
+    "fechaEntrega": { "$date": "2025-01-30T00:00:00.000Z" },
+    "plataforma": "Confluence",
+    "createdAt": { "$date": "2025-01-30T09:00:00.000Z" }
+  },
+  {
+    "_id": { "$oid": "663a0b00000000000000ab02" },
+    "title": "Plan de Pruebas PRJ001 Q1 2025",
+    "description": "Plan de pruebas funcionales, de integración y de rendimiento para la release 2.1 del Portal Ciudadano.",
+    "fileId": "test-plan-prj001-q1.xlsx",
+    "ruta": "documents/PRJ001/test-plan-prj001-q1.xlsx",
+    "version": "1.2",
+    "autor": "rplante",
+    "validadoPor": "fsgil",
+    "fechaEntrega": { "$date": "2025-02-14T00:00:00.000Z" },
+    "plataforma": "Confluence",
+    "createdAt": { "$date": "2025-02-10T10:00:00.000Z" }
+  }
+]

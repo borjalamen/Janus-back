@@ -1,0 +1,46 @@
+[
+  {
+    "_id": { "$oid": "6639e100000000000000ee01" },
+    "name": "Kubernetes Fundamentals",
+    "link": "https://kubernetes.io/docs/tutorials/",
+    "description": "Curso oficial de introducción a Kubernetes: pods, deployments, services y configuración básica de clústeres.",
+    "tags": ["kubernetes", "contenedores", "orquestación", "devops"],
+    "location": "Online",
+    "visible": true,
+    "deleted": false,
+    "deletedAt": null
+  },
+  {
+    "_id": { "$oid": "6639e100000000000000ee02" },
+    "name": "OpenShift para Administradores",
+    "link": "https://learn.openshift.com",
+    "description": "Formación en Red Hat OpenShift: gestión de proyectos, rutas, builds, imagestreams y operadores.",
+    "tags": ["openshift", "redhat", "contenedores", "plataforma"],
+    "location": "Presencial - Madrid",
+    "visible": true,
+    "deleted": false,
+    "deletedAt": null
+  },
+  {
+    "_id": { "$oid": "6639e100000000000000ee03" },
+    "name": "Jenkins Pipelines Avanzado",
+    "link": "https://www.jenkins.io/doc/book/pipeline/",
+    "description": "Creación de pipelines declarativos y scriptados en Jenkins. Shared libraries, agentes dinámicos y integración con SonarQube y Nexus.",
+    "tags": ["jenkins", "ci/cd", "pipelines", "automatización"],
+    "location": "Online",
+    "visible": true,
+    "deleted": false,
+    "deletedAt": null
+  },
+  {
+    "_id": { "$oid": "6639e100000000000000ee04" },
+    "name": "GitOps con ArgoCD",
+    "link": "https://argo-cd.readthedocs.io/en/stable/",
+    "description": "Introducción a GitOps y despliegue continuo con ArgoCD sobre Kubernetes y OpenShift.",
+    "tags": ["gitops", "argocd", "kubernetes", "cd"],
+    "location": "Online",
+    "visible": true,
+    "deleted": false,
+    "deletedAt": null
+  }
+]

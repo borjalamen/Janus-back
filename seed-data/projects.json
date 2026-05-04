@@ -1,0 +1,112 @@
+[
+  {
+    "_id": { "$oid": "6639c100000000000000cc01" },
+    "codigoProyecto": "PRJ001",
+    "nombre": "Portal Ciudadano Digital",
+    "codigoImputacion": "IMP-2025-001",
+    "lote": "Lote 1",
+    "departamento": "Arquitectura",
+    "urlEntornoDesarrollo": "https://dev.portal-ciudadano.indra.es",
+    "urlEntornoIntegracion": "https://int.portal-ciudadano.indra.es",
+    "urlEntornoPreproduccion": "https://pre.portal-ciudadano.indra.es",
+    "urlEntornoProduccion": "https://portal-ciudadano.indra.es",
+    "responsableProyecto": "fsgil",
+    "responsableTecnico": "rgallegoga",
+    "horaDaily": "09:30",
+    "ip": ["172.19.208.100", "172.19.208.101"],
+    "tareas": [
+      { "titulo": "Despliegue release 2.1", "prioridad": "ALTA", "estado": "EN_CURSO", "completadoPercent": 60, "notas": "Pendiente validación QA" },
+      { "titulo": "Migración base de datos", "prioridad": "MEDIA", "estado": "PENDIENTE", "completadoPercent": 0, "notas": "" }
+    ],
+    "herramientas": ["Jenkins", "SonarQube", "Nexus"],
+    "jenkinsNodes": ["jenkins-node-01", "jenkins-node-02"],
+    "dockerImages": [
+      { "image": "portal-ciudadano/backend:latest", "purpose": "API REST Spring Boot" },
+      { "image": "portal-ciudadano/frontend:latest", "purpose": "Angular SPA" }
+    ],
+    "pipelines": ["PC-build-backend", "PC-build-frontend", "PC-deploy-dev"],
+    "repositorios": [
+      "https://bitbucket.indra.es/scm/pc/portal-ciudadano-back.git",
+      "https://bitbucket.indra.es/scm/pc/portal-ciudadano-front.git"
+    ],
+    "bbdd": [
+      { "tipo": "MongoDB", "uri": "mongodb://172.19.208.104:27017/portaldb", "usuario": "portalUser", "password": "p0rtal2025!", "notas": "MongoDB Atlas dev cluster" }
+    ],
+    "openshift": [
+      { "usuario": "devops-pc", "url": "https://console.openshift.indra.es", "token": "sha256~xxxxxxxxxxxxxxxx", "kibana": "https://kibana.openshift.indra.es", "grafana": "https://grafana.openshift.indra.es" }
+    ],
+    "usuarios": ["fsgil", "rgallegoga", "rplante", "blara"],
+    "notasGenerales": "Proyecto estratégico. Daily a las 9:30. Despliegues solo en ventana autorizada.",
+    "entornoNotas": "Dev accesible VPN. Pre requiere aprobación de arquitectura.",
+    "equipoMinsait": [
+      { "nombre": "Francisco S. Gil", "rol": "Arquitecto", "email": "fsgil@minsait.com" },
+      { "nombre": "Roberto Gallego García", "rol": "DevOps Senior", "email": "rgallegoga@minsait.com" },
+      { "nombre": "Raúl Plante", "rol": "DevOps", "email": "rplante@minsait.com" },
+      { "nombre": "Beatriz Lara", "rol": "DevOps", "email": "blara@eservicios.indra.es" }
+    ],
+    "devMachines": [
+      { "identifier": "DM-001", "ip": "172.19.208.50", "user": "devops", "password": "D3v0ps2025!", "ram": "16GB", "cpu": "8 cores", "disk": "500GB SSD" }
+    ],
+    "herramientasMind": {
+      "codeRepos": [{ "name": "Bitbucket Indra", "url": "https://bitbucket.indra.es" }],
+      "artifactRepos": [{ "name": "Nexus", "url": "https://nexus.indra.es" }],
+      "jenkins": [{ "name": "Jenkins CI", "url": "https://jenkins.indra.es/job/PRJ001" }],
+      "sonarList": [{ "prefix": "PC", "url": "https://sonar.indra.es", "tokenUser": "sonar-pc", "tokenValue": "sqp_xxxxxxxx" }]
+    },
+    "documents": [],
+    "createdAt": { "$date": "2025-01-15T08:00:00.000Z" },
+    "updatedAt": { "$date": "2025-03-01T10:00:00.000Z" },
+    "deleted": false,
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "6639c100000000000000cc02" },
+    "codigoProyecto": "PRJ002",
+    "nombre": "Sistema de Gestión Documental",
+    "codigoImputacion": "IMP-2025-002",
+    "lote": "Lote 2",
+    "departamento": "Desarrollo",
+    "urlEntornoDesarrollo": "https://dev.sgd.indra.es",
+    "urlEntornoIntegracion": "https://int.sgd.indra.es",
+    "urlEntornoPreproduccion": null,
+    "urlEntornoProduccion": null,
+    "responsableProyecto": "rgallegoga",
+    "responsableTecnico": "rplante",
+    "horaDaily": "10:00",
+    "ip": ["172.19.208.110"],
+    "tareas": [
+      { "titulo": "Setup CI/CD pipeline", "prioridad": "ALTA", "estado": "FINALIZADA", "completadoPercent": 100, "notas": "" },
+      { "titulo": "Configurar SonarQube", "prioridad": "MEDIA", "estado": "EN_CURSO", "completadoPercent": 40, "notas": "Falta definir quality gate" }
+    ],
+    "herramientas": ["Jenkins", "Docker", "SonarQube"],
+    "jenkinsNodes": ["jenkins-node-02"],
+    "dockerImages": [
+      { "image": "sgd/api:1.0.0", "purpose": "API REST" }
+    ],
+    "pipelines": ["SGD-build", "SGD-deploy-dev"],
+    "repositorios": ["https://bitbucket.indra.es/scm/sgd/sgd-back.git"],
+    "bbdd": [
+      { "tipo": "PostgreSQL", "uri": "jdbc:postgresql://172.19.208.110:5432/sgddb", "usuario": "sgduser", "password": "sgd2025!", "notas": "" }
+    ],
+    "openshift": [],
+    "usuarios": ["rgallegoga", "rplante", "blara"],
+    "notasGenerales": "Proyecto en fase inicial. Sin acceso a producción.",
+    "entornoNotas": "Solo dev disponible por ahora.",
+    "equipoMinsait": [
+      { "nombre": "Roberto Gallego García", "rol": "DevOps Senior", "email": "rgallegoga@minsait.com" },
+      { "nombre": "Raúl Plante", "rol": "DevOps", "email": "rplante@minsait.com" }
+    ],
+    "devMachines": [],
+    "herramientasMind": {
+      "codeRepos": [{ "name": "Bitbucket Indra", "url": "https://bitbucket.indra.es" }],
+      "artifactRepos": [],
+      "jenkins": [{ "name": "Jenkins CI", "url": "https://jenkins.indra.es/job/PRJ002" }],
+      "sonarList": []
+    },
+    "documents": [],
+    "createdAt": { "$date": "2025-02-01T08:00:00.000Z" },
+    "updatedAt": { "$date": "2025-02-20T15:30:00.000Z" },
+    "deleted": false,
+    "visible": true
+  }
+]

@@ -1,0 +1,98 @@
+[
+  {
+    "_id": { "$oid": "663a0600000000000000a601" },
+    "titulo": "Procedimiento de Despliegue en OpenShift Dev",
+    "descripcion": "Pasos estándar para realizar un despliegue en el entorno de desarrollo de OpenShift. Aplicable a todos los proyectos del equipo.",
+    "departamento": "Operaciones",
+    "tags": ["openshift", "despliegue", "dev", "estándar"],
+    "steps": [
+      {
+        "id": "sp001",
+        "titulo": "Verificar rama y tag",
+        "descripcion": "Asegurarse de que el tag de la release está creado en el repositorio y aprobado en el PR correspondiente.",
+        "orden": 1,
+        "attachments": []
+      },
+      {
+        "id": "sp002",
+        "titulo": "Lanzar pipeline Jenkins",
+        "descripcion": "Ejecutar el pipeline de build y push de imagen. Verificar que todos los stages pasan en verde.",
+        "orden": 2,
+        "attachments": []
+      },
+      {
+        "id": "sp003",
+        "titulo": "Aplicar ConfigMap y Secrets actualizados",
+        "descripcion": "Si hay cambios en configuración: oc apply -f openshift/dev/. Verificar que no hay errores de validación.",
+        "orden": 3,
+        "attachments": []
+      },
+      {
+        "id": "sp004",
+        "titulo": "Hacer rollout del deployment",
+        "descripcion": "Ejecutar: oc rollout restart deployment/<nombre-servicio>. Supervisar que los pods arrancan correctamente.",
+        "orden": 4,
+        "attachments": []
+      },
+      {
+        "id": "sp005",
+        "titulo": "Validar smoke test",
+        "descripcion": "Ejecutar las pruebas de humo básicas contra el endpoint /actuator/health y los endpoints principales de la API.",
+        "orden": 5,
+        "attachments": []
+      }
+    ],
+    "createdAt": { "$date": "2025-01-20T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-04-01T11:00:00.000Z" },
+    "isDeleted": false,
+    "isVisible": true
+  },
+  {
+    "_id": { "$oid": "663a0600000000000000a602" },
+    "titulo": "Procedimiento de Rotación de Credenciales",
+    "descripcion": "Proceso para rotar contraseñas y tokens de acceso a entornos y servicios. Debe realizarse cada 90 días o ante sospecha de compromiso.",
+    "departamento": "Arquitectura",
+    "tags": ["seguridad", "credenciales", "rotación", "tokens"],
+    "steps": [
+      {
+        "id": "sp006",
+        "titulo": "Inventariar credenciales a rotar",
+        "descripcion": "Revisar el listado de secrets en OpenShift y credenciales en Jenkins para identificar las que han superado el período de vigencia.",
+        "orden": 1,
+        "attachments": []
+      },
+      {
+        "id": "sp007",
+        "titulo": "Generar nuevas credenciales",
+        "descripcion": "Generar nuevas contraseñas con gestor de contraseñas seguro (mínimo 16 caracteres, mayúsculas, minúsculas, números y símbolos).",
+        "orden": 2,
+        "attachments": []
+      },
+      {
+        "id": "sp008",
+        "titulo": "Actualizar Secrets en OpenShift",
+        "descripcion": "Actualizar los objetos Secret en el namespace correspondiente con: oc create secret generic <nombre> --from-literal=<key>=<valor> --dry-run=client -o yaml | oc apply -f -",
+        "orden": 3,
+        "attachments": []
+      },
+      {
+        "id": "sp009",
+        "titulo": "Actualizar credenciales en Jenkins",
+        "descripcion": "Acceder a Manage Jenkins > Credentials y actualizar los tokens/contraseñas afectados.",
+        "orden": 4,
+        "attachments": []
+      },
+      {
+        "id": "sp010",
+        "titulo": "Validar accesos",
+        "descripcion": "Verificar que todos los pipelines y servicios funcionan correctamente con las nuevas credenciales.",
+        "orden": 5,
+        "attachments": []
+      }
+    ],
+    "createdAt": { "$date": "2025-02-15T09:00:00.000Z" },
+    "updatedAt": { "$date": "2025-02-15T09:00:00.000Z" },
+    "isDeleted": false,
+    "isVisible": true
+  }
+]

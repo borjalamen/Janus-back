@@ -1,0 +1,6 @@
+[
+  { "_id": { "$oid": "6639b100000000000000bb01" }, "name": "Arquitectura" },
+  { "_id": { "$oid": "6639b100000000000000bb02" }, "name": "Desarrollo" },
+  { "_id": { "$oid": "6639b100000000000000bb03" }, "name": "Operaciones" },
+  { "_id": { "$oid": "6639b100000000000000bb04" }, "name": "QA & Testing" }
+]

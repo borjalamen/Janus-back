@@ -1,0 +1,73 @@
+[
+  {
+    "_id": { "$oid": "6639f100000000000000ff01" },
+    "idProyecto": "PRJ001",
+    "titulo": "Error 502 Bad Gateway en despliegue de release 2.0",
+    "contexto": "Durante el despliegue de la release 2.0 en el entorno de integración, el servicio de backend devolvía 502 Bad Gateway al cabo de unos minutos de arrancar. El nginx del frontend no podía conectar con el servicio Spring Boot.",
+    "error": "502 Bad Gateway - upstream connect error or disconnect/reset before headers. reset reason: connection timeout",
+    "soluciones": [
+      {
+        "numero": 1,
+        "descripcion": "Aumentar el proxy_read_timeout en nginx a 600s. El timeout por defecto (60s) era insuficiente para el arranque completo de Spring Boot.",
+        "entorno": ["Integración"],
+        "archivoNombre": null,
+        "archivoBase64": null,
+        "archivoTipo": null
+      },
+      {
+        "numero": 2,
+        "descripcion": "Revisar los readinessProbe de OpenShift. El pod se marcaba como ready antes de que la aplicación hubiese cargado todos los beans.",
+        "entorno": ["Integración", "Dev"],
+        "archivoNombre": null,
+        "archivoBase64": null,
+        "archivoTipo": null
+      }
+    ],
+    "entorno": "Integración",
+    "fecha": { "$date": "2025-02-10T14:30:00.000Z" },
+    "tags": ["nginx", "openshift", "timeout", "502"],
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "6639f100000000000000ff02" },
+    "idProyecto": "PRJ001",
+    "titulo": "OOM en pod de backend tras migración a JDK 21",
+    "contexto": "Tras actualizar el base image de JDK 11 a JDK 21 en OpenShift, el pod de backend terminaba con OOMKilled al cabo de unas horas en entorno dev.",
+    "error": "OOMKilled - Container exceeded memory limit of 2Gi",
+    "soluciones": [
+      {
+        "numero": 1,
+        "descripcion": "JDK 21 con G1GC reserva más heap por defecto. Se ajustaron los flags -Xms512m -Xmx1536m y se aumentó el límite de memoria del pod a 2.5Gi.",
+        "entorno": ["Dev"],
+        "archivoNombre": null,
+        "archivoBase64": null,
+        "archivoTipo": null
+      }
+    ],
+    "entorno": "Dev",
+    "fecha": { "$date": "2025-03-05T10:00:00.000Z" },
+    "tags": ["jdk21", "oom", "openshift", "jvm", "memoria"],
+    "visible": true
+  },
+  {
+    "_id": { "$oid": "6639f100000000000000ff03" },
+    "idProyecto": "PRJ002",
+    "titulo": "Pipeline Jenkins falla en etapa de SonarQube",
+    "contexto": "El pipeline de CI para el proyecto SGD falla en la etapa de análisis de SonarQube con un error de autenticación. El token configurado en Jenkins estaba caducado.",
+    "error": "ERROR: SonarQube analysis failed: 401 Unauthorized - The token used is not valid.",
+    "soluciones": [
+      {
+        "numero": 1,
+        "descripcion": "Regenerar el token en SonarQube (Admin > Security > Tokens) y actualizarlo en las credenciales de Jenkins (Manage Jenkins > Credentials).",
+        "entorno": ["Dev"],
+        "archivoNombre": null,
+        "archivoBase64": null,
+        "archivoTipo": null
+      }
+    ],
+    "entorno": "Dev",
+    "fecha": { "$date": "2025-03-20T16:45:00.000Z" },
+    "tags": ["jenkins", "sonarqube", "token", "autenticación", "ci/cd"],
+    "visible": true
+  }
+]
