@@ -390,22 +390,26 @@ public class OpenAiService {
 
     // ── Instrucciones de relleno de estimación (disponibles para todos los roles) ────
     private static final String FILL_INSTRUCTIONS =
-        "=== RELLENO DE FORMULARIO DE ESTIMACIÓN ===\n" +
-        "Cuando el usuario te pida crear, generar o rellenar una estimación (puede adjuntar un txt, descripción, lista de tareas...),\n" +
-        "analiza los datos y genera un bloque ACTION con FILL_ESTIMACION AL FINAL de tu respuesta.\n" +
-        "Formato: FILL_ESTIMACION: {\"action\":\"FILL_ESTIMACION\",\"estimationName\":\"...\",\"projectCode\":\"PRJ-XXX o vacío\",\n" +
-        "\"projectName\":\"...\",\"requester\":\"...\",\"requesterEmail\":\"...\",\"notes\":\"Resumen ejecutivo del trabajo\",\n" +
-        "\"weeks\":[\"Semana 1\",\"Semana 2\"],\"tasks\":[{\"title\":\"Nombre tarea\",\"estimates\":[8,4]}]}\n" +
-        "REGLAS:\n" +
-        "1) El array 'estimates' de cada tarea debe tener exactamente la misma longitud que 'weeks'.\n" +
-        "2) Los valores de 'estimates' son horas de trabajo dedicadas esa semana a esa tarea.\n" +
-        "3) Genera tantas tareas y semanas como sean necesarias según el contexto proporcionado.\n" +
-        "4) Si el usuario no especifica solicitante o email, déjalos vacíos.\n" +
-        "5) El bloque ACTION siempre va AL FINAL, con el formato:\n" +
-        "<<<ACTION>>>\n{...json...}\n<<<END_ACTION>>>";
+        "=== CAPACIDAD: RELLENO DE ESTIMACIÓN ===\n" +
+        "Cuando el usuario pida crear, generar o rellenar una estimación de tareas, analiza el contexto y responde SIEMPRE en DOS PARTES:\n" +
+        "PARTE 1: Explica brevemente lo que has hecho (2-4 líneas máximo).\n" +
+        "PARTE 2: Un bloque ACTION con EXACTAMENTE este formato (sin variaciones):\n" +
+        "<<<ACTION>>>\n" +
+        "{\"action\":\"FILL_ESTIMACION\",\"estimationName\":\"nombre descriptivo\",\"projectCode\":\"PRJ-XXX\",\"projectName\":\"nombre proyecto\",\"requester\":\"nombre solicitante\",\"requesterEmail\":\"email\",\"notes\":\"resumen del trabajo\",\"weeks\":[\"Semana 1\",\"Semana 2\"],\"tasks\":[{\"title\":\"Nombre tarea\",\"estimates\":[8,4]}]}\n" +
+        "<<<END_ACTION>>>\n" +
+        "REGLAS OBLIGATORIAS:\n" +
+        "1) El JSON debe ir SIEMPRE entre <<<ACTION>>> y <<<END_ACTION>>>, sin excepciones.\n" +
+        "2) 'estimates' de cada tarea: mismo número de elementos que 'weeks', en horas.\n" +
+        "3) Genera las tareas y semanas necesarias según el contexto.\n" +
+        "4) Si faltan datos (solicitante, email, código), déjalos vacíos.\n" +
+        "5) NO pongas el JSON fuera del bloque ACTION. NO expliques el JSON.";
 
     private static final Pattern ACTION_PATTERN =
         Pattern.compile("<<<ACTION>>>\\s*(\\{.*?\\})\\s*<<<END_ACTION>>>", Pattern.DOTALL);
+
+    /** Fallback: detecta un objeto JSON con "action":"FILL_ESTIMACION" aunque no tenga marcadores */
+    private static final Pattern FILL_JSON_FALLBACK =
+        Pattern.compile("\\{[^{}]*\"action\"\\s*:\\s*\"FILL_ESTIMACION\"[^{}]*(?:\\{[^{}]*\\}[^{}]*)*\\}", Pattern.DOTALL);
 
     /**
      * Extrae bloques ACTION del texto de la IA, los ejecuta y devuelve
@@ -414,7 +418,8 @@ public class OpenAiService {
     private AiResult executeActions(String rawAnswer) {
         Matcher m = ACTION_PATTERN.matcher(rawAnswer);
         if (!m.find()) {
-            return new AiResult(rawAnswer, null);
+            // Fallback: buscar FILL_ESTIMACION sin marcadores
+            return executeFillOnlyActions(rawAnswer);
         }
 
         String jsonBlock = m.group(1).trim();
@@ -762,24 +767,44 @@ public class OpenAiService {
 
     /**
      * Para usuarios sin rol privilegiado: solo ejecuta FILL_ESTIMACION (no escribe en BD).
+     * Intenta primero con marcadores <<<ACTION>>>, luego busca JSON suelto como fallback.
      */
     private AiResult executeFillOnlyActions(String rawAnswer) {
+        // 1) Intento normal con marcadores
         Matcher m = ACTION_PATTERN.matcher(rawAnswer);
-        if (!m.find()) return new AiResult(rawAnswer, null);
-
-        String jsonBlock = m.group(1).trim();
-        String cleanAnswer = rawAnswer.substring(0, m.start()).trim();
-        if (cleanAnswer.isBlank()) cleanAnswer = rawAnswer.replaceAll("<<<ACTION>>>.*<<<END_ACTION>>>", "").trim();
-
-        try {
-            Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
-            String action = (String) actionMap.get("action");
-            if ("FILL_ESTIMACION".equals(action)) {
-                return new AiResult(cleanAnswer, fillEstimacionFromJson(actionMap));
+        if (m.find()) {
+            String jsonBlock = m.group(1).trim();
+            String cleanAnswer = rawAnswer.substring(0, m.start()).trim();
+            if (cleanAnswer.isBlank()) cleanAnswer = rawAnswer.replaceAll("<<<ACTION>>>.*<<<END_ACTION>>>", "").trim();
+            try {
+                Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
+                String action = (String) actionMap.get("action");
+                if ("FILL_ESTIMACION".equals(action)) {
+                    return new AiResult(cleanAnswer, fillEstimacionFromJson(actionMap));
+                }
+            } catch (Exception e) {
+                log.warn("Error ejecutando fill action (marcadores): {}", e.getMessage());
             }
-        } catch (Exception e) {
-            log.warn("Error ejecutando fill action: {}", e.getMessage());
         }
+
+        // 2) Fallback: la IA puso el JSON directamente en el texto sin marcadores
+        Matcher fallback = FILL_JSON_FALLBACK.matcher(rawAnswer);
+        if (fallback.find()) {
+            String jsonBlock = fallback.group(0);
+            String cleanAnswer = rawAnswer.substring(0, fallback.start()).trim();
+            if (cleanAnswer.isBlank()) cleanAnswer = rawAnswer.replace(jsonBlock, "").trim();
+            try {
+                Map<?, ?> actionMap = mapper.readValue(jsonBlock, Map.class);
+                String action = (String) actionMap.get("action");
+                if ("FILL_ESTIMACION".equals(action)) {
+                    log.info("FILL_ESTIMACION detectado via fallback (sin marcadores)");
+                    return new AiResult(cleanAnswer, fillEstimacionFromJson(actionMap));
+                }
+            } catch (Exception e) {
+                log.warn("Error ejecutando fill action (fallback): {}", e.getMessage());
+            }
+        }
+
         return new AiResult(rawAnswer, null);
     }
 
