@@ -783,16 +783,25 @@ public class OpenAiService {
         return new AiResult(rawAnswer, null);
     }
 
+    private static String getString(Map<?, ?> map, String key) {
+        return getString(map, key, "");
+    }
+
+    private static String getString(Map<?, ?> map, String key, String defaultValue) {
+        Object val = map.get(key);
+        return (val != null) ? val.toString() : defaultValue;
+    }
+
     @SuppressWarnings("unchecked")
     private String fillEstimacionFromJson(Map<?, ?> data) {
         try {
             Map<String, Object> result = new LinkedHashMap<>();
-            result.put("estimationName", data.getOrDefault("estimationName", ""));
-            result.put("projectCode",    data.getOrDefault("projectCode", ""));
-            result.put("projectName",    data.getOrDefault("projectName", ""));
-            result.put("requester",      data.getOrDefault("requester", ""));
-            result.put("requesterEmail", data.getOrDefault("requesterEmail", ""));
-            result.put("notes",          data.getOrDefault("notes", ""));
+            result.put("estimationName", getString(data, "estimationName"));
+            result.put("projectCode",    getString(data, "projectCode"));
+            result.put("projectName",    getString(data, "projectName"));
+            result.put("requester",      getString(data, "requester"));
+            result.put("requesterEmail", getString(data, "requesterEmail"));
+            result.put("notes",          getString(data, "notes"));
 
             // Weeks: puede llegar como lista de strings o como número entero
             Object weeksObj = data.get("weeks");
@@ -816,7 +825,7 @@ public class OpenAiService {
                     if (!(t instanceof Map)) continue;
                     Map<?, ?> tm = (Map<?, ?>) t;
                     Map<String, Object> task = new LinkedHashMap<>();
-                    task.put("title", tm.getOrDefault("title", "Tarea sin nombre"));
+                    task.put("title", getString(tm, "title", "Tarea sin nombre"));
                     Object est = tm.get("estimates");
                     List<Integer> estimates;
                     if (est instanceof List) {
