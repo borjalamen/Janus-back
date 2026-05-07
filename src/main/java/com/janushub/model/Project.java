@@ -131,6 +131,63 @@ public class Project {
         private String ram;
         private String cpu;
         private String disk;
+        private Boolean openshiftEnabled;
+        private List<OpenShiftDev> openshifts;
+        private Boolean dbEnabled;
+        private List<DBConfig> dbs;
+        private Boolean otherToolEnabled;
+        private List<OtherTool> otherTools;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OpenShiftDev {
+        private String identifier;
+        private String user;
+        private String password;
+        private String ram;
+        private String cpu;
+        private String disk;
+        private List<VolumeConfig> volumes;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class VolumeConfig {
+        private String name;
+        private String capacity;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class DBConfig {
+        private String identifier;
+        private String engine;
+        private String instanceName;
+        private String host;
+        private String port;
+        private String sid;
+        private String user;
+        private String password;
+        private String description;
+        private String properties;
+        private String contactPerson;
+        private String contactMail;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class OtherTool {
+        private String identifier;
+        private String name;
+        private String path;
+        private Boolean running;
+        private String contactPerson;
+        private String contactMail;
     }
     
     @Data
