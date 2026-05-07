@@ -27,6 +27,7 @@ public class PeticionTarea {
     private String comments;
     private List<String> attachments;
 
+    private String prioridad; // BAJA | MEDIA | ALTA | CRITICA
     private String estado; // PENDIENTE | APROBADA | INICIADA | FINALIZADA | RECHAZADA
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;

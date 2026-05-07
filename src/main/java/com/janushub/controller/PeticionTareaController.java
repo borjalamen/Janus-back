@@ -47,6 +47,7 @@ public class PeticionTareaController {
             @RequestPart("jiraTask") String jiraTask,
             @RequestPart(value = "comments", required = false) String comments,
             @RequestPart("devopsAssignee") String devopsAssignee,
+            @RequestPart(value = "prioridad", required = false) String prioridad,
             @RequestPart(value = "deadline", required = false) String deadline,
             @RequestPart(value = "deadlineTime", required = false) String deadlineTime,
             @RequestPart(value = "files", required = false) List<MultipartFile> files
@@ -59,6 +60,7 @@ public class PeticionTareaController {
                 jiraTask,
                 comments,
                 devopsAssignee,
+                prioridad,
                 deadline,
                 deadlineTime,
                 files

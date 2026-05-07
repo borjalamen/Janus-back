@@ -51,6 +51,7 @@ public class PeticionTareaService {
             String jiraTask,
             String comments,
             String devopsAssignee,
+            String prioridad,
             String deadlineIso,
             String deadlineTime,
             List<MultipartFile> files
@@ -66,6 +67,7 @@ public class PeticionTareaService {
         p.setJiraTask(jiraTask);
         p.setDevopsAssignee(devopsAssignee);
         p.setComments(comments);
+        p.setPrioridad(prioridad != null && !prioridad.isBlank() ? prioridad : "MEDIA");
 
         if (deadlineIso != null && !deadlineIso.isBlank()) {
             p.setDeadline(
