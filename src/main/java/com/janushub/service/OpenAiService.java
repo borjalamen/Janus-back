@@ -586,8 +586,8 @@ public class OpenAiService {
         p.setNombre((String) data.get("nombre"));
         p.setDepartamento((String) data.get("departamento"));
         p.setLote((String) data.get("lote"));
-        p.setResponsableProyecto((String) data.get("responsableProyecto"));
-        p.setResponsableTecnico((String) data.get("responsableTecnico"));
+        p.setResponsableProyecto(data.get("responsableProyecto") != null ? new Project.ResponsableInfo((String) data.get("responsableProyecto"), null) : null);
+        p.setResponsableTecnico(data.get("responsableTecnico") != null ? new Project.ResponsableInfo((String) data.get("responsableTecnico"), null) : null);
         Project saved = projectRepository.save(p);
         log.info("IAnusHub creó proyecto '{}' (id={})", saved.getNombre(), saved.getId());
         return "✅ Proyecto **" + saved.getNombre() + "** creado correctamente (ID: `" + saved.getId() + "`).";
@@ -598,8 +598,8 @@ public class OpenAiService {
             if (data.get("nombre") != null)               p.setNombre((String) data.get("nombre"));
             if (data.get("departamento") != null)         p.setDepartamento((String) data.get("departamento"));
             if (data.get("lote") != null)                 p.setLote((String) data.get("lote"));
-            if (data.get("responsableProyecto") != null)  p.setResponsableProyecto((String) data.get("responsableProyecto"));
-            if (data.get("responsableTecnico") != null)   p.setResponsableTecnico((String) data.get("responsableTecnico"));
+            if (data.get("responsableProyecto") != null)  p.setResponsableProyecto(new Project.ResponsableInfo((String) data.get("responsableProyecto"), null));
+            if (data.get("responsableTecnico") != null)   p.setResponsableTecnico(new Project.ResponsableInfo((String) data.get("responsableTecnico"), null));
             Project saved = projectRepository.save(p);
             log.info("IAnusHub modificó proyecto '{}' (id={})", saved.getNombre(), saved.getId());
             return "✅ Proyecto **" + saved.getNombre() + "** actualizado correctamente.";

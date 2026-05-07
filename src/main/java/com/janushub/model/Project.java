@@ -31,8 +31,8 @@ public class Project {
     private String urlEntornoProduccion;
     
     // Responsables
-    private String responsableProyecto;
-    private String responsableTecnico;
+    private ResponsableInfo responsableProyecto;
+    private ResponsableInfo responsableTecnico;
     private String horaDaily;
     
     // Listas
@@ -111,6 +111,14 @@ public class Project {
         private String grafana;
     }
     
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ResponsableInfo {
+        private String nombre;
+        private String email;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
