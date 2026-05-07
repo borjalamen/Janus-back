@@ -14,6 +14,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.io.IOException;
+import org.springframework.beans.factory.annotation.Value;
 
 @Service
 @RequiredArgsConstructor
@@ -22,6 +23,9 @@ public class PeticionTareaService {
     private final PeticionTareaRepository repository;
     private final EmailNotificationService emailNotificationService;
     private final NotificationService notificationService;
+
+    @Value("${upload.root:uploads}")
+    private String uploadRoot;
 
     // Mètode antic (JSON) — el pots deixar sense usar o eliminar si vols
     public PeticionTarea crear(PeticionTarea p) {
@@ -83,7 +87,7 @@ public class PeticionTareaService {
 
         if (files != null && !files.isEmpty()) {
     try {
-        Path uploadDir = Paths.get("C:/Users/USUARIO/Documents/GitHub/janus-back/uploads/peticiones-tareas");
+        Path uploadDir = Paths.get(uploadRoot, "peticiones-tareas");
         if (!Files.exists(uploadDir)) {
             Files.createDirectories(uploadDir);
         }

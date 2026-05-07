@@ -10,6 +10,10 @@ RUN mkdir -p /app/assets/multimedia
 RUN mkdir -p /app/assets/multimedia/avatars
 RUN mkdir -p /app/assets/multimedia/cv
 
+# Directorios del volumen compartido (el PVC los sobreescribirá en runtime)
+RUN mkdir -p /app/shared-data/uploads/peticiones-tareas
+RUN mkdir -p /app/shared-data/volumenDocumentos
+
 WORKDIR /app
 
 COPY target/janus-backend-*.jar app.jar
