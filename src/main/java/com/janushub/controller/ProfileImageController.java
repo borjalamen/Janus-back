@@ -56,25 +56,28 @@ public class ProfileImageController {
         }
 
         try {
-            // 1) esborrar avatar antic si existeix
-            String oldAvatarPath = userService.getAvatarPath(username);
-            if (oldAvatarPath != null && !oldAvatarPath.isBlank()) {
-                Files.deleteIfExists(Paths.get(oldAvatarPath));
+            // 1) esborrar avatar antic si existeix (usando ruta relativa reconstruida)
+            String oldRelativePath = userService.getAvatarPath(username);
+            if (oldRelativePath != null && !oldRelativePath.isBlank()) {
+                Path oldFile = resolveAvatarPath(oldRelativePath);
+                Files.deleteIfExists(oldFile);
             }
 
-            // 2) carpeta de l'usuari dins uploads (resolem a ruta absoluta)
+            // 2) carpeta de l'usuari dins uploads
             Path userDir = Paths.get(uploadRoot).toAbsolutePath().resolve(username);
             Files.createDirectories(userDir);
 
             // 3) Nom fix
-            String fileName = "avatar." + extension.toLowerCase(); // avatar.png / avatar.jpg, etc.
+            String fileName = "avatar." + extension.toLowerCase();
             Path path = userDir.resolve(fileName);
 
             // 4) guardar nou avatar
             Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
 
-            // Guardar path absolut a la BD, com ja feies
-            userService.updateAvatar(username, path.toString());
+            // Guardar ruta RELATIVA a la BD (username/avatar.ext)
+            // Así funciona igual en local y en DEV independientemente de upload.root
+            String relativePath = username + "/" + fileName;
+            userService.updateAvatar(username, relativePath);
 
             return ResponseEntity.ok("Imagen de perfil guardada correctamente");
         } catch (IOException e) {
@@ -87,12 +90,12 @@ public class ProfileImageController {
     // ---------- OBTENER AVATAR ----------
     @GetMapping
     public ResponseEntity<Resource> getImage(@RequestParam("username") String username) throws IOException {
-        String avatarPath = userService.getAvatarPath(username);
-        if (avatarPath == null) {
+        String storedPath = userService.getAvatarPath(username);
+        if (storedPath == null) {
             return ResponseEntity.notFound().build();
         }
 
-        Path filePath = Paths.get(avatarPath);
+        Path filePath = resolveAvatarPath(storedPath);
         if (!Files.exists(filePath)) {
             return ResponseEntity.notFound().build();
         }
@@ -111,13 +114,26 @@ public class ProfileImageController {
     // ---------- ELIMINAR AVATAR ----------
     @DeleteMapping
     public ResponseEntity<?> deleteImage(@RequestParam("username") String username) throws IOException {
-        String avatarPath = userService.getAvatarPath(username);
-        if (avatarPath != null) {
-            Path filePath = Paths.get(avatarPath);
+        String storedPath = userService.getAvatarPath(username);
+        if (storedPath != null) {
+            Path filePath = resolveAvatarPath(storedPath);
             Files.deleteIfExists(filePath);
             userService.removeAvatar(username);
         }
 
         return ResponseEntity.ok("Imagen eliminada correctamente");
+    }
+
+    /**
+     * Resuelve la ruta almacenada en BD a una Path absoluta.
+     * Soporta tanto rutas relativas nuevas ("username/avatar.png")
+     * como rutas absolutas antiguas ("/app/shared-data/..." o "C:\...").
+     */
+    private Path resolveAvatarPath(String storedPath) {
+        Path p = Paths.get(storedPath);
+        if (p.isAbsolute()) {
+            return p;
+        }
+        return Paths.get(uploadRoot).toAbsolutePath().resolve(storedPath);
     }
 }

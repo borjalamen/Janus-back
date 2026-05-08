@@ -8,6 +8,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -24,6 +25,9 @@ import java.nio.file.Paths;
 public class PeticionTareaController {
 
     private final PeticionTareaService service;
+
+    @Value("${upload.root:uploads}")
+    private String uploadRoot;
 
     // ─────────────────────────────────────────────
     //  GET /peticiones-tareas
@@ -167,7 +171,7 @@ public ResponseEntity<Resource> descargarAdjunto(
         return ResponseEntity.notFound().build();
     }
 
-    Path filePath = Paths.get("uploads/peticiones-tareas").resolve(filename);
+    Path filePath = Paths.get(uploadRoot, "peticiones-tareas").resolve(filename);
     if (!Files.exists(filePath)) {
         return ResponseEntity.notFound().build();
     }
