@@ -290,7 +290,7 @@ public class DocumentController {
         try {
             Path carpetaProyecto = Paths.get(VOLUMEN, idProyecto);
             if (!Files.exists(carpetaProyecto) || !Files.isDirectory(carpetaProyecto)) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(lista);
+                return ResponseEntity.ok(lista);
             }
 
             try (DirectoryStream<Path> stream = Files.newDirectoryStream(carpetaProyecto)) {
