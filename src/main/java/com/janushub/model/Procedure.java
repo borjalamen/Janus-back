@@ -40,6 +40,13 @@ public class Procedure {
     @Field("steps")
     private List<StepProcedures> steps;
 
+    // Autor que creó el procedimiento
+    @Field("createdBy")
+    private String createdByUsername;
+
+    @Field("createdByEmail")
+    private String createdByEmail;
+
     // Campos de auditoría
     @Builder.Default
     private LocalDateTime createdAt = LocalDateTime.now();
