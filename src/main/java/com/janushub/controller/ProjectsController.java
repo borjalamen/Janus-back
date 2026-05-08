@@ -25,7 +25,6 @@ import java.util.stream.Stream;
 
 @RestController
 @RequestMapping("/api/projects")
-@CrossOrigin(origins = "http://localhost:4200,http://localhost:8080", allowedHeaders = "*")
 public class ProjectsController {
       private final ProjectService projectService;
       private String VOLUMEN;
