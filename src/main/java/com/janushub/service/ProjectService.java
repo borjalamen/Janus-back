@@ -153,6 +153,9 @@ public class ProjectService {
             // Herramientas de Monitorización
             if (details.getMonitoringTools() != null) existing.setMonitoringTools(details.getMonitoringTools());
 
+            // Conectividades
+            if (details.getConnectivities() != null) existing.setConnectivities(details.getConnectivities());
+
             // Documentos
             if (details.getDocuments() != null) existing.setDocuments(details.getDocuments());
            

@@ -61,6 +61,9 @@ public class Project {
 
     // Herramientas de Monitorización
     private MonitoringTools monitoringTools;
+
+    // Conectividades del proyecto
+    private List<ConnectivityEntry> connectivities;
     
     // Documentos agregados durante creación
     private List<ProjectDocument> documents;
@@ -258,5 +261,32 @@ public class Project {
         private String descripcion;
         private String tipo;
         private String path;  // Ruta del archivo en volumenDocumentos
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ConnectivityEntry {
+        private String id;          // UUID para identificar la entrada
+        private String role;        // PRODUCER | CONSUMER | MIXED
+        private String type;        // INTERNAL | EXTERNAL | OTHER
+
+        // Para INTERNAL (proyecto JanusHub)
+        private String internalProjectId;
+        private String internalProjectCode;
+        private String internalProjectName;
+
+        // Para EXTERNAL (servicio externo)
+        private String externalServiceId;
+        private String externalServiceName;
+
+        // Para OTHER
+        private String otherName;
+        private String otherCode;
+        private String otherNotes;
+
+        // Común
+        private List<String> environments;  // DEV, INT, PRE, PRO
+        private String notes;
     }
 }
