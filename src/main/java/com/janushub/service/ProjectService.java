@@ -149,7 +149,10 @@ public class ProjectService {
            
             // Herramientas Mind
             if (details.getHerramientasMind() != null) existing.setHerramientasMind(details.getHerramientasMind());
- 
+
+            // Herramientas de Monitorización
+            if (details.getMonitoringTools() != null) existing.setMonitoringTools(details.getMonitoringTools());
+
             // Documentos
             if (details.getDocuments() != null) existing.setDocuments(details.getDocuments());
            

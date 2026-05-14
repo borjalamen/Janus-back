@@ -58,6 +58,9 @@ public class Project {
     // Herramientas MIND
     @org.springframework.data.mongodb.core.mapping.Field("herramientasMind")
     private HerramientasMind herramientasMind;
+
+    // Herramientas de Monitorización
+    private MonitoringTools monitoringTools;
     
     // Documentos agregados durante creación
     private List<ProjectDocument> documents;
@@ -226,6 +229,27 @@ public class Project {
         private String tokenValue;
     }
     
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MonitoringEnv {
+        private String grafanaUrl;
+        private String grafanaUser;
+        private String grafanaPassword;
+        private String kibanaUrl;
+        private String kibanaUser;
+        private String kibanaPassword;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class MonitoringTools {
+        private MonitoringEnv dev;
+        private MonitoringEnv pre;
+        private MonitoringEnv pro;
+    }
+
     @Data
     @NoArgsConstructor
     @AllArgsConstructor
