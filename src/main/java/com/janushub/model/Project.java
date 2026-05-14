@@ -34,6 +34,7 @@ public class Project {
     private ResponsableInfo responsableProyecto;
     private ResponsableInfo responsableTecnico;
     private String horaDaily;
+    private List<Daily> dailies;
     
     // Listas
     private List<String> ip;
@@ -123,6 +124,15 @@ public class Project {
     public static class ResponsableInfo {
         private String nombre;
         private String email;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class Daily {
+        private String hora;
+        private List<String> dias;
+        private String notas;
     }
 
     @Data

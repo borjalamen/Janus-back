@@ -126,6 +126,7 @@ public class ProjectService {
             existing.setResponsableProyecto(details.getResponsableProyecto());
             existing.setResponsableTecnico(details.getResponsableTecnico());
             existing.setHoraDaily(details.getHoraDaily());
+            if (details.getDailies() != null) existing.setDailies(details.getDailies());
            
             // Listas
             if (details.getIp() != null) existing.setIp(details.getIp());
