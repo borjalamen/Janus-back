@@ -14,6 +14,9 @@ RUN mkdir -p /app/assets/multimedia/cv
 RUN mkdir -p /app/shared-data/uploads/peticiones-tareas
 RUN mkdir -p /app/shared-data/volumenDocumentos
 
+# Permisos para UID arbitrario de OpenShift (SCC restricted)
+RUN chown -R 1001:0 /app && chmod -R g=u /app
+
 WORKDIR /app
 
 COPY target/janus-backend-*.jar app.jar

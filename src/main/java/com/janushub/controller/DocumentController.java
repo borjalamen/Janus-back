@@ -71,7 +71,11 @@ public class DocumentController {
      */
     private String findVolumenPath() {
         String userDir = System.getProperty("user.dir");
-        String overridePath = System.getenv("JANUS_VOLUMEN_PATH");
+        // Soporta tanto -DJANUS_VOLUMEN_PATH (JVM property) como variable de entorno
+        String overridePath = System.getProperty("JANUS_VOLUMEN_PATH");
+        if (overridePath == null || overridePath.trim().isEmpty()) {
+            overridePath = System.getenv("JANUS_VOLUMEN_PATH");
+        }
 
         if (overridePath != null && !overridePath.trim().isEmpty()) {
             Path custom = Paths.get(overridePath.trim()).toAbsolutePath().normalize();
