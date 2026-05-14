@@ -24,9 +24,7 @@ public class Herramienta {
 
     private List<String> tags = new ArrayList<>();
     private List<InstallStep> installSteps = new ArrayList<>();
-    private List<String> projects = new ArrayList<>();
 
-    private String projectsString;
     private Boolean visible = true;
 
     @Data
