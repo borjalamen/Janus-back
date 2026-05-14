@@ -51,7 +51,8 @@ public class RecursoDescargableController {
     // ── Descarga ──────────────────────────────────────────────────────────────
 
     @GetMapping("/{id}/file")
-    public ResponseEntity<?> download(@PathVariable String id) {
+    public ResponseEntity<?> download(@PathVariable String id,
+            @RequestParam(value = "inline", defaultValue = "false") boolean inline) {
         return repo.findById(id).map(rec -> {
             try {
                 Path file = Paths.get(volumen, rec.getFilePath());
@@ -60,12 +61,12 @@ public class RecursoDescargableController {
                 }
                 InputStreamResource resource = new InputStreamResource(new FileInputStream(file.toFile()));
                 String encoded = URLEncoder.encode(rec.getFileName(), StandardCharsets.UTF_8).replace("+", "%20");
+                String disposition = (inline ? "inline" : "attachment") + "; filename*=UTF-8''" + encoded;
                 return ResponseEntity.ok()
                         .contentType(rec.getMimeType() != null
                                 ? MediaType.parseMediaType(rec.getMimeType())
                                 : MediaType.APPLICATION_OCTET_STREAM)
-                        .header(HttpHeaders.CONTENT_DISPOSITION,
-                                "attachment; filename*=UTF-8''" + encoded)
+                        .header(HttpHeaders.CONTENT_DISPOSITION, disposition)
                         .contentLength(Files.size(file))
                         .body((Object) resource);
             } catch (IOException e) {
@@ -92,6 +93,9 @@ public class RecursoDescargableController {
                 Objects.requireNonNullElse(file.getOriginalFilename(), "file")).getFileName().toString();
         // Tomcat lee el filename del Content-Disposition como ISO-8859-1; re-codificamos a UTF-8
         originalName = new String(originalName.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+        if (displayName != null) displayName = new String(displayName.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+        if (description != null) description = new String(description.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
+        if (category != null) category = new String(category.getBytes(StandardCharsets.ISO_8859_1), StandardCharsets.UTF_8);
 
         // Bloquear comprimidos
         String lower = originalName.toLowerCase();
