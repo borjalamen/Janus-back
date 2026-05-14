@@ -4,9 +4,13 @@ import com.janushub.model.Bitacora;
 import com.janushub.model.PeticionTarea;
 import com.janushub.model.ScrumSprint;
 import com.janushub.model.ScrumTask;
+import com.janushub.model.Unete;
 import com.janushub.repository.BitacoraRepository;
+import com.janushub.repository.FormacionRepository;
+import com.janushub.repository.HerramientaRepository;
 import com.janushub.repository.PeticionTareaRepository;
 import com.janushub.repository.ProjectRepository;
+import com.janushub.repository.ProceduresRepository;
 import com.janushub.repository.ScrumSprintRepository;
 import com.janushub.repository.ScrumTaskRepository;
 import com.janushub.repository.UneteRepository;
@@ -40,6 +44,9 @@ public class DashboardController {
     private final ProjectRepository projectRepo;
     private final BitacoraRepository bitacoraRepo;
     private final UserRepository userRepo;
+    private final ProceduresRepository proceduresRepo;
+    private final HerramientaRepository herramientaRepo;
+    private final FormacionRepository formacionRepo;
 
     @GetMapping("/kpis")
     public ResponseEntity<Map<String, Object>> getKpis() {
@@ -140,6 +147,40 @@ public class DashboardController {
         // ── 7. TAREAS SCRUM SIN SPRINT (backlog) ──────────────────────────────
         long backlog = taskRepo.findBySprintIdIsNullAndVisibleTrue().size();
         kpis.put("backlog", Map.of("total", backlog));
+
+        // ── 8. SOLICITUDES ÚNETE RECIENTES ────────────────────────────────────
+        List<Unete> todasSolicitudes = uneteRepo.findAll();
+        List<Map<String, Object>> recentSolicitudes = todasSolicitudes.stream()
+                .filter(u -> u.getCreatedAt() != null)
+                .sorted(Comparator.comparing(Unete::getCreatedAt).reversed())
+                .limit(5)
+                .map(u -> {
+                    Map<String, Object> m = new LinkedHashMap<>();
+                    m.put("id",        u.getId());
+                    m.put("fullName",  u.getFullName());
+                    m.put("email",     u.getEmail());
+                    m.put("estado",    u.getEstado());
+                    m.put("createdAt", u.getCreatedAt().toString());
+                    return m;
+                })
+                .collect(Collectors.toList());
+        kpis.put("solicitudes", Map.of(
+                "total", todasSolicitudes.size(),
+                "pendientes", joinPendientes,
+                "recent", recentSolicitudes
+        ));
+
+        // ── 9. PROCEDIMIENTOS ─────────────────────────────────────────────────
+        long totalProcedimientos = proceduresRepo.findByIsDeletedFalse().size();
+        kpis.put("procedimientos", Map.of("total", totalProcedimientos));
+
+        // ── 10. HERRAMIENTAS ──────────────────────────────────────────────────
+        long totalHerramientas = herramientaRepo.findByVisibleTrue().size();
+        kpis.put("herramientas", Map.of("total", totalHerramientas));
+
+        // ── 11. FORMACIONES ───────────────────────────────────────────────────
+        long totalFormaciones = formacionRepo.findByDeletedFalseAndVisibleTrue().size();
+        kpis.put("formaciones", Map.of("total", totalFormaciones));
 
         return ResponseEntity.ok(kpis);
     }
