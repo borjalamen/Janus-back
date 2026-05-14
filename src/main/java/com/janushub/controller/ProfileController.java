@@ -4,7 +4,7 @@ import com.janushub.model.Users;
 import dto.ChangePasswordRequest;
 import com.janushub.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
-//import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDateTime;
@@ -14,12 +14,12 @@ import java.time.LocalDateTime;
 public class ProfileController {
 
     private final UserRepository userRepository;
-    //private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    public ProfileController(UserRepository userRepository){
-                             //PasswordEncoder passwordEncoder) {
+    public ProfileController(UserRepository userRepository,
+                             PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        //this.passwordEncoder = passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // --- CONSULTAR PERFIL ---
@@ -70,12 +70,12 @@ public ResponseEntity<?> changePassword(@RequestParam String username,
     }
 
     
-    if (!request.getCurrentPassword().equals(user.getPassword())) {
+    if (!passwordEncoder.matches(request.getCurrentPassword(), user.getPassword())) {
         return ResponseEntity.status(400).body("Contrasenya actual incorrecta");
     }
 
    
-    user.setPassword(newPassword);
+    user.setPassword(passwordEncoder.encode(newPassword));
     user.setUpdatedAt(LocalDateTime.now());
     userRepository.save(user);
 
