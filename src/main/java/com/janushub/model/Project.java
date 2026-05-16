@@ -68,6 +68,9 @@ public class Project {
     
     // Documentos agregados durante creación
     private List<ProjectDocument> documents;
+
+    // Metadatos extra clave-valor
+    private List<ExtraMetadata> extras;
     
     // Información de auditoría
     private LocalDateTime createdAt;
@@ -298,5 +301,13 @@ public class Project {
         // Común
         private List<String> environments;  // DEV, INT, PRE, PRO
         private String notes;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class ExtraMetadata {
+        private String key;
+        private String value;
     }
 }
