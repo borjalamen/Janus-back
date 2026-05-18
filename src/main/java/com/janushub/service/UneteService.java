@@ -132,7 +132,7 @@ public class UneteService {
 
         try {
             username = request.getFullName().replaceAll("\\s+", "").toLowerCase();
-            autoPassword = request.getFullName() + "1234";
+            autoPassword = generateSecurePassword(request.getFullName());
 
             List<String> roles = determineRoles(request.getRole());
 
@@ -170,6 +170,42 @@ public class UneteService {
         Unete updated = updateEstado(id, "RECHAZADA", adminComment);
         emailNotificationService.sendJoinRequestRejected(updated);
         return updated;
+    }
+
+    /**
+     * Genera una contraseña segura: mínimo 9 chars, mayúscula, minúscula, número y especial (@#$%&).
+     */
+    private String generateSecurePassword(String fullName) {
+        String specials = "@#$%&";
+        String upper   = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+        String lower   = "abcdefghijklmnopqrstuvwxyz";
+        String digits  = "0123456789";
+        String all     = lower + upper + digits + specials;
+
+        java.security.SecureRandom rnd = new java.security.SecureRandom();
+
+        // Base: primeras letras del nombre (sin espacios ni caracteres raros), máx 5
+        String base = fullName.replaceAll("[^a-zA-Z0-9]", "").toLowerCase();
+        if (base.length() > 5) base = base.substring(0, 5);
+        if (base.isEmpty()) base = "user";
+
+        StringBuilder sb = new StringBuilder(base);
+        // Añadir al menos uno de cada tipo obligatorio
+        sb.append(upper.charAt(rnd.nextInt(upper.length())));
+        sb.append(digits.charAt(rnd.nextInt(digits.length())));
+        sb.append(specials.charAt(rnd.nextInt(specials.length())));
+        // Rellenar hasta 9 caracteres si hace falta
+        while (sb.length() < 9) {
+            sb.append(all.charAt(rnd.nextInt(all.length())));
+        }
+
+        // Mezclar para no dejar patrón predecible
+        char[] arr = sb.toString().toCharArray();
+        for (int i = arr.length - 1; i > 0; i--) {
+            int j = rnd.nextInt(i + 1);
+            char tmp = arr[i]; arr[i] = arr[j]; arr[j] = tmp;
+        }
+        return new String(arr);
     }
 
     /**
