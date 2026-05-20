@@ -179,5 +179,15 @@ public class NotificationService {
         }
         log.debug("Notificación '{}' enviada a {} sesión(es)", type, sent);
     }
+
+    /** Elimina todas las notificaciones persistidas en MongoDB. */
+    public void deleteAll() {
+        try {
+            notificationRepository.deleteAll();
+            log.info("Todas las notificaciones eliminadas de MongoDB");
+        } catch (Exception e) {
+            log.warn("Error al eliminar notificaciones: {}", e.getMessage());
+        }
+    }
 }
 

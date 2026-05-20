@@ -50,4 +50,12 @@ public class NotificationController {
         );
         return ResponseEntity.ok(Map.of("status", "ok", "message", "Test enviado a todos los conectados"));
     }
-}
+    /**
+     * Elimina todas las notificaciones persistidas en MongoDB.
+     * DELETE /api/notifications
+     */
+    @DeleteMapping
+    public ResponseEntity<Map<String, String>> deleteAllNotifications() {
+        notificationService.deleteAll();
+        return ResponseEntity.ok(Map.of("status", "ok", "message", "Notificaciones eliminadas"));
+    }}
