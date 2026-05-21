@@ -5,6 +5,7 @@ import com.janushub.repository.UserRepository;
 import com.mongodb.MongoWriteException; 
 import org.springframework.http.HttpStatus; 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
 import java.time.LocalDateTime;
@@ -16,9 +17,11 @@ import java.util.List;
 public class UserController {
 
     private final UserRepository repository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserController(UserRepository repository) {
+    public UserController(UserRepository repository, PasswordEncoder passwordEncoder) {
         this.repository = repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     // --- GET ALL ---
@@ -31,6 +34,9 @@ public class UserController {
     @PostMapping("/create")
     public ResponseEntity<?> createUser(@RequestBody Users user) {
         try {
+            if (user.getPassword() != null && !user.getPassword().isEmpty()) {
+                user.setPassword(passwordEncoder.encode(user.getPassword()));
+            }
             Users savedUser = repository.save(user);
             // Si tiene éxito, devuelve 201 Created
             return ResponseEntity.status(HttpStatus.CREATED).body(savedUser); 
@@ -60,7 +66,7 @@ public class UserController {
                     
                     
                     if (userDetails.getPassword() != null && !userDetails.getPassword().isEmpty()) {
-                        users.setPassword(userDetails.getPassword());
+                        users.setPassword(passwordEncoder.encode(userDetails.getPassword()));
                     }
 
                     Users updatedUser = repository.save(users);

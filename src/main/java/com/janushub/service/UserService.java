@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
  
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
  
 import com.janushub.model.Users;
@@ -16,6 +17,7 @@ import lombok.RequiredArgsConstructor;
 public class UserService {
  
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
  
     private Users getUserOrThrow(String username) {
         System.out.println("DEBUG getUserOrThrow -> username = " + username);
@@ -30,7 +32,7 @@ public class UserService {
      * Valida que no exista un usuario con el mismo username o email.
      *
      * @param username - identificador único del usuario
-     * @param password - contraseña del usuario (se almacena como texto plano o hash según configuración)
+     * @param password - contraseña en texto plano (se almacena como hash BCrypt)
      * @param fullName - nombre completo del usuario
      * @param email - email del usuario
      * @param roles - roles del usuario (ej. ["ADMIN", "CONSULTOR", "DEV"])
@@ -57,7 +59,7 @@ public class UserService {
  
         Users newUser = new Users();
         newUser.setUsername(username);
-        newUser.setPassword(password);
+        newUser.setPassword(passwordEncoder.encode(password));
         newUser.setFullName(fullName != null ? fullName : username);
         newUser.setEmail(email);
         newUser.setRoles(roles != null && !roles.isEmpty() ? roles : Arrays.asList("CONSULTOR"));

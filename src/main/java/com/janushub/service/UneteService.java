@@ -8,7 +8,6 @@ import com.janushub.service.NotificationService;
 import dto.ApprovalResponseDTO;
 import dto.UneteDTO;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -25,7 +24,6 @@ public class UneteService {
     private final UserService userService;
     private final EmailNotificationService emailNotificationService;
     private final NotificationService notificationService;
-    private final PasswordEncoder passwordEncoder;
 
     /**
      * Registra una nueva peticion de "unete" con estado INICIADA.
@@ -138,12 +136,9 @@ public class UneteService {
 
             List<String> roles = determineRoles(request.getRole());
 
-            // Encriptar la password antes de guardarla en la base de datos
-            String encryptedPassword = passwordEncoder.encode(autoPassword);
-
             userService.createUser(
                     username,
-                    encryptedPassword,
+                    autoPassword,
                     request.getFullName(),
                     request.getEmail(),
                     roles
