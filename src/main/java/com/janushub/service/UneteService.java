@@ -245,6 +245,10 @@ public class UneteService {
             case "DEVOPS":
             case "DEV":
                 return Arrays.asList("DEV", "CONSULTOR");
+            case "MANAGER":
+                return Arrays.asList("MANAGER");
+            case "TEAM":
+                return Arrays.asList("TEAM");
             case "INVITADO":
             case "GUEST":
                 return Arrays.asList("CONSULTOR");

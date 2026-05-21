@@ -115,6 +115,13 @@ public class ProjectsController {
         return ResponseEntity.ok(projects);
     }
 
+    // URL: /api/projects/for-user?email={email}
+    @GetMapping("/for-user")
+    public ResponseEntity<List<Project>> getProjectsForUser(@RequestParam String email) {
+        List<Project> projects = projectService.getProjectsForUser(email);
+        return ResponseEntity.ok(projects);
+    }
+
 
      // =============================================================
     // 2. GET BY ID

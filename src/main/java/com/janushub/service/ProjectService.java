@@ -6,6 +6,7 @@ import org.springframework.stereotype.Service;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
  
 @Service
 public class ProjectService {
@@ -21,6 +22,30 @@ public class ProjectService {
      */
     public List<Project> getAllProjects() {
         return repository.findByDeletedFalse();
+    }
+
+    /**
+     * Obtener proyectos donde el email del usuario aparece en el equipo Minsait,
+     * como responsable de proyecto o como responsable técnico.
+     * Para roles MANAGER y TEAM.
+     */
+    public List<Project> getProjectsForUser(String email) {
+        if (email == null || email.isBlank()) return List.of();
+        final String emailLower = email.strip().toLowerCase();
+        return getAllProjects().stream()
+            .filter(p -> {
+                if (p.getEquipoMinsait() != null && p.getEquipoMinsait().stream()
+                        .anyMatch(m -> emailLower.equals(m.getEmail() != null ? m.getEmail().toLowerCase() : null)))
+                    return true;
+                if (p.getResponsableProyecto() != null &&
+                        emailLower.equals(p.getResponsableProyecto().getEmail() != null ? p.getResponsableProyecto().getEmail().toLowerCase() : null))
+                    return true;
+                if (p.getResponsableTecnico() != null &&
+                        emailLower.equals(p.getResponsableTecnico().getEmail() != null ? p.getResponsableTecnico().getEmail().toLowerCase() : null))
+                    return true;
+                return false;
+            })
+            .collect(Collectors.toList());
     }
  
     /**
