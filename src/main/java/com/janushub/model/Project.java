@@ -71,6 +71,9 @@ public class Project {
 
     // Metadatos extra clave-valor
     private List<ExtraMetadata> extras;
+
+    // Tecnologías utilizadas en el proyecto
+    private List<TechnologyEntry> technologies;
     
     // Información de auditoría
     private LocalDateTime createdAt;
@@ -309,5 +312,14 @@ public class Project {
     public static class ExtraMetadata {
         private String key;
         private String value;
+    }
+
+    @Data
+    @NoArgsConstructor
+    @AllArgsConstructor
+    public static class TechnologyEntry {
+        private String name;
+        private String version;
+        private String comment;
     }
 }
