@@ -321,5 +321,6 @@ public class Project {
         private String name;
         private String version;
         private String comment;
+        private boolean obsolete;
     }
 }
