@@ -1,6 +1,8 @@
 package com.janushub.controller;
 
 import com.janushub.model.Project;
+import com.janushub.model.ObsolescenciaEntry;
+import com.janushub.repository.ObsolescenciaRepository;
 import com.janushub.service.ProjectService;
 import com.janushub.service.ProjectService.ProjectStats;
 import org.springframework.core.io.InputStreamResource;
@@ -27,10 +29,12 @@ import java.util.stream.Stream;
 @RequestMapping("/api/projects")
 public class ProjectsController {
       private final ProjectService projectService;
+      private final ObsolescenciaRepository obsolescenciaRepository;
       private String VOLUMEN;
 
-    public ProjectsController(ProjectService projectService) {
+    public ProjectsController(ProjectService projectService, ObsolescenciaRepository obsolescenciaRepository) {
         this.projectService = projectService;
+        this.obsolescenciaRepository = obsolescenciaRepository;
         this.VOLUMEN = findVolumenPath();
     }
 
@@ -210,6 +214,7 @@ public class ProjectsController {
             @RequestBody Project details) {
         try {
             Optional<Project> updatedProject = projectService.updateProject(id, details);
+            updatedProject.ifPresent(this::syncObsolescencia);
             return updatedProject.map(ResponseEntity::ok)
                     .orElse(ResponseEntity.notFound().build());
         } catch (IllegalArgumentException e) {
@@ -227,6 +232,27 @@ public class ProjectsController {
             Map<String, String> error = new HashMap<>();
             error.put("error", "Error al actualizar el proyecto: " + errorMessage);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+
+    /** Sincroniza la colección 'obsolescencia' con las tecnologías marcadas del proyecto */
+    private void syncObsolescencia(Project project) {
+        List<ObsolescenciaEntry> existing = obsolescenciaRepository.findByProjectId(project.getId());
+        obsolescenciaRepository.deleteAll(existing);
+        if (project.getTechnologies() != null) {
+            for (Project.TechnologyEntry tech : project.getTechnologies()) {
+                if (tech.isObsolete()) {
+                    ObsolescenciaEntry entry = new ObsolescenciaEntry();
+                    entry.setProjectId(project.getId());
+                    entry.setProjectCode(project.getCodigoProyecto());
+                    entry.setProjectName(project.getNombre());
+                    entry.setTechName(tech.getName());
+                    entry.setTechVersion(tech.getVersion());
+                    entry.setTechComment(tech.getComment());
+                    entry.setMarkedAt(java.time.LocalDateTime.now());
+                    obsolescenciaRepository.save(entry);
+                }
+            }
         }
     }
 

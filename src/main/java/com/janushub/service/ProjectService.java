@@ -184,7 +184,10 @@ public class ProjectService {
 
             // Documentos
             if (details.getDocuments() != null) existing.setDocuments(details.getDocuments());
-           
+
+            // Tecnologías
+            if (details.getTechnologies() != null) existing.setTechnologies(details.getTechnologies());
+
             existing.setUpdatedAt(LocalDateTime.now());
            
             return Optional.of(repository.save(existing));
