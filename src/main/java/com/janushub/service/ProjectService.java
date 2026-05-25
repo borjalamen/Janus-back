@@ -83,8 +83,8 @@ public class ProjectService {
             throw new IllegalArgumentException("El código del proyecto es obligatorio y no puede estar vacío");
         }
 
-        // Validar que codigoProyecto no sea duplicado
-        Project existingProject = repository.findByCodigoProyecto(project.getCodigoProyecto()).orElse(null);
+        // Validar que codigoProyecto no sea duplicado (ignorando proyectos borrados)
+        Project existingProject = repository.findByCodigoProyectoAndDeletedFalse(project.getCodigoProyecto()).orElse(null);
         if (existingProject != null) {
             throw new IllegalArgumentException("El proyecto con código '" + project.getCodigoProyecto() + "' ya está dado de alta en la base de datos");
         }
