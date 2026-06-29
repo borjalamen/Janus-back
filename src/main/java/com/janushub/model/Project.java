@@ -48,6 +48,47 @@ public class Project {
     private List<OpenShiftInfo> openshift;
     private List<String> usuarios;
     
+    // ── Campos CTTI / Inventari d'Aplicacions ──
+
+    // Classificació
+    private String acronim;
+    private String codiComponent;
+    private String blocServei;
+    private String estat;
+    private String tipusAplicacio;
+    private String nivelCriticitat;
+    private String gestionadaCdC;
+
+    // Identificació addicional
+    private String codidep;
+    private String codient;
+    private String entitat;
+    private String codiClientAdmin;
+    private String codiDialeg;
+
+    // Contracte i manteniment
+    private String empresaManteniment;
+    private String contracteManteniment;
+    private String serveiMantHorari;
+    private String descripcioLot;
+    private String cmdb;
+
+    // Taxonomia
+    private String sistemaInformacio;
+    private String codiSolucio;
+    private String familiaSolucions;
+    private String anyImplantacio;
+
+    // Plataforma i Entorn Tecnològic
+    private String plataforma;
+    private String entornTecnologic;
+    private String descEntornTecnologic;
+    private String numUsuaris;
+    private String estacionalitat;
+    private String lotCPD;
+    private String proveidor;
+    private String producteUtilitzat;
+
     // Información adicional
     private String notasGenerales;
     private String entornoNotas;
