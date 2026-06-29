@@ -31,6 +31,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .requestMatchers("/api/auth/signin").permitAll()
                 .requestMatchers("/api/contact/unete").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/config/all").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .anyRequest().authenticated()
             )
