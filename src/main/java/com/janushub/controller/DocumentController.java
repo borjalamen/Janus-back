@@ -201,7 +201,8 @@ public class DocumentController {
     public ResponseEntity<List<String>> getAllFiles(@RequestParam String idProyecto) {
         File carpetaProyecto = new File(VOLUMEN, idProyecto);
         if (!carpetaProyecto.exists() || !carpetaProyecto.isDirectory()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ArrayList<>());
+            // Devuelve lista vacía con 200 OK si el proyecto aún no tiene documentos
+            return ResponseEntity.ok(new ArrayList<>());
         }
         String[] archivos = carpetaProyecto.list((current, name) -> new File(current, name).isFile());
         List<String> lista = archivos != null ? List.of(archivos) : new ArrayList<>();
