@@ -1,34 +1,48 @@
 package com.janushub.config;
 
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration
 public class SecurityConfig {
 
-     @Bean
+    private final JwUtil jwUtil;
+
+    public SecurityConfig(JwUtil jwUtil) {
+        this.jwUtil = jwUtil;
+    }
+
+    @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-            // ❌ desactivar CSRF (necessari per Postman)
             .csrf(csrf -> csrf.disable())
-
-            // ✅ delegar CORS a WebConfig (WebMvcConfigurer)
             .cors(Customizer.withDefaults())
-
-            // ✅ permetre TOTES les rutes
+            .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
             .authorizeHttpRequests(auth -> auth
-                .anyRequest().permitAll()
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/api/auth/signin").permitAll()
+                .requestMatchers("/api/contact/unete").permitAll()
+                .requestMatchers("/ws/**").permitAll()
+                .anyRequest().authenticated()
             )
-
-            // ❌ desactivar formulari de login
+            .exceptionHandling(ex -> ex
+                .authenticationEntryPoint((req, res, e) -> {
+                    res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                    res.setContentType("application/json");
+                    res.getWriter().write("{\"error\":\"No autorizado. Token requerido.\"}");
+                })
+            )
+            .addFilterBefore(new JwtAuthFilter(jwUtil), UsernamePasswordAuthenticationFilter.class)
             .formLogin(form -> form.disable())
-
-            // ❌ desactivar basic auth
             .httpBasic(basic -> basic.disable());
 
         return http.build();

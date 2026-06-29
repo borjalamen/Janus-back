@@ -1,5 +1,6 @@
 package com.janushub.controller;
 
+import com.janushub.config.JwUtil;
 import com.janushub.model.Users;
 import com.janushub.repository.UserRepository;
 import org.springframework.http.ResponseEntity;
@@ -18,10 +19,12 @@ public class AuthController {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final JwUtil jwUtil;
 
-    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public AuthController(UserRepository userRepository, PasswordEncoder passwordEncoder, JwUtil jwUtil) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
+        this.jwUtil = jwUtil;
     }
 
     @PostMapping("/signin")
@@ -29,6 +32,10 @@ public class AuthController {
 
         String username = loginRequest.get("username");
         String password = loginRequest.get("password");
+
+        if (username == null || username.isBlank() || password == null || password.isBlank()) {
+            return ResponseEntity.status(401).body("Error: Credenciales inválidas.");
+        }
 
         Users user = userRepository.findByUsername(username).orElse(null);
 
@@ -41,7 +48,10 @@ public class AuthController {
             return ResponseEntity.status(403).body("Error: Usuario inhabilitado.");
         }
 
+        String token = jwUtil.generateToken(user.getUsername());
+
         Map<String, Object> response = new HashMap<>();
+        response.put("token", token);
         response.put("username", user.getUsername());
         response.put("roles", user.getRoles());
 
