@@ -32,6 +32,8 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/signin").permitAll()
                 .requestMatchers("/api/contact/unete").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/config/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/recursos-descargables").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/profile/image").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .anyRequest().authenticated()
             )
