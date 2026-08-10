@@ -34,6 +34,8 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.GET, "/api/config/all").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/recursos-descargables").permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/profile/image").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/formacion/all").permitAll()
+                .requestMatchers(HttpMethod.GET, "/api/users/all").permitAll()
                 .requestMatchers("/ws/**").permitAll()
                 .anyRequest().authenticated()
             )
