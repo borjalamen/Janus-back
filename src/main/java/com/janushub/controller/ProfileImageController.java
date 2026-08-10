@@ -41,12 +41,22 @@ public class ProfileImageController {
             @RequestParam("file") MultipartFile imageFile,
             @RequestParam("username") String username) {
 
-        if (imageFile.isEmpty()) {
+        System.out.println("[ProfileImageController] POST /api/profile/image - username: " + username);
+        System.out.println("[ProfileImageController] uploadRoot configurado: " + uploadRoot);
+
+        if (username == null || username.isBlank()) {
+            System.err.println("[ProfileImageController] ERROR: username vacío o nulo");
+            return ResponseEntity.badRequest().body("Username requerido");
+        }
+
+        if (imageFile == null || imageFile.isEmpty()) {
+            System.err.println("[ProfileImageController] ERROR: archivo vacío");
             return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
         }
 
         String contentType = imageFile.getContentType();
         if (contentType == null || !contentType.startsWith("image/")) {
+            System.err.println("[ProfileImageController] ERROR: tipo no permitido - " + contentType);
             return ResponseEntity.badRequest().body("Formato no permitido. Solo imágenes");
         }
 
@@ -56,47 +66,76 @@ public class ProfileImageController {
         }
 
         try {
-            // 1) esborrar avatar antic si existeix (usando ruta relativa reconstruida)
+            // 0) Asegurar que el directorio base existe
+            Path baseDir = Paths.get(uploadRoot).toAbsolutePath();
+            if (!Files.exists(baseDir)) {
+                System.out.println("[ProfileImageController] Creando directorio base: " + baseDir);
+                Files.createDirectories(baseDir);
+            }
+
+            // 1) esborrar avatar antic si existeix
             String oldRelativePath = userService.getAvatarPath(username);
             if (oldRelativePath != null && !oldRelativePath.isBlank()) {
                 Path oldFile = resolveAvatarPath(oldRelativePath);
-                Files.deleteIfExists(oldFile);
+                if (Files.exists(oldFile)) {
+                    System.out.println("[ProfileImageController] Eliminando avatar anterior: " + oldFile);
+                    Files.deleteIfExists(oldFile);
+                }
             }
 
-            // 2) carpeta de l'usuari dins uploads
-            Path userDir = Paths.get(uploadRoot).toAbsolutePath().resolve(username);
-            Files.createDirectories(userDir);
+            // 2) carpeta del usuario dentro de uploads
+            Path userDir = baseDir.resolve(username);
+            if (!Files.exists(userDir)) {
+                System.out.println("[ProfileImageController] Creando directorio usuario: " + userDir);
+                Files.createDirectories(userDir);
+            }
 
-            // 3) Nom fix
+            // 3) Nombre fijo
             String fileName = "avatar." + extension.toLowerCase();
-            Path path = userDir.resolve(fileName);
+            Path targetPath = userDir.resolve(fileName);
+            System.out.println("[ProfileImageController] Guardando avatar en: " + targetPath);
 
-            // 4) guardar nou avatar
-            Files.copy(imageFile.getInputStream(), path, StandardCopyOption.REPLACE_EXISTING);
+            // 4) guardar nuevo avatar
+            Files.copy(imageFile.getInputStream(), targetPath, StandardCopyOption.REPLACE_EXISTING);
 
-            // Guardar ruta RELATIVA a la BD (username/avatar.ext)
-            // Así funciona igual en local y en DEV independientemente de upload.root
+            // 5) Guardar ruta RELATIVA en BD (username/avatar.ext)
             String relativePath = username + "/" + fileName;
             userService.updateAvatar(username, relativePath);
 
+            System.out.println("[ProfileImageController] Avatar guardado correctamente: " + relativePath);
             return ResponseEntity.ok("Imagen de perfil guardada correctamente");
+
         } catch (IOException e) {
+            System.err.println("[ProfileImageController] ERROR IOException al guardar avatar:");
             e.printStackTrace();
             return ResponseEntity.internalServerError()
-                    .body("Error al guardar la imagen de perfil");
+                    .body("Error al guardar la imagen: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("[ProfileImageController] ERROR inesperado:");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError()
+                    .body("Error inesperado: " + e.getMessage());
         }
     }
 
     // ---------- OBTENER AVATAR ----------
     @GetMapping
     public ResponseEntity<Resource> getImage(@RequestParam("username") String username) throws IOException {
+        if (username == null || username.isBlank()) {
+            System.err.println("[ProfileImageController] GET: username vacío");
+            return ResponseEntity.badRequest().build();
+        }
+
         String storedPath = userService.getAvatarPath(username);
-        if (storedPath == null) {
+        if (storedPath == null || storedPath.isBlank()) {
+            // No es un error: simplemente el usuario no tiene avatar
+            System.out.println("[ProfileImageController] Usuario '" + username + "' no tiene avatar configurado");
             return ResponseEntity.notFound().build();
         }
 
         Path filePath = resolveAvatarPath(storedPath);
         if (!Files.exists(filePath)) {
+            System.err.println("[ProfileImageController] Avatar registrado pero archivo no existe: " + filePath);
             return ResponseEntity.notFound().build();
         }
 
@@ -106,6 +145,7 @@ public class ProfileImageController {
                 ? MediaType.parseMediaType(detectedType)
                 : MediaType.IMAGE_PNG;
 
+        System.out.println("[ProfileImageController] Sirviendo avatar de '" + username + "': " + filePath);
         return ResponseEntity.ok()
                 .contentType(mediaType)
                 .body(resource);

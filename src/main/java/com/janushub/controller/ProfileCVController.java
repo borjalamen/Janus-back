@@ -93,7 +93,16 @@ public class ProfileCVController {
             @RequestParam("file") MultipartFile file,
             @RequestParam("username") String username) {
 
-        if (file.isEmpty()) {
+        System.out.println("[ProfileCVController] POST /api/profile/cv - username: " + username);
+        System.out.println("[ProfileCVController] uploadRoot configurado: " + uploadRoot);
+
+        if (username == null || username.isBlank()) {
+            System.err.println("[ProfileCVController] ERROR: username vacío o nulo");
+            return ResponseEntity.badRequest().body("Username requerido");
+        }
+
+        if (file == null || file.isEmpty()) {
+            System.err.println("[ProfileCVController] ERROR: archivo vacío");
             return ResponseEntity.badRequest().body("No se ha seleccionado ningún archivo");
         }
 
@@ -103,16 +112,29 @@ public class ProfileCVController {
                  !contentType.equals("application/msword") &&
                  !contentType.equals("application/vnd.openxmlformats-officedocument.wordprocessingml.document"))) {
 
+            System.err.println("[ProfileCVController] ERROR: formato no permitido - " + contentType);
             return ResponseEntity.badRequest()
                     .body("Formato no permitido. Solo PDF o DOC/DOCX");
         }
 
         try {
-            Path userDir = resolveUserDir(username);
-            Files.createDirectories(userDir);
+            // Asegurar que el directorio base existe
+            Path baseDir = Paths.get(uploadRoot).toAbsolutePath();
+            if (!Files.exists(baseDir)) {
+                System.out.println("[ProfileCVController] Creando directorio base: " + baseDir);
+                Files.createDirectories(baseDir);
+            }
 
+            Path userDir = resolveUserDir(username);
+            if (!Files.exists(userDir)) {
+                System.out.println("[ProfileCVController] Creando directorio usuario: " + userDir);
+                Files.createDirectories(userDir);
+            }
+
+            // Eliminar CV anterior si existe
             Path oldCvPath = resolveCvPath(userDir);
             if (oldCvPath != null) {
+                System.out.println("[ProfileCVController] Eliminando CV anterior: " + oldCvPath);
                 Files.deleteIfExists(oldCvPath);
             }
 
@@ -122,30 +144,45 @@ public class ProfileCVController {
 
             String fileName = "cv" + extension;
             Path filePath = userDir.resolve(fileName);
+            System.out.println("[ProfileCVController] Guardando CV en: " + filePath);
 
             Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
 
             userService.updateCv(username.trim(), filePath.toString());
 
+            System.out.println("[ProfileCVController] CV guardado correctamente");
             return ResponseEntity.ok("CV guardado correctamente");
+
         } catch (IOException e) {
+            System.err.println("[ProfileCVController] ERROR IOException:");
             e.printStackTrace();
-            return ResponseEntity.internalServerError().body(e.getMessage());
+            return ResponseEntity.internalServerError().body("Error al guardar CV: " + e.getMessage());
+        } catch (Exception e) {
+            System.err.println("[ProfileCVController] ERROR inesperado:");
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Error inesperado: " + e.getMessage());
         }
     }
 
     @GetMapping
     public ResponseEntity<Resource> getCv(@RequestParam String username) throws IOException {
+        if (username == null || username.isBlank()) {
+            System.err.println("[ProfileCVController] GET: username vacío");
+            return ResponseEntity.badRequest().build();
+        }
+
         Path userDir = resolveUserDir(username);
         Path path = resolveCvPath(userDir);
 
         if (path == null) {
+            System.out.println("[ProfileCVController] Usuario '" + username + "' no tiene CV configurado");
             return ResponseEntity.notFound().build();
         }
 
         Resource resource = new UrlResource(path.toUri());
         String contentType = resolveContentType(path);
 
+        System.out.println("[ProfileCVController] Sirviendo CV de '" + username + "': " + path);
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION,
                         "attachment; filename=\"" + path.getFileName().toString() + "\"")
